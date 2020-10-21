@@ -1,0 +1,25 @@
+{
+    "name": "aligent/fredhopperindexer",
+    "description": "Index and push data from Magento to Fredhopper",
+    "require": {
+        "php": "^7.0.0",
+        "magento/module-catalog-search": "null",
+        "magento/magento-composer-installer": "*"
+    },
+    "suggest": {
+        "aligent/dataproxy": "Pull and process data from Fredhopper"
+    },
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "proprietary"
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Aligent\\FredhopperIndexer\\": ""
+        }
+    }
+}
