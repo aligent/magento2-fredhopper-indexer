@@ -3,11 +3,24 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 
 class Products
 {
     public const PRODUCT_TYPE_PRODUCT = 'p';
     public const PRODUCT_TYPE_VARIANT = 'v';
+
+    protected const OPERATION_TYPE_ADD = 'add';
+    protected const OPERATION_TYPE_UPDATE = 'update';
+    protected const OPERATION_TYPE_REPLACE = 'replace';
+    protected const OPERATION_TYPE_DELETE = 'delete';
+
+    protected const OPERATION_TYPE_MAPPING = [
+        DataHandler::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
+        DataHandler::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
+        DataHandler::OPERATION_TYPE_REPLACE => self::OPERATION_TYPE_REPLACE,
+        DataHandler::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
+    ];
 
     /**
      * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
@@ -152,7 +165,7 @@ class Products
         $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
         $connection = $this->resource->getConnection();
         $select = $connection->select()
-            ->from(\Aligent\FredhopperIndexer\Model\Indexer\DataHandler::INDEX_TABLE_NAME)
+            ->from(DataHandler::INDEX_TABLE_NAME)
             ->columns([
                 'store_id' => 'store_id',
                 'product_type' => 'product_type',
@@ -221,7 +234,7 @@ class Products
                 $product['variant_id'] = "{$this->generalConfig->getVariantPrefix()}{$productId}";
             }
             if ($isIncremental) {
-                $product['operation'] = $productData['operation_type'];
+                $product['operation'] = self::OPERATION_TYPE_MAPPING[$productData['operation_type']];
             }
             $products[] = $product;
         }

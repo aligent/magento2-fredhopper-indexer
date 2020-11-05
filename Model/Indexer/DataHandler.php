@@ -309,7 +309,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
             " AND main_table.attribute_data <> scope_table.attribute_data";
         $connection->query($updateQuery, [
             'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_REPLACE
+            'operation_type' => self::OPERATION_TYPE_UPDATE
         ]);
     }
 
@@ -339,6 +339,8 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
             $this->resource->getConnection()
                 ->delete($this->getTableName($dimensions), ['product_id in (?)' => $batchDocuments]);
+            $this->resource->getConnection()
+                ->delete($this->getTableName($dimensions), ['parent_id in (?)' => $batchDocuments]);
         }
     }
 

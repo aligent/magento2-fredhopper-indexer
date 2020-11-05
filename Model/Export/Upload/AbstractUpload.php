@@ -5,6 +5,8 @@ abstract class AbstractUpload
 {
     protected const FAS_ENDPOINT = 'fas';
     protected const SUGGEST_ENDPOINT = 'suggest';
+    protected const FAS_TRIGGER_ENDPOINT = 'load-data';
+    protected const SUGGEST_TRIGGER_ENDPOINT = 'generate';
 
     /**
      * @var \Zend\Http\Client
@@ -113,7 +115,7 @@ abstract class AbstractUpload
 
     protected function getTriggerUrl()
     {
-        return $this->getBaseUrl() . '/trigger/load-data';
+        return $this->getBaseUrl() . '/trigger/' . $this->getFredhopperTriggerEndpoint();
     }
 
     protected function getBaseUrl()
@@ -122,7 +124,15 @@ abstract class AbstractUpload
             $this->getFredhopperUploadEndpoint() .':' . $this->generalConfig->getEnvironmentName();
     }
 
+    /**
+     * @return string
+     */
     protected abstract function getFredhopperUploadEndpoint() : string;
+
+    /**
+     * @return string
+     */
+    protected abstract function getFredhopperTriggerEndpoint() : string;
 
     protected function sendRequest($request)
     {

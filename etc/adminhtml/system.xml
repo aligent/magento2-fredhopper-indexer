@@ -128,7 +128,22 @@
                     </depends>
                 </field>
             </group>
-            <group id="cron" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="suggest" translate="label" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Suggest Export</label>
+                <field id="blacklist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Blacklist Search Terms</label>
+                    <comment>Used to remove suggestions which are found in the historic search data.</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="whitelist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Whitelist Search Terms</label>
+                    <comment>Used to add any additional suggestions which are not found in the historic search data.</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+            </group>
+            <group id="cron" translate="label" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Cron Schedules</label>
                 <field id="incremental_schedule" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Incremental Update</label>
