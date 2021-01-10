@@ -188,16 +188,19 @@ class ProductMapper
             if ($retrievedValue) {
                 $combinedProductAttributes = [$attribute->getAttributeCode() => [$productId => $retrievedValue]];
 
-                $attributeLabels = $this->getValuesLabels(
-                    $attribute,
-                    $attributeValues,
-                    $attribute->getFrontendInput() === 'multiselect'
-                );
-                $retrievedLabel = $this->retrieveFieldValue($attributeLabels);
-                // if there is a label for the attribute value(s), then use those, as they will potentially be used
-                // in facets, etc. which are customer-facing
-                if ($retrievedLabel) {
-                    $combinedProductAttributes[$attribute->getAttributeCode()] = [$productId => $retrievedLabel];
+                // boolean attributes should always be sent as 1/0, rather than Yes/No
+                if ($attribute->getFrontendInput() !== 'boolean') {
+                    $attributeLabels = $this->getValuesLabels(
+                        $attribute,
+                        $attributeValues,
+                        $attribute->getFrontendInput() === 'multiselect'
+                    );
+                    $retrievedLabel = $this->retrieveFieldValue($attributeLabels);
+                    // if there is a label for the attribute value(s), then use those, as they will potentially be used
+                    // in facets, etc. which are customer-facing
+                    if ($retrievedLabel) {
+                        $combinedProductAttributes[$attribute->getAttributeCode()] = [$productId => $retrievedLabel];
+                    }
                 }
             }
         }
