@@ -25,6 +25,8 @@ class AttributeConfig extends GeneralConfig
     protected $variantAttributes;
     /** @var array */
     protected $allAttributes;
+    /** @var array */
+    protected $booleanAttributes;
     /** @var string[] */
     protected $variantAttributeCodes;
     /** @var array */
@@ -89,6 +91,16 @@ class AttributeConfig extends GeneralConfig
         return $this->allAttributes;
     }
 
+    public function getBooleanAttributes()
+    {
+        if ($this->booleanAttributes === null) {
+            $this->booleanAttributes = array_filter($this->getAllAttributes(), function ($attribute) {
+                return isset($attribute['frontend_input']) && $attribute['frontend_input'] === 'boolean';
+            });
+        }
+        return $this->booleanAttributes;
+    }
+
     public function getVariantAttributeCodes()
     {
         if ($this->variantAttributeCodes === null) {
@@ -119,6 +131,7 @@ class AttributeConfig extends GeneralConfig
                 if ($attributeCode === $searchableAttributeCode) {
                     $attributeConfig['backend_type'] = $attribute->getBackendType();
                     $attributeConfig['attribute_id'] = $attribute->getAttributeId();
+                    $attributeConfig['frontend_input'] = $attribute->getFrontendInput();
                     $attributeConfig['label'] = $attribute->getStoreLabel($defaultStoreId);
                     break;
                 }
