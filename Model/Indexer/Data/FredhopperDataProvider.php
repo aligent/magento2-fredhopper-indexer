@@ -31,27 +31,6 @@ class FredhopperDataProvider
      * @var array
      */
     protected $variantIdParentMapping = [];
-    /**
-     * Attribute prefixes that will be preserved at product level
-     * @var array
-     */
-    protected $preservedProductAttributes = [
-        'price',
-        'min_price',
-        'max_price',
-        'stock_qty',
-        'stock_status'
-    ];
-    /**
-     * @var array
-     */
-    protected $preservedVariantAttributes = [
-        'price',
-        'min_price',
-        'max_price',
-        'stock_qty',
-        'stock_status'
-    ];
 
     public function __construct(
         \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
@@ -59,8 +38,6 @@ class FredhopperDataProvider
         \Magento\Catalog\Model\Product\Attribute\Source\Status $catalogProductStatus,
         \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
         \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper $productMapper,
-        $preservedProductAttributes = [],
-        $preservedVariantAttributes = [],
         $batchSize = 500
     ) {
         $this->searchDataProvider = $dataProvider;
@@ -68,12 +45,6 @@ class FredhopperDataProvider
         $this->catalogProductStatus = $catalogProductStatus;
         $this->attributeConfig = $attributeConfig;
         $this->productMapper = $productMapper;
-        $this->preservedProductAttributes = array_unique(
-            array_merge($this->preservedProductAttributes, $preservedVariantAttributes)
-        );
-        $this->preservedVariantAttributes = array_unique(
-            array_merge($this->preservedVariantAttributes, $preservedVariantAttributes)
-        );
         $this->batchSize = $batchSize;
     }
 
@@ -196,10 +167,29 @@ class FredhopperDataProvider
             $additionalFields
         );
 
+        // boolean attributes with value of "No" (0) get removed by above functions - replace them here
+        $this->populateBooleanAttributes($indexData);
+
         foreach ($indexData['variants'] as $variantId => $variantData) {
             $this->variantIdParentMapping[$variantId] = $productId;
         }
         return $indexData;
+    }
+
+    protected function populateBooleanAttributes(array &$indexData)
+    {
+        // all boolean attributes are of type "int"
+        $booleanAttributes = $this->attributeConfig->getBooleanAttributes();
+        foreach ($booleanAttributes as $attribute) {
+            if (!isset($indexData['product'][$attribute['attribute']])) {
+                $indexData['product'][$attribute['attribute']] = '0';
+            }
+            foreach ($indexData['variants'] as $variantId => &$variantData) {
+                if (!isset($variantData[$attribute['attribute']])) {
+                    $variantData[$attribute['attribute']] = '0';
+                }
+            }
+        }
     }
 
     public function getVariantIdParentMapping() : array
