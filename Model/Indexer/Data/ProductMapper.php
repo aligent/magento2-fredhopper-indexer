@@ -180,7 +180,11 @@ class ProductMapper
                     $attribute,
                     [$productId => $attributeValues[$productId]]
                 );
-                $combinedProductAttributes[$attributeCode][$productId] = $productAttributes[$attributeCode][$productId];
+                $attributeValue = '';
+                if (isset($productAttributes[$attributeCode][$productId])) {
+                    $attributeValue = $productAttributes[$attributeCode][$productId];
+                }
+                $combinedProductAttributes[$attributeCode][$productId] = $attributeValue;
             }
         } else {
             $productId = reset($productIds);
