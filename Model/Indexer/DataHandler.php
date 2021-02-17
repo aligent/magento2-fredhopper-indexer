@@ -131,7 +131,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * @param array $documents
      * @param $scopeId
      */
-    protected function processDocuments(array &$documents, $scopeId) : void
+    public function processDocuments(array &$documents, $scopeId) : void
     {
         foreach ($this->documentPreProcessors as $preProcessor) {
             $preProcessor->processDocuments($documents, $scopeId);
@@ -365,7 +365,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * @param Dimension[] $dimensions
      * @return int
      */
-    protected function getScopeId(array $dimensions) : int
+    public function getScopeId(array $dimensions) : int
     {
         $dimension = current($dimensions);
         return $this->scopeResolver->getScope($dimension->getValue())->getId();
