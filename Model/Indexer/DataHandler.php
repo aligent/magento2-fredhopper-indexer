@@ -168,6 +168,15 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
                             }
                         }
                     }
+
+                    // remove product-level attributes from variants
+                    foreach ($data['variants'] as &$variantData) {
+                        foreach ($variantData as $attributeCode => $attributeValue) {
+                            if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                                unset($variantData[$attributeCode]);
+                            }
+                        }
+                    }
                 }
             } else {
                 // need to collate variant level attributes at product level
