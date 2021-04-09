@@ -168,6 +168,9 @@ class GeneralConfig extends AbstractHelper
     {
         if (!isset($this->rootCategoryId)) {
             $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
+            if ($this->rootCategoryId <= 0) {
+                $this->rootCategoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+            }
         }
         return $this->rootCategoryId;
     }
