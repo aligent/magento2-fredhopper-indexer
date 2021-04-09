@@ -92,26 +92,6 @@ class Category implements \Magento\Framework\Data\OptionSourceInterface
                 unset($orphans[$parentId]);
             }
         }
-
-        // Append actual orphans (parent category doesn't exist)
-        if (count($orphans) > 0) {
-            /**
-             * @var Category\Node $orphanParent
-             */
-            $orphanParent = $this->nodeFactory->create([
-                'id' => -1,
-                'name' => '* Orphans *',
-            ]);
-            foreach ($orphans as $parentId => $nodes) {
-                /**
-                 * @var Category\Node $node
-                 */
-                foreach ($nodes as $node) {
-                    $node->name .= " (parent {$parentId})";
-                    $orphanParent->children[] = $node;
-                }
-            }
-        }
     }
 
     /**
