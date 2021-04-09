@@ -5,7 +5,6 @@ use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 
 class Meta
 {
-    public const ROOT_CATEGORY_ID = 1;
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
     /**
@@ -44,6 +43,11 @@ class Meta
      * @var array
      */
     protected $customAttributeData;
+
+    /**
+     * @var int
+     */
+    protected $rootCategoryId = 1;
 
     public function __construct(
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
@@ -335,7 +339,8 @@ class Meta
         $allCategories = $categoryCollection->getItems();
 
         /** @var \Magento\Catalog\Model\Category $rootCategory */
-        $rootCategory = $allCategories[self::ROOT_CATEGORY_ID] ?? null;
+        $this->rootCategoryId = $this->attributeConfig->getRootCategoryId();
+        $rootCategory = $allCategories[$this->rootCategoryId] ?? null;
         return $this->getCategoryDataWithChildren($rootCategory, $allCategories);
     }
 
@@ -345,7 +350,7 @@ class Meta
     ) : array {
         $categoryId = $category->getId();
         $categoryData = [
-            'category_id' => ($categoryId == self::ROOT_CATEGORY_ID ? self::ROOT_CATEGORY_NAME : $categoryId)
+            'category_id' => ($categoryId == $this->rootCategoryId ? self::ROOT_CATEGORY_NAME : $categoryId)
         ];
         $names =[
             [
