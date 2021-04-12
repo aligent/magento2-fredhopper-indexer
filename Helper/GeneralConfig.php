@@ -15,6 +15,7 @@ class GeneralConfig extends AbstractHelper
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
     public const XML_PATH_DEFAULT_STORE = self::XML_PATH_PREFIX . 'default_store';
     public const XML_PATH_SITE_VARIANT = self::XML_PATH_PREFIX . 'site_variant';
+    public const XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
     public const XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
 
     /** @var string */
@@ -39,6 +40,8 @@ class GeneralConfig extends AbstractHelper
     protected $siteVariants = [];
     /** @var string[] */
     protected $allSiteVariantSuffixes;
+    /** @var int */
+    protected $rootCategoryId;
     /** @var bool */
     protected $debugLogging;
 
@@ -159,6 +162,17 @@ class GeneralConfig extends AbstractHelper
             }
         }
         return $this->allSiteVariantSuffixes;
+    }
+
+    public function getRootCategoryId()
+    {
+        if (!isset($this->rootCategoryId)) {
+            $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
+            if ($this->rootCategoryId <= 0) {
+                $this->rootCategoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+            }
+        }
+        return $this->rootCategoryId;
     }
 
     public function getDebugLogging()
