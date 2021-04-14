@@ -5,7 +5,7 @@ class PricingAttributeConfig extends GeneralConfig
 {
     public const XML_PATH_PREFIX = 'fredhopper_indexer/pricing_config/';
     public const XML_PATH_USE_CUSTOMER_GROUP = self::XML_PATH_PREFIX . 'use_customer_group';
-    public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_stie_variant';
+    public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
     public const XML_PATH_USE_RANGE = self::XML_PATH_PREFIX . 'use_range';
 
     /** @var bool */
