@@ -141,7 +141,7 @@ class GeneralConfig extends AbstractHelper
     public function getSiteVariant($storeId = null)
     {
         if (!isset($this->siteVariants[$storeId ?? 'default'])) {
-            $siteVariants[$storeId ?? 'default'] = $this->scopeConfig->getValue(
+            $this->siteVariants[$storeId ?? 'default'] = $this->scopeConfig->getValue(
                 self::XML_PATH_SITE_VARIANT,
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
                 $storeId
