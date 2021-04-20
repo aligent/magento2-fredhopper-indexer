@@ -173,7 +173,7 @@ class Meta
         }
         // check for any custom attributes that are prices
         foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-            if (($attributeData['type'] ?? null) === 'price') {
+            if (($attributeData['fredhopper_type'] ?? null) === 'price') {
                 $priceAttributes[$attributeCode] = $attributeData['label'];
             }
         }
