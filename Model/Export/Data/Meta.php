@@ -214,7 +214,7 @@ class Meta
     {
         $stockAttributes = [];
         if ($this->stockAttributeConfig->getSendStockCount()) {
-            $stockAttributes['stock_count'] = 'Stock Count';
+            $stockAttributes['stock_qty'] = 'Stock Count';
         }
         if ($this->stockAttributeConfig->getSendStockStatus()) {
             $stockAttributes['stock_status'] = 'Stock Status';

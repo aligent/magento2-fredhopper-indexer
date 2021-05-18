@@ -67,7 +67,7 @@ class Products
      * @var string[]
      */
     protected $siteVariantStockAttributes = [
-        'stock_count',
+        'stock_qty',
         'stock_status'
     ];
     /**
