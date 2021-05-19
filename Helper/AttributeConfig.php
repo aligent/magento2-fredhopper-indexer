@@ -143,8 +143,7 @@ class AttributeConfig extends GeneralConfig
     {
         if ($this->staticAttributes === null) {
             $staticAttributes = [];
-            $combinedAttrs = array_merge($this->getProductAttributes(), $this->getVariantAttributes());
-            foreach ($combinedAttrs as $productAttribute) {
+            foreach ($this->getAllAttributes() as $productAttribute) {
                 if ($productAttribute['backend_type'] === 'static') {
                     $staticAttributes[$productAttribute['attribute_id']] = $productAttribute['attribute'];
                 }
