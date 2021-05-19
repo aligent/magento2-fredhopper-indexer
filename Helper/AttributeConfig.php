@@ -143,9 +143,9 @@ class AttributeConfig extends GeneralConfig
     {
         if ($this->staticAttributes === null) {
             $staticAttributes = [];
-            foreach ($this->getProductAttributes() as $productAttribute) {
+            foreach ($this->getAllAttributes() as $productAttribute) {
                 if ($productAttribute['backend_type'] === 'static') {
-                    $staticAttributes[] = $productAttribute['attribute'];
+                    $staticAttributes[$productAttribute['attribute_id']] = $productAttribute['attribute'];
                 }
             }
             $this->staticAttributes = $staticAttributes;
