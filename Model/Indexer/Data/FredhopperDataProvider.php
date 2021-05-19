@@ -4,6 +4,10 @@ namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 class FredhopperDataProvider
 {
     /**
+     * @var \Magento\Framework\App\ResourceConnection
+     */
+    protected $resource;
+    /**
      * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
      */
     protected $searchDataProvider;
@@ -33,6 +37,7 @@ class FredhopperDataProvider
     protected $variantIdParentMapping = [];
 
     public function __construct(
+        \Magento\Framework\App\ResourceConnection $resource,
         \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
         \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface $additionalFieldsProvider,
         \Magento\Catalog\Model\Product\Attribute\Source\Status $catalogProductStatus,
@@ -40,6 +45,7 @@ class FredhopperDataProvider
         \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper $productMapper,
         $batchSize = 500
     ) {
+        $this->resource = $resource;
         $this->searchDataProvider = $dataProvider;
         $this->additionalFieldsProvider = $additionalFieldsProvider;
         $this->catalogProductStatus = $catalogProductStatus;
@@ -55,9 +61,10 @@ class FredhopperDataProvider
         }
 
         $lastProductId = 0;
+        $staticAttributes = $this->attributeConfig->getStaticAttributes();
         $products = $this->searchDataProvider->getSearchableProducts(
             $storeId,
-            $this->attributeConfig->getStaticAttributes(),
+            [],
             $productIds,
             $lastProductId,
             $this->batchSize
@@ -79,6 +86,9 @@ class FredhopperDataProvider
                 $allProductIds,
                 $eavAttributesByType
             );
+
+            // Static field data are not included in searchDataProvider::getProductAttributes
+            $this->addStaticAttributes($productsAttributes, $staticAttributes);
 
             $additionalFields = $this->additionalFieldsProvider->getFields($allProductIds, $storeId);
 
@@ -103,7 +113,7 @@ class FredhopperDataProvider
             }
             $products = $this->searchDataProvider->getSearchableProducts(
                 $storeId,
-                $this->attributeConfig->getStaticAttributes(),
+                [],
                 $productIds,
                 $lastProductId,
                 $this->batchSize
@@ -144,6 +154,27 @@ class FredhopperDataProvider
         $allowedStatuses = $this->catalogProductStatus->getVisibleStatusIds();
         return isset($productsAttributes[$productId][$status->getId()]) &&
             in_array($productsAttributes[$productId][$status->getId()], $allowedStatuses);
+    }
+
+    protected function addStaticAttributes(array &$productsAttributes, array $staticAttributes)
+    {
+        if (count($productsAttributes) == 0 || count($staticAttributes) == 0) {
+            return;
+        }
+        $attributeIds = array_flip($staticAttributes);
+
+        $conn = $this->resource->getConnection();
+        $select = $conn->select()
+            ->from($conn->getTableName('catalog_product_entity'), ['entity_id'])
+            ->columns($staticAttributes)
+            ->where('entity_id IN (?)', array_keys($productsAttributes));
+        foreach ($conn->query($select) as $row) {
+            $productId = $row['entity_id'];
+            unset($row['entity_id']);
+            foreach ($row as $col => $val) {
+                $productsAttributes[$productId][$attributeIds[$col]] = $val;
+            }
+        }
     }
 
     protected function prepareProductIndex(
