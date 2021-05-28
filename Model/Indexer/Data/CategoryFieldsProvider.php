@@ -2,6 +2,7 @@
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
 use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
+use Magento\Catalog\Api\Data\CategoryInterface;
 
 class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
 {
@@ -16,6 +17,11 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     protected $categoryRepository;
 
     /**
+     * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
+     */
+    protected $categoryCollectionFactory;
+
+    /**
      * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
      */
     protected $config;
@@ -28,15 +34,17 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     /**
      * @var int[]
      */
-    protected $ancestorCategories;
+    protected $excludeCategories;
 
     public function __construct(
         \Magento\AdvancedSearch\Model\ResourceModel\Index $index,
         \Magento\Catalog\Api\CategoryRepositoryInterface $categoryRepository,
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Aligent\FredhopperIndexer\Helper\GeneralConfig $config
     ) {
         $this->index = $index;
         $this->categoryRepository = $categoryRepository;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->config = $config;
     }
 
@@ -47,14 +55,24 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     {
         if (!isset($this->ancestorCategories)) {
             $this->rootCategoryId = $this->config->getRootCategoryId();
-            $this->ancestorCategories = [];
+            $this->excludeCategories = [];
             try {
                 $rootCategory = $this->categoryRepository->get($this->rootCategoryId);
                 $rootAncestors = explode('/', $rootCategory->getPath());
-                $this->ancestorCategories = array_filter($rootAncestors);
+                $this->excludeCategories = array_filter($rootAncestors);
             } catch (\Exception $ex) {
                 // Root category configured incorrectly?
                 ;
+            }
+
+            /**
+             * @var \Magento\Catalog\Model\ResourceModel\Category\Collection $disabledCategories
+             */
+            $disabledCategories = $this->categoryCollectionFactory->create();
+            $disabledCategories->setStoreId(\Magento\Store\Model\Store::DEFAULT_STORE_ID);
+            $disabledCategories->addAttributeToFilter(CategoryInterface::KEY_IS_ACTIVE, 0);
+            foreach ($disabledCategories as $disabledCategory) {
+                $this->excludeCategories[] = $disabledCategory->getId();
             }
         }
 
@@ -64,10 +82,10 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
         foreach ($productCategoryData as $productId => $categoryInfo) {
             $inRootCategory = isset($categoryInfo[$this->rootCategoryId]);
 
-            // Remove unwanted categories (root category and ancestors)
+            // Remove unwanted categories (root category, ancestors, disabled categories)
             // as they won't be in FH and so each would generate a warning
-            foreach ($this->ancestorCategories as $ancestorId) {
-                unset($categoryInfo[$ancestorId]);
+            foreach ($this->excludeCategories as $excludeCategoryId) {
+                unset($categoryInfo[$excludeCategoryId]);
             }
 
             // only care about category ids, not positions
