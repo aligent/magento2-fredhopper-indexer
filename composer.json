@@ -3,6 +3,7 @@
     "description": "Index and push data from Magento to Fredhopper",
     "require": {
         "php": "^7.0.0",
+        "aligent/category-selector": "*",
         "magento/module-catalog-search": "*",
         "magento/magento-composer-installer": "*"
     },

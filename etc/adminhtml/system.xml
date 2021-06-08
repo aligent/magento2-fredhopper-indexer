@@ -42,7 +42,7 @@
                 <field id="root_category" translate="label comment" type="select" sortOrder="110" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Root category</label>
                     <comment>Subcategories are sent to Fredhopper</comment>
-                    <source_model>Aligent\FredhopperIndexer\Model\Config\Source\Category</source_model>
+                    <source_model>Aligent\CategorySelector\Model\Config\Source\Category</source_model>
                 </field>
                 <field id="debug_logging" translate="label comment" type="select" sortOrder="120" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Debug Logging</label>
