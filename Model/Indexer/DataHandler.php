@@ -240,12 +240,12 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         }
         foreach (array_chunk($productRows, $this->batchSize) as $batchRows) {
             $this->resource->getConnection()
-                ->insertMultiple($this->getTableName($dimensions), $batchRows);
+                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['attribute_data']);
         }
 
         foreach (array_chunk($variantRows, $this->batchSize) as $batchRows) {
             $this->resource->getConnection()
-                ->insertMultiple($this->getTableName($dimensions), $batchRows);
+                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['attribute_data']);
         }
     }
 
