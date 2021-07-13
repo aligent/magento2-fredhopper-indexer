@@ -139,6 +139,10 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         if (!empty($documents)) {
             // if using variants, need to ensure each product has a variant
             if ($this->attributeConfig->getUseVariantProducts()) {
+                $productAttributeCodes = [];
+                foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
+                    $productAttributeCodes[$code] = true;
+                }
                 foreach ($documents as $productId => &$data) {
                     // copy product data to variant
                     if (empty($data['variants'])) {
@@ -153,7 +157,9 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
                             foreach ($data['variants'] as $variantId => &$variantData) {
                                 $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
                             }
-                            unset($data['product'][$attributeCode]);
+                            if (!isset($productAttributeCodes[$attributeCode])) {
+                                unset($data['product'][$attributeCode]);
+                            }
                             continue; // continue with the next attribute
                         }
                         // check pricing attributes

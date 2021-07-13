@@ -28,6 +28,8 @@ class AttributeConfig extends GeneralConfig
     /** @var array */
     protected $booleanAttributes;
     /** @var string[] */
+    protected $productAttributeCodes;
+    /** @var string[] */
     protected $variantAttributeCodes;
     /** @var array */
     protected $searchableAttributes;
@@ -99,6 +101,18 @@ class AttributeConfig extends GeneralConfig
             });
         }
         return $this->booleanAttributes;
+    }
+
+    public function getProductAttributeCodes()
+    {
+        if ($this->productAttributeCodes === null) {
+            $attributeCodes = [];
+            foreach ($this->getProductAttributes() as $attributeConfig) {
+                $attributeCodes[] = $attributeConfig['attribute'];
+            }
+            $this->productAttributeCodes = $attributeCodes;
+        }
+        return $this->productAttributeCodes;
     }
 
     public function getVariantAttributeCodes()
