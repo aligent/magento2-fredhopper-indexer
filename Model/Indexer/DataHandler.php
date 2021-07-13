@@ -240,12 +240,12 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         }
         foreach (array_chunk($productRows, $this->batchSize) as $batchRows) {
             $this->resource->getConnection()
-                ->insertMultiple($this->getTableName($dimensions), $batchRows);
+                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['attribute_data']);
         }
 
         foreach (array_chunk($variantRows, $this->batchSize) as $batchRows) {
             $this->resource->getConnection()
-                ->insertMultiple($this->getTableName($dimensions), $batchRows);
+                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['attribute_data']);
         }
     }
 
@@ -319,6 +319,27 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $connection->query($updateQuery, [
             'store_id' => $storeId,
             'operation_type' => self::OPERATION_TYPE_UPDATE
+        ]);
+
+        // restore incorrectly deleted  products
+        /**
+         * UPDATE fredhopper_product_data_index main,
+         *        fredhopper_product_data_index_store<id> store_index
+         *    SET main.operation_type = null
+         *  WHERE main.store_id = :scopeId
+         *    AND main.product_type = store_index.product_type
+         *    AND main.product_id = store_index.product_id
+         *    AND main.operation_type = :operation_type
+         */
+        $restoreQuery = "UPDATE {$indexTableName} main_table, {$scopeTableName} scope_table" .
+            " SET main_table.operation_type = NULL" .
+            " WHERE main_table.store_id = :store_id" .
+            " AND main_table.product_id = scope_table.product_id" .
+            " AND main_table.product_type = scope_table.product_type" .
+            " AND main_table.operation_type = :operation_type";
+        $connection->query($restoreQuery, [
+            'store_id' => $storeId,
+            'operation_type' => self::OPERATION_TYPE_DELETE
         ]);
     }
 
