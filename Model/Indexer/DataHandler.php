@@ -157,7 +157,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
                             foreach ($data['variants'] as $variantId => &$variantData) {
                                 $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
                             }
-                            if (!isset($productAttributeCodes)) {
+                            if (!isset($productAttributeCodes[$attributeCode])) {
                                 unset($data['product'][$attributeCode]);
                             }
                             continue; // continue with the next attribute
