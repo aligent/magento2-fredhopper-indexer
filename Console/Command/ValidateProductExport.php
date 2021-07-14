@@ -123,7 +123,7 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
 
         $groupedDirs = $this->getDirs();
         $processedSkus = [];
-        foreach ($groupedDirs as $group => $dirs) {
+        foreach ($groupedDirs as $dirs) {
             $groupSkus = $skus;
             foreach ($dirs as $dir) {
                 $files = glob($dir . '/products-*.json');
