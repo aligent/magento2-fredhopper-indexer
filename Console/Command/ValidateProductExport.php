@@ -27,12 +27,22 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
     }
 
     /**
+     * Get the base directory which contains the Fredhopper exports
+     * @return string
+     */
+    public function getBaseDir(): string
+    {
+        // TODO: add config value that determines where the exports are stored
+        return '/tmp/';
+    }
+
+    /**
      * Get two lists of directory paths of FH exports: incremental, and full
      * @return array[]
      */
     protected function getDirs(): array
     {
-        $files = glob('/tmp/fh_export_*', GLOB_NOSORT);
+        $files = glob($this->getBaseDir() . 'fh_export_*', GLOB_NOSORT);
         $incremental = $full = [];
         foreach ($files as $file) {
             $time = (int)filemtime($file);
