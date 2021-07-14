@@ -47,11 +47,27 @@ EOH
          * @var \Magento\Framework\DB\Adapter\AdapterInterface $conn
          */
         $conn = $this->resourceConnection->getConnection();
+        $productFetch = $conn->select()
+            ->from($conn->getTableName('catalog_product_entity'))
+            ->reset(\Zend_Db_Select::COLUMNS)
+            ->columns(['entity_id'])
+            ->where("sku IN (?)", $skus);
+        $insertData = [];
+        foreach ($conn->query($productFetch) as $row) {
+            $insertData[] = ['entity_id' => $row['entity_id']];
+        }
 
-        $table = $conn->getTableName('catalog_product_entity');
-        $fields = ['updated_at' => new \Zend_Db_Expr('NOW()')];
-        $where = ["sku IN (?)" => $skus];
-        $affected = $conn->update($table, $fields, $where);
-        $output->writeln("Affected {$affected} SKU(s)");
+        if (count($insertData) == 0) {
+            $output->writeln("No matching products");
+            return;
+        }
+
+        $table = $conn->getTableName('catalogsearch_fulltext_cl');
+        try {
+            $conn->insertMultiple($table, $insertData);
+            $output->writeln("Updated " . count($insertData) . " product(s)");
+        } catch (\Exception $ex) {
+            $output->writeln("Failed to update changelog");
+        }
     }
 }
