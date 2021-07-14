@@ -9,7 +9,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ValidateProductExport extends \Symfony\Component\Console\Command\Command
 {
+    /**
+     * @var int
+     */
     protected $maxLength = 200;
+
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    protected $jsonSerializer;
+
+    public function __construct(
+        \Magento\Framework\Serialize\Serializer\Json $jsonSerializer,
+        string $name = null
+    ) {
+        $this->jsonSerializer = $jsonSerializer;
+        parent::__construct($name);
+    }
 
     protected function configure()
     {
@@ -68,7 +84,13 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
      */
     protected function extractSkus(string $filePath, array $skus, OutputInterface $output): array
     {
-        $data = @json_decode(file_get_contents($filePath), true);
+        try {
+            $data = $this->jsonSerializer->unserialize(file_get_contents($filePath));
+        } catch (\Exception $ex) {
+            // No drama, the check for $data['products'] will handle this
+            ;
+        }
+
         if (empty($data['products'])) {
             $output->writeln("Unable to read JSON from {$filePath}");
             return [];
@@ -154,10 +176,15 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
                             // Pretty print attributes that are JSON blobs
                             $isJson = false;
                             if (strlen($vals) > 0 && ($vals[0] == '{' || $vals[0] == '[')) {
-                                $decodedVals = @json_decode($vals, true);
-                                if ($decodedVals !== null) {
-                                    $isJson = true;
+                                try {
+                                    $decodedVals = $this->jsonSerializer->unserialize($vals);
+
+                                    // N.B. $this->jsonSerializer has no option for pretty printing
                                     $vals = json_encode($decodedVals, JSON_PRETTY_PRINT);
+                                    $isJson = true;
+                                } catch (\Exception $ex) {
+                                    // looked like JSON, but wasn't valid JSON, so treat as normal string
+                                    ;
                                 }
                             }
                             if (!$isJson && strlen($vals) > $this->maxLength) {
