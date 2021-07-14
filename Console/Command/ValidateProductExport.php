@@ -71,7 +71,7 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
         $data = @json_decode(file_get_contents($filePath), true);
         if (empty($data['products'])) {
             $output->writeln("Unable to read JSON from {$filePath}");
-            return;
+            return [];
         }
         $skuProducts = [];
         foreach ($data['products'] as $idx => $product) {
