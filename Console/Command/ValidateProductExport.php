@@ -105,6 +105,10 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
                 continue;
             }
             $skuProducts[$sku] = $formattedAttrs;
+
+            if (count($skuProducts) == count($skus)) {
+                break;
+            }
         }
         return $skuProducts;
     }
