@@ -16,11 +16,21 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
         $this->setName('fredhopper:indexer:validate_export')
             ->setDescription('Validate export of one or more products');
 
+        $this->setHelp(
+            "Searches the history of Fredhopper exports for specified products, and displays " .
+            "the most recently exported data for each export type (incremental and full), for " .
+            "manual validation by the operator"
+        );
+
         $desc = 'SKU(s), e.g. ABC123';
         $this->addArgument('sku', InputArgument::REQUIRED | InputArgument::IS_ARRAY, $desc);
     }
 
-    protected function getDirs()
+    /**
+     * Get two lists of directory paths of FH exports: incremental, and full
+     * @return array[]
+     */
+    protected function getDirs(): array
     {
         $files = glob('/tmp/fh_export_*', GLOB_NOSORT);
         $incremental = $full = [];
@@ -38,7 +48,15 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
         return [$incremental, $full];
     }
 
-    protected function extractSkus($filePath, $skus, OutputInterface $output)
+    /**
+     * Extract the product definitions for a set of SKUs from a single product export JSON file
+     *
+     * @param string $filePath
+     * @param array $skus
+     * @param OutputInterface $output
+     * @return array [sku => [attribute_code => value]]
+     */
+    protected function extractSkus(string $filePath, array $skus, OutputInterface $output): array
     {
         $data = @json_decode(file_get_contents($filePath), true);
         if (empty($data['products'])) {
