@@ -2,6 +2,15 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="fh_indexer_validate_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\ValidateProductExport</item>
+                <item name="fh_indexer_touch_product" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\TouchProduct</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Magento\CatalogSearch\Model\Indexer\IndexerHandlerFactory">
         <arguments>
             <argument name="handlers" xsi:type="array">
