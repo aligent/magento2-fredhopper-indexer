@@ -145,6 +145,24 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
         return $skuProducts;
     }
 
+    protected function formatTime(int $timeDiff) {
+        $measures = [
+            'd' => 86400, // 24hr
+            'h' => 3600,
+            'm' => 60,
+            's' => 1,
+        ];
+        $formatted = '';
+        foreach ($measures as $unit => $length) {
+            if ($timeDiff > $length) {
+                $num = (int)floor($timeDiff / $length);
+                $timeDiff -= $num * $length;
+                $formatted .= $num . $unit . ' ';
+            }
+        }
+        return rtrim($formatted);
+    }
+
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $requestedSkus = $input->getArgument('sku');
@@ -153,6 +171,7 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
             $skus[$sku] = true;
         }
 
+        $now = time();
         $groupedDirs = $this->getDirs();
         $processedSkus = [];
         foreach ($groupedDirs as $dirs) {
@@ -165,6 +184,13 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
                         continue;
                     }
                     $msg = "In file {$file}";
+                    $matches = [];
+                    preg_match('/[0-9]+/', $file, $matches);
+                    if (!empty($matches[0])) {
+                        $fileTime = (int)$matches[0];
+                        $timeDiff = $now - $fileTime;
+                        $msg .= ' (' . $this->formatTime($timeDiff) . ' ago)';
+                    }
                     $delimitLine = str_repeat('=', strlen($msg));
                     $output->writeln($delimitLine);
                     $output->writeln($msg);
