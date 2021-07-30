@@ -124,6 +124,10 @@
                     <comment>Send the age of the product in days</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="created_at_field" translate="label comment" sortOrder="25" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Determine age using</label>
+                    <source_model>Aligent\FredhopperIndexer\Data\CreatedAtOptionSource</source_model>
+                </field>
                 <field id="use_site_variant" translate="label comment" sortOrder="30" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Site Variant Attributes?</label>
                     <comment>Send separate attributes per site variant</comment>

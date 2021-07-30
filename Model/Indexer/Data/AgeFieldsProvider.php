@@ -32,11 +32,15 @@ class AgeFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMap
         if (!$this->ageAttributeConfig->getSendNewIndicator() && !$this->ageAttributeConfig->getSendDaysOnline()) {
             return [];
         }
+        $createdAtFieldName = $this->ageAttributeConfig->getCreatedAtFieldName();
         $productCollection = $this->productCollectionFactory->create();
         $productCollection->addIdFilter($productIds);
         $productCollection->addStoreFilter($storeId);
         if ($this->ageAttributeConfig->getSendNewIndicator()) {
             $productCollection->addAttributeToSelect('news_from_date');
+        }
+        if ($this->ageAttributeConfig->getSendDaysOnline()) {
+            $productCollection->addAttributeToSelect($createdAtFieldName);
         }
         $results = [];
         $products = $productCollection->getItems();
@@ -46,7 +50,7 @@ class AgeFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMap
                 $results[$productId]['is_new'] = (int)((bool)$product->getData('news_from_date')); // boolean as 1/0
             }
             if ($this->ageAttributeConfig->getSendDaysOnline()) {
-                $createdTime = strtotime($product->getData('created_at'));
+                $createdTime = strtotime($product->getData($createdAtFieldName));
                 // convert seconds to days (rounded down)
                 $daysOnline = (int)(($this->currentTime - $createdTime) / (60 * 60 * 24));
                 $results[$productId]['days_online'] = $daysOnline;

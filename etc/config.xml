@@ -9,6 +9,9 @@
                 <variant_prefix>v_</variant_prefix>
                 <debug_logging>0</debug_logging>
             </general>
+            <age_config>
+                <created_at_field>created_at</created_at_field>
+            </age_config>
             <cron>
                 <incremental_schedule>*/15 * * * *</incremental_schedule>
                 <full_schedule>20 */6 * * *</full_schedule>
