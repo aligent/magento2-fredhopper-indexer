@@ -202,7 +202,7 @@ class ProductMapper
                     $retrievedLabel = $this->retrieveFieldValue($attributeLabels);
                     // if there is a label for the attribute value(s), then use those, as they will potentially be used
                     // in facets, etc. which are customer-facing
-                    if ($retrievedLabel) {
+                    if ($retrievedLabel !== []) {
                         $combinedProductAttributes[$attribute->getAttributeCode()] = [$productId => $retrievedLabel];
                     }
                 }
@@ -338,7 +338,10 @@ class ProductMapper
      */
     protected function retrieveFieldValue(array $values)
     {
-        $values = array_filter(array_unique($values));
+        $values = array_unique($values);
+        $values = array_filter($values, function($el) {
+            return $el !== null;
+        });
 
         return count($values) === 1 ? array_shift($values) : array_values($values);
     }
