@@ -21,6 +21,8 @@ abstract class AbstractUpload
      */
     protected $logger;
 
+    protected $dryRun = false;
+
     public function __construct(
         \Zend\Http\Client $httpClient,
         \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
@@ -29,6 +31,11 @@ abstract class AbstractUpload
         $this->httpClient = $httpClient;
         $this->generalConfig = $generalConfig;
         $this->logger = $logger;
+    }
+
+    public function setDryRun(bool $isDryRun): void
+    {
+        $this->dryRun = $isDryRun;
     }
 
     public function uploadZipFile($zipFilePath)
@@ -136,6 +143,9 @@ abstract class AbstractUpload
 
     protected function sendRequest($request)
     {
+        if ($this->dryRun) {
+            return false;
+        }
         $auth = $this->getAuth();
         $this->httpClient->setAuth($auth['username'], $auth['password']);
 
