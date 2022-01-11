@@ -82,6 +82,11 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
 
     protected abstract function getZipFileName() : string;
 
+    public function setDryRun(bool $isDryRun): void
+    {
+        $this->upload->setDryRun($isDryRun);
+    }
+
     protected function doExport(bool $isIncremental) : bool
     {
         // create a new temp directory for files to be sent to fredhopper
