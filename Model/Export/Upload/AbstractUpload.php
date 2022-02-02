@@ -144,6 +144,7 @@ abstract class AbstractUpload
     protected function sendRequest($request)
     {
         if ($this->dryRun) {
+            $this->logger->info("Dry run; not exporting");
             return false;
         }
         $auth = $this->getAuth();
