@@ -8,9 +8,9 @@ class Meta
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
+     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
      */
-    protected $categoryCollectionFactory;
+    protected $relevantCategory;
     /**
      * @var \Magento\Catalog\Api\CategoryRepositoryInterface
      */
@@ -50,7 +50,7 @@ class Meta
     protected $rootCategoryId = 1;
 
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
+        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
         \Magento\Catalog\Api\CategoryRepositoryInterface $categoryRepository,
         \Magento\Customer\Api\GroupRepositoryInterface $customerGroupRepository,
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -61,7 +61,7 @@ class Meta
         $customAttributeData = []
     )
     {
-        $this->categoryCollectionFactory = $categoryCollectionFactory;
+        $this->relevantCategory = $relevantCategory;
         $this->categoryRepository = $categoryRepository;
         $this->customerGroupRepository = $customerGroupRepository;
         $this->attributeConfig = $attributeConfig;
@@ -332,9 +332,7 @@ class Meta
 
     protected function getCategoryArray() : array
     {
-        $categoryCollection = $this->categoryCollectionFactory->create();
-        $categoryCollection->setStoreId(0);
-        $categoryCollection->addNameToResult();
+        $categoryCollection = $this->relevantCategory->getCollection();
 
         $allCategories = $categoryCollection->getItems();
 
@@ -370,6 +368,9 @@ class Meta
         } else {
             $childArray = [];
             foreach ($children as $childId) {
+                if (!isset($allCategories[$childId])) {
+                    continue;
+                }
                 $childCategory = $allCategories[$childId];
                 $childArray[] = $this->getCategoryDataWithChildren($childCategory, $allCategories);
             }
