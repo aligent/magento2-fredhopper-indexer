@@ -194,6 +194,11 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         return $content;
     }
 
+    /**
+     * @param array $metaContent Format as per Data\Meta::getMetaData()
+     * @param array $productData Format as per Data\Products::getProductData()
+     * @return string[] Errors found in categories, if any
+     */
     protected function validateCategories(array $metaContent, array $productData): array
     {
         $errors = [];
