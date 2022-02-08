@@ -25,6 +25,12 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
      */
     protected $rootCategoryId;
 
+    /**
+     * Array has form [int:category id => bool:allowed?]
+     * @var array|null
+     */
+    protected $allowCategories = null;
+
     public function __construct(
         \Magento\AdvancedSearch\Model\ResourceModel\Index $index,
         \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
