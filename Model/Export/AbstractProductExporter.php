@@ -30,6 +30,14 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      */
     protected $config;
     /**
+     * @var \Aligent\FredhopperIndexer\Helper\SanityCheckConfig
+     */
+    protected $sanityConfig;
+    /**
+     * @var \Aligent\FredhopperIndexer\Helper\Email
+     */
+    protected $emailHelper;
+    /**
      * @var \Magento\Framework\Filesystem\Driver\File
      */
     protected $filesystem;
@@ -61,6 +69,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         \Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload $upload,
         \Aligent\FredhopperIndexer\Helper\AttributeConfig $config,
         \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
+        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
         \Magento\Framework\Filesystem\Driver\File $filesystem,
         \Magento\Framework\Serialize\Serializer\Json $json,
         \Psr\Log\LoggerInterface $logger,
@@ -72,6 +81,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $this->upload = $upload;
         $this->config = $config;
         $this->sanityConfig = $sanityConfig;
+        $this->emailHelper = $emailHelper;
         $this->filesystem = $filesystem;
         $this->json = $json;
         $this->logger = $logger;
@@ -118,14 +128,21 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $productCount = count($productData);
         if (!$isIncremental) {
             $minProducts = $this->sanityConfig->getMinTotalProducts();
+            $errs = [];
             if ($productCount < $minProducts) {
-                $err = "Full export has {$productCount} products, below minimum threshold of {$minProducts}; exiting";
-                $this->logger->critical($err);
-                return false;
+                $errs[] = "Full export has {$productCount} products, below minimum threshold of {$minProducts}";
             }
+            $errs = array_merge($errs, $this->validateCategories($metaContent, $productData));
 
-            if (!$this->validateCategories($metaContent, $productData)) {
-                $this->logger->critical("Category validation failed; skipping full export of {$productCount} products");
+            if (count($errs) > 0) {
+                foreach ($errs as $err) {
+                    $this->logger->error($err);
+                }
+                $this->logger->critical("Cancelling export due to errors");
+                $recipients = $this->sanityConfig->getErrorEmailRecipients();
+                if (count($recipients) > 0) {
+                    $this->emailHelper->sendErrorEmail($recipients, $errs);
+                }
                 return false;
             }
 
@@ -177,8 +194,9 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         return $content;
     }
 
-    protected function validateCategories(array $metaContent, array $productData)
+    protected function validateCategories(array $metaContent, array $productData): array
     {
+        $errors = [];
         $categories = [];
         foreach ($metaContent['meta']['attributes'] as $attr) {
             if ($attr['attribute_id'] == 'categories') {
@@ -240,7 +258,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             if ($cat['product_count'] < $required) {
                 $errMsg = "Insufficient products in tier {$tier} category {$cat['name']}";
                 $errMsg .= ": {$cat['product_count']} (expected {$required})";
-                $this->logger->error($errMsg);
+                $errors[] = $errMsg;
                 $sufficientProducts = false;
             }
         }
@@ -252,7 +270,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             }
         }
 
-        return $sufficientProducts;
+        return $errors;
     }
 
     /**

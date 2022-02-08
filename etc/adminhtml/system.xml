@@ -61,6 +61,10 @@
                 <field id="cat_tier2" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Minimum products per tier 2 category</label>
                 </field>
+                <field id="report_email" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Email failures to</label>
+                    <comment>Comma-separated list</comment>
+                </field>
             </group>
             <group id="product_config" translate="label" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
                 <label>Product Configuration</label>

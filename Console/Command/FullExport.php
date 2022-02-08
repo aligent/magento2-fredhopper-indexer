@@ -10,14 +10,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 class FullExport extends \Symfony\Component\Console\Command\Command
 {
     /**
+     * @var \Magento\Framework\App\State
+     */
+    protected $appState;
+
+    /**
      * @var \Aligent\FredhopperIndexer\Model\Export\FullExporter
      */
     protected $exporter;
 
     public function __construct(
+        \Magento\Framework\App\State $appState,
         \Aligent\FredhopperIndexer\Model\Export\FullExporter $exporter,
         string $name = null
     ) {
+        $this->appState = $appState;
         $this->exporter = $exporter;
         parent::__construct($name);
     }
@@ -33,6 +40,12 @@ class FullExport extends \Symfony\Component\Console\Command\Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        try {
+            $this->appState->getAreaCode();
+        } catch (\Exception $e) {
+            $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
+        }
+
         $this->exporter->setDryRun($input->getOption('dry-run'));
 
         $this->exporter->export();
