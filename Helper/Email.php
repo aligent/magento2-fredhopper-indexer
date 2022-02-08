@@ -34,7 +34,7 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getErrorHtml(array $errors): string
     {
-        if (count($errors) < 1) {
+        if (empty($errors)) {
             return '';
         }
         $output = "<ul>\n";
