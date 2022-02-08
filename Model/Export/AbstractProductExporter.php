@@ -203,6 +203,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     {
         $errors = [];
         $categories = [];
+        // Collate tier 1 and 2 categories from FH meta-data structure into flat array
         foreach ($metaContent['meta']['attributes'] as $attr) {
             if ($attr['attribute_id'] == 'categories') {
                 $catList = $attr['values'][0]['children'] ?? [];
@@ -231,6 +232,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             }
         }
 
+        // Count products in each tier 1/2 category
         foreach ($productData as $product) {
             foreach ($product['attributes'] as $attr) {
                 if ($attr['attribute_id'] != 'categories') {
@@ -251,6 +253,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             2 => $this->sanityConfig->getMinProductsCategoryTier2(),
         ];
 
+        // Ensure that tier 1 & 2 categories all have sufficient products to meet the tier's threshold
         $tierMin = [];
         $sufficientProducts = true;
         foreach ($categories as $cat) {
