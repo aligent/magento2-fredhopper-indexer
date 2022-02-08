@@ -2,7 +2,6 @@
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
 use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
-use Magento\Catalog\Api\Data\CategoryInterface;
 
 class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
 {
@@ -12,14 +11,9 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     protected $index;
 
     /**
-     * @var \Magento\Catalog\Api\CategoryRepositoryInterface
+     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
      */
-    protected $categoryRepository;
-
-    /**
-     * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
-     */
-    protected $categoryCollectionFactory;
+    protected $relevantCategory;
 
     /**
      * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
@@ -32,19 +26,18 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     protected $rootCategoryId;
 
     /**
-     * @var int[]
+     * Array has form [int:category id => bool:allowed?]
+     * @var array|null
      */
-    protected $excludeCategories;
+    protected $allowCategories = null;
 
     public function __construct(
         \Magento\AdvancedSearch\Model\ResourceModel\Index $index,
-        \Magento\Catalog\Api\CategoryRepositoryInterface $categoryRepository,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
+        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
         \Aligent\FredhopperIndexer\Helper\GeneralConfig $config
     ) {
         $this->index = $index;
-        $this->categoryRepository = $categoryRepository;
-        $this->categoryCollectionFactory = $categoryCollectionFactory;
+        $this->relevantCategory = $relevantCategory;
         $this->config = $config;
     }
 
@@ -53,47 +46,33 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
      */
     public function getFields(array $productIds, $storeId)
     {
-        if (!isset($this->ancestorCategories)) {
-            $this->rootCategoryId = $this->config->getRootCategoryId();
-            $this->excludeCategories = [];
-            try {
-                $rootCategory = $this->categoryRepository->get($this->rootCategoryId);
-                $rootAncestors = explode('/', $rootCategory->getPath());
-                $this->excludeCategories = array_filter($rootAncestors);
-            } catch (\Exception $ex) {
-                // Root category configured incorrectly?
-                ;
+        if (!isset($this->allowCategories)) {
+            $this->rootCategoryId = (int)$this->config->getRootCategoryId();
+            $collection = $this->relevantCategory->getCollection();
+            $allowCategories = [];
+            foreach ($collection as $category) {
+                $allowCategories[$category->getId()] = true;
             }
-
-            /**
-             * @var \Magento\Catalog\Model\ResourceModel\Category\Collection $disabledCategories
-             */
-            $disabledCategories = $this->categoryCollectionFactory->create();
-            $disabledCategories->setStoreId(\Magento\Store\Model\Store::DEFAULT_STORE_ID);
-            $disabledCategories->addAttributeToFilter(CategoryInterface::KEY_IS_ACTIVE, 0);
-            foreach ($disabledCategories as $disabledCategory) {
-                $this->excludeCategories[] = $disabledCategory->getId();
-            }
+            $this->allowCategories = $allowCategories;
         }
 
         $result = [];
         // gives array of form [product id][category_id] = position
         $productCategoryData = $this->index->getCategoryProductIndexData($storeId, $productIds);
         foreach ($productCategoryData as $productId => $categoryInfo) {
-            $inRootCategory = isset($categoryInfo[$this->rootCategoryId]);
+            $result[$productId]['categories'] = [];
 
-            // Remove unwanted categories (root category, ancestors, disabled categories)
-            // as they won't be in FH and so each would generate a warning
-            foreach ($this->excludeCategories as $excludeCategoryId) {
-                unset($categoryInfo[$excludeCategoryId]);
+            // Add to root category
+            if (isset($categoryInfo[$this->rootCategoryId])) {
+                $result[$productId]['categories'][] = Meta::ROOT_CATEGORY_NAME;
+                unset($categoryInfo[$this->rootCategoryId]);
             }
 
-            // only care about category ids, not positions
-            $result[$productId]['categories'] = array_keys($categoryInfo);
-
-            // Re-add to root category using FH-specific ref
-            if ($inRootCategory) {
-                $result[$productId]['categories'][] = Meta::ROOT_CATEGORY_NAME;
+            // Add to other relevant categories
+            foreach ($categoryInfo as $catId => $position) {
+                if (isset($this->allowCategories[$catId])) {
+                    $result[$productId]['categories'][] = $catId;
+                }
             }
         }
         return $result;

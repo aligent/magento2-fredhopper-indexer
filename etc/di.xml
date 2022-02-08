@@ -7,6 +7,7 @@
             <argument name="commands" xsi:type="array">
                 <item name="fh_indexer_validate_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\ValidateProductExport</item>
                 <item name="fh_indexer_touch_product" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\TouchProduct</item>
+                <item name="fh_indexer_full_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\FullExport</item>
             </argument>
         </arguments>
     </type>

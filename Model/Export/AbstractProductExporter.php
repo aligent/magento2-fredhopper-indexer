@@ -30,6 +30,14 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      */
     protected $config;
     /**
+     * @var \Aligent\FredhopperIndexer\Helper\SanityCheckConfig
+     */
+    protected $sanityConfig;
+    /**
+     * @var \Aligent\FredhopperIndexer\Helper\Email
+     */
+    protected $emailHelper;
+    /**
      * @var \Magento\Framework\Filesystem\Driver\File
      */
     protected $filesystem;
@@ -60,6 +68,8 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         \Aligent\FredhopperIndexer\Model\Export\ZipFile $zipFile,
         \Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload $upload,
         \Aligent\FredhopperIndexer\Helper\AttributeConfig $config,
+        \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
+        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
         \Magento\Framework\Filesystem\Driver\File $filesystem,
         \Magento\Framework\Serialize\Serializer\Json $json,
         \Psr\Log\LoggerInterface $logger,
@@ -70,6 +80,8 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $this->zipFile = $zipFile;
         $this->upload = $upload;
         $this->config = $config;
+        $this->sanityConfig = $sanityConfig;
+        $this->emailHelper = $emailHelper;
         $this->filesystem = $filesystem;
         $this->json = $json;
         $this->logger = $logger;
@@ -102,7 +114,8 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         }
 
         if (!$isIncremental) {
-            if (!$this->generateMetaJson()) {
+            $metaContent = $this->generateMetaJson();
+            if (!$metaContent) {
                 return false;
             }
         }
@@ -111,8 +124,32 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             $this->logger->info('Product export has no products to process - exiting.');
             return true;
         }
-        if ($this->config->getDebugLogging()) {
-            $this->logger->debug('Generating JSON for ' . count($productData) . ' products');
+
+        $productCount = count($productData);
+        if (!$isIncremental) {
+            $minProducts = $this->sanityConfig->getMinTotalProducts();
+            $errs = [];
+            if ($productCount < $minProducts) {
+                $errs[] = "Full export has {$productCount} products, below minimum threshold of {$minProducts}";
+            }
+            $errs = array_merge($errs, $this->validateCategories($metaContent, $productData));
+
+            if (count($errs) > 0) {
+                foreach ($errs as $err) {
+                    $this->logger->error($err);
+                }
+                $this->logger->critical("Cancelling export due to errors");
+                $recipients = $this->sanityConfig->getErrorEmailRecipients();
+                if (count($recipients) > 0) {
+                    $this->emailHelper->sendErrorEmail($recipients, $errs);
+                }
+                return false;
+            }
+
+            $msg = "Generating JSON for full export of {$productCount} products (meets minimum of {$minProducts})";
+            $this->logger->info($msg);
+        } elseif ($this->config->getDebugLogging()) {
+            $this->logger->debug("Generating JSON for {$productCount} products");
         }
         if (!$this->generateProductsJson($productData)) {
             return false;
@@ -137,9 +174,9 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     }
 
     /**
-     * @return bool
+     * @return array|bool
      */
-    protected  function generateMetaJson() : bool
+    protected  function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();
@@ -154,7 +191,94 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             return false;
         }
         $this->files[] = $filePath;
-        return true;
+        return $content;
+    }
+
+    /**
+     * @param array $metaContent Format as per Data\Meta::getMetaData()
+     * @param array $productData Format as per Data\Products::getProductData()
+     * @return string[] Errors found in categories, if any
+     */
+    protected function validateCategories(array $metaContent, array $productData): array
+    {
+        $errors = [];
+        $categories = [];
+        // Collate tier 1 and 2 categories from FH meta-data structure into flat array
+        foreach ($metaContent['meta']['attributes'] as $attr) {
+            if ($attr['attribute_id'] == 'categories') {
+                $catList = $attr['values'][0]['children'] ?? [];
+                foreach ($catList as $category) {
+                    $catId = (int)$category['category_id'];
+                    $catName = $category['names'][0]['name'];
+                    $categories[$catId] = [
+                        'id' => $catId,
+                        'name' => $catName,
+                        'tier' => 1,
+                        'parent' => null,
+                        'product_count' => 0,
+                    ];
+                    foreach ($category['children'] as $child) {
+                        $childCatId = (int)$child['category_id'];
+                        $categories[$childCatId] = [
+                            'id' => $childCatId,
+                            'name' => $catName . ' > ' . $child['names'][0]['name'],
+                            'tier' => 2,
+                            'parent' => $catId,
+                            'product_count' => 0,
+                        ];
+                    }
+                }
+                break;
+            }
+        }
+
+        // Count products in each tier 1/2 category
+        foreach ($productData as $product) {
+            foreach ($product['attributes'] as $attr) {
+                if ($attr['attribute_id'] != 'categories') {
+                    continue;
+                }
+                foreach ($attr['values'] as $productCategory) {
+                    $catId = (int)$productCategory['value'];
+                    if (!isset($categories[$catId])) {
+                        continue;
+                    }
+                    $categories[$catId]['product_count'] += 1;
+                }
+            }
+        }
+
+        $tierReqd = [
+            1 => $this->sanityConfig->getMinProductsCategoryTier1(),
+            2 => $this->sanityConfig->getMinProductsCategoryTier2(),
+        ];
+
+        // Ensure that tier 1 & 2 categories all have sufficient products to meet the tier's threshold
+        $tierMin = [];
+        $sufficientProducts = true;
+        foreach ($categories as $cat) {
+            $tier = $cat['tier'];
+            if (!isset($tierMin[$tier]) || $cat['product_count'] < $tierMin[$tier]['product_count']) {
+                $tierMin[$tier] = $cat;
+            }
+
+            $required = $tierReqd[$tier];
+            if ($cat['product_count'] < $required) {
+                $errMsg = "Insufficient products in tier {$tier} category {$cat['name']}";
+                $errMsg .= ": {$cat['product_count']} (expected {$required})";
+                $errors[] = $errMsg;
+                $sufficientProducts = false;
+            }
+        }
+
+        if ($sufficientProducts) {
+            foreach ($tierMin as $tier => $cat) {
+                $msg = "Category {$cat['name']} has fewest products in tier {$tier}: {$cat['product_count']}";
+                $this->logger->info($msg);
+            }
+        }
+
+        return $errors;
     }
 
     /**

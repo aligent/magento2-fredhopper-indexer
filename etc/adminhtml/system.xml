@@ -50,6 +50,22 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
+            <group id="sanity_check" translate="label" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Sanity checks</label>
+                <field id="total_products" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Minimum total products</label>
+                </field>
+                <field id="cat_tier1" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Minimum products per tier 1 category</label>
+                </field>
+                <field id="cat_tier2" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Minimum products per tier 2 category</label>
+                </field>
+                <field id="report_email" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Email failures to</label>
+                    <comment>Comma-separated list</comment>
+                </field>
+            </group>
             <group id="product_config" translate="label" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
                 <label>Product Configuration</label>
                 <field id="use_variant_products" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">

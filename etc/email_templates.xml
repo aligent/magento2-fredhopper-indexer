@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="fh_indexer_sanity_check_email_template" label="Sanity check failed" file="sanity_check_failed.html"
+              type="html" module="Aligent_FredhopperIndexer" area="adminhtml"/>
+</config>
