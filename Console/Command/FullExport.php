@@ -19,13 +19,26 @@ class FullExport extends \Symfony\Component\Console\Command\Command
      */
     protected $exporter;
 
+    /**
+     * @var \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[]
+     */
+    protected $preExportValidators;
+
+    /**
+     * @param \Magento\Framework\App\State $appState
+     * @param \Aligent\FredhopperIndexer\Model\Export\FullExporter $exporter
+     * @param \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[] $preExportValidators
+     * @param string|null $name
+     */
     public function __construct(
         \Magento\Framework\App\State $appState,
         \Aligent\FredhopperIndexer\Model\Export\FullExporter $exporter,
+        array $preExportValidators = [],
         string $name = null
     ) {
         $this->appState = $appState;
         $this->exporter = $exporter;
+        $this->preExportValidators = $preExportValidators;
         parent::__construct($name);
     }
 
@@ -48,6 +61,9 @@ class FullExport extends \Symfony\Component\Console\Command\Command
 
         $this->exporter->setDryRun($input->getOption('dry-run'));
 
+        foreach ($this->preExportValidators as $preExportValidator) {
+            $preExportValidator->validateState();
+        }
         $this->exporter->export();
     }
 }
