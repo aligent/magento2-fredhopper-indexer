@@ -8,7 +8,7 @@ class FredhopperExport
      */
     protected $fredhopperExporter;
     /**
-     * @var
+     * @var \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[]
      */
     protected $preExportValidators;
 
