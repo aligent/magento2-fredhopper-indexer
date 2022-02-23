@@ -5,6 +5,9 @@
         <job name="fredhopper_incremental_export" instance="FredhopperIncrementalProductCron" method="export">
             <config_path>fredhopper_indexer/cron/incremental_schedule</config_path>
         </job>
+        <job name="fredhopper_force_incremental_export" instance="FredhopperForceIncrementalProductCron" method="export">
+            <!-- intentionally blank schedule - only want it run manually -->
+        </job>
     </group>
     <group id="fredhopper">
         <job name="fredhopper_full_export" instance="FredhopperFullProductCron" method="export">

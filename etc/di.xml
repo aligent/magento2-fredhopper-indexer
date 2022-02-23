@@ -178,11 +178,17 @@
     <virtualType name="FredhopperIncrementalProductCron" type="Aligent\FredhopperIndexer\Cron\FredhopperExport">
         <arguments>
             <argument name="fredhopperExporter" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\IncrementalExporter</argument>
+            <argument name="preExportValidators" xsi:type="array">
+                <item name="deletedProductsValidator" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Validator\DeletedProductsValidator</item>
+            </argument>
         </arguments>
     </virtualType>
     <virtualType name="FredhopperFullProductCron" type="Aligent\FredhopperIndexer\Cron\FredhopperExport">
         <arguments>
             <argument name="fredhopperExporter" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\FullExporter</argument>
+            <argument name="preExportValidators" xsi:type="array">
+                <item name="deletedProductsValidator" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Validator\DeletedProductsValidator</item>
+            </argument>
         </arguments>
     </virtualType>
     <virtualType name="FredhopperSuggestCron" type="Aligent\FredhopperIndexer\Cron\FredhopperExport">
@@ -190,5 +196,9 @@
             <argument name="fredhopperExporter" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\SuggestExporter</argument>
         </arguments>
     </virtualType>
-
+    <virtualType name="FredhopperForceIncrementalProductCron" type="\Aligent\FredhopperIndexer\Cron\FredhopperExport">
+        <arguments>
+            <argument name="fredhopperExporter" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\IncrementalExporter</argument>
+        </arguments>
+    </virtualType>
 </config>
