@@ -45,7 +45,7 @@ class DeletedProductsValidator implements \Aligent\FredhopperIndexer\Api\Export\
         $maxDeletes = $this->sanityCheckConfig->getMaxDeleteProducts();
         if ($productCount > $maxDeletes) {
             throw new ValidationException(__(
-                'Number of deleted products (%1) exceeds threshold (%2) - aborting',
+                'Number of deleted products (%1) exceeds threshold (%2)',
                 $productCount,
                 $maxDeletes)
             );
