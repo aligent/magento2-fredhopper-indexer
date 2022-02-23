@@ -55,6 +55,10 @@
                 <field id="total_products" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Minimum total products</label>
                 </field>
+                <field id="delete_products" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Maximum products to delete</label>
+                    <comment>Applies to both full and incremental exports</comment>
+                </field>
                 <field id="cat_tier1" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Minimum products per tier 1 category</label>
                 </field>
