@@ -20,16 +20,23 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
      */
     protected $escaper;
 
+    /**
+     * @var \Aligent\FredhopperIndexer\Model\IndexerInfo
+     */
+    protected $indexerInfo;
+
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
         \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
-        \Magento\Framework\Escaper $escaper
+        \Magento\Framework\Escaper $escaper,
+        \Aligent\FredhopperIndexer\Model\IndexerInfo $indexerInfo
     ) {
         parent::__construct($context);
         $this->transportBuilder = $transportBuilder;
         $this->inlineTranslation = $inlineTranslation;
         $this->escaper = $escaper;
+        $this->indexerInfo = $indexerInfo;
     }
 
     public function getErrorHtml(array $errors): string
@@ -45,6 +52,55 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
         return $output;
     }
 
+    public function getIndexInfoTables(): string
+    {
+        $html = '';
+
+        // Collate `bin/magento indexer:status` data
+        $data = $this->indexerInfo->getIndexState();
+        if (!empty($data)) {
+            $html .= "<table border=\"1\">\n";
+            $html .= '<tr>';
+            $html .= '<th align="left">Indexer</th>';
+            $html .= '<th align="left">Status</th>';
+            $html .= '<th align="left">Schedule Status</th>';
+            $html .= '<th align="left">Schedule Updated</th>';
+            $html .= "<tr>\n";
+            foreach ($data as $indexer) {
+                $scheduleStatus = "{$indexer['schedule_status']} ({$indexer['schedule_backlog']} in backlog)";
+                $html .= '<tr>';
+                $html .= '<td>' . $this->escaper->escapeHtml($indexer['id']) .  '</td>';
+                $html .= '<td>' . $this->escaper->escapeHtml($indexer['status']) .  '</td>';
+                $html .= '<td>' . $this->escaper->escapeHtml($scheduleStatus) .  '</td>';
+                $html .= '<td>' . $this->escaper->escapeHtml($indexer['schedule_updated']) .  '</td>';
+                $html .= "</tr>\n";
+            }
+            $html .= "</table>\n";
+        }
+
+        $data = $this->indexerInfo->getFredhopperIndexState();
+        if (!empty($data)) {
+            $html .= "<br>\n";
+            $html .= "<table border=\"1\">\n";
+            $html .= '<tr>';
+            $row = reset($data);
+            foreach ($row as $heading => $junk) {
+                $html .= '<th align="left">' . $this->escaper->escapeHtml(ucfirst($heading)) . '</th>';
+            }
+            $html .= "</tr>\n";
+            foreach ($data as $row) {
+                $html .= '<tr>';
+                foreach ($row as $value) {
+                    $html .= '<td>' . $this->escaper->escapeHtml($value) . '</td>';
+                }
+                $html .= "<tr>\n";
+            }
+            $html .= "</table>\n";
+        }
+
+        return $html;
+    }
+
     /**
      * @param $template
      * @param array $to
@@ -57,6 +113,7 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
         try {
             $templateVars = [
                 'errors' => $this->getErrorHtml($errors),
+                'indexer_info' => $this->getIndexInfoTables(),
             ];
 
             $transport = $this->transportBuilder
