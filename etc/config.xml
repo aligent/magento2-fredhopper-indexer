@@ -9,6 +9,9 @@
                 <variant_prefix>v_</variant_prefix>
                 <debug_logging>0</debug_logging>
             </general>
+            <sanity_check>
+                <delete_products>10</delete_products>
+            </sanity_check>
             <age_config>
                 <created_at_field>created_at</created_at_field>
             </age_config>
