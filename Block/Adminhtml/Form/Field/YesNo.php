@@ -26,7 +26,7 @@ class YesNo extends Select
      * @return $this
      * @throws LocalizedException
      */
-    public function setInputName($value)
+    public function setInputName($value): Select
     {
         return $this->setName($value);
     }
@@ -34,7 +34,7 @@ class YesNo extends Select
     /**
      * @return string
      */
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         if (!$this->getOptions()) {
             $this->setOptions($this->sourceConfig->toOptionArray());

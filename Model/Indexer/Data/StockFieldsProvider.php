@@ -31,7 +31,7 @@ class StockFieldsProvider implements AdditionalFieldsProviderInterface
     /**
      * @inheritDoc
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         $result = [];
         // only add stock information if enabled

@@ -6,7 +6,6 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Indexer\IndexStructureInterface;
 use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
-use Magento\Framework\Search\Request\Dimension;
 
 class StructureHandler implements IndexStructureInterface
 {
@@ -40,6 +39,7 @@ class StructureHandler implements IndexStructureInterface
 
     /**
      * @inheritDoc
+     * @throws \Zend_Db_Exception
      */
     public function create($index, array $fields, array $dimensions = [])
     {

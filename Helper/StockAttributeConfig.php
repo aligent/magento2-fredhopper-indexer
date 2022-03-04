@@ -15,7 +15,10 @@ class StockAttributeConfig extends GeneralConfig
     /** @var bool */
     protected $useSiteVariantStock;
 
-    public function getSendStockStatus()
+    /**
+     * @return bool
+     */
+    public function getSendStockStatus(): bool
     {
         if ($this->sendStockStatus === null) {
             $this->sendStockStatus = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_STOCK_STATUS);
@@ -23,7 +26,10 @@ class StockAttributeConfig extends GeneralConfig
         return $this->sendStockStatus;
     }
 
-    public function getSendStockCount()
+    /**
+     * @return bool
+     */
+    public function getSendStockCount(): bool
     {
         if ($this->sendStockCount === null) {
             $this->sendStockCount = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_STOCK_COUNT);
@@ -31,7 +37,10 @@ class StockAttributeConfig extends GeneralConfig
         return $this->sendStockCount;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
         if ($this->useSiteVariantStock === null) {
             $this->useSiteVariantStock = parent::getUseSiteVariant() &&
@@ -40,7 +49,10 @@ class StockAttributeConfig extends GeneralConfig
         return $this->useSiteVariantStock;
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         return $this->getUseSiteVariant() ? parent::getAllSiteVariantSuffixes() : [''];
     }

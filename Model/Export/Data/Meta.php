@@ -11,6 +11,7 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Exception\LocalizedException;
 
 class Meta
 {
@@ -80,6 +81,10 @@ class Meta
         $this->customAttributeData = $customAttributeData;
     }
 
+    /**
+     * @return array
+     * @throws LocalizedException
+     */
     public function getMetaData() : array
     {
         $attributesArray = array_merge(
@@ -101,6 +106,9 @@ class Meta
         ];
     }
 
+    /**
+     * @throws LocalizedException
+     */
     protected function getAttributesArray() : array
     {
         $attributeArray = [];
@@ -168,7 +176,12 @@ class Meta
         );
     }
 
-    protected function getPriceAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     * @throws LocalizedException
+     */
+    protected function getPriceAttributesArray(string $defaultLocale): array
     {
         $priceAttributes = [
             'regular_price' => 'Regular Price',
@@ -192,7 +205,7 @@ class Meta
         if ($this->pricingAttributeConfig->getUseCustomerGroup()) {
             foreach ($customerGroups as $customerGroup) {
                 foreach ($siteVariantSuffixes as $siteVariantSuffix) {
-                    $suffixes[] = "_{$customerGroup->getId()}{$siteVariantSuffix}";
+                    $suffixes[] = '_' . $customerGroup->getId() . $siteVariantSuffix;
                 }
             }
         } else {
@@ -202,7 +215,7 @@ class Meta
         foreach ($suffixes as $suffix) {
             foreach ($priceAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$suffix}",
+                    'attribute_id' => $attributeCode . $suffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_FLOAT,
                     'names' => [
                         [
@@ -217,7 +230,11 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getStockAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    protected function getStockAttributesArray(string $defaultLocale): array
     {
         $stockAttributes = [];
         if ($this->stockAttributeConfig->getSendStockCount()) {
@@ -239,7 +256,7 @@ class Meta
         foreach ($siteVariantSuffixes as $siteVariantSuffix) {
             foreach ($stockAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$siteVariantSuffix}",
+                    'attribute_id' => $attributeCode . $siteVariantSuffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
                     'names' => [
                         [
@@ -254,7 +271,11 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getImageAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    protected function getImageAttributesArray(string $defaultLocale): array
     {
         $imageAttributes = [
             '_imageurl' => 'Image URL',
@@ -272,7 +293,7 @@ class Meta
         foreach ($suffixes as $suffix) {
             foreach ($imageAttributes as $attributeCode => $label) {
                 $attributeArray[] = [
-                    'attribute_id' => "{$attributeCode}{$suffix}",
+                    'attribute_id' => $attributeCode . $suffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_ASSET,
                     'names' => [
                         [
@@ -286,7 +307,11 @@ class Meta
         return $attributeArray;
     }
 
-    protected function getAgeAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    protected function getAgeAttributesArray(string $defaultLocale): array
     {
         $ageAttributes = [];
         if ($this->ageAttributeConfig->getSendNewIndicator()) {
@@ -301,7 +326,7 @@ class Meta
         foreach ($siteVariantSuffixes as $siteVariantSuffix) {
             foreach ($ageAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$siteVariantSuffix}",
+                    'attribute_id' => $attributeCode . $siteVariantSuffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
                     'names' => [
                         [
@@ -316,7 +341,11 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getCustomAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    protected function getCustomAttributesArray(string $defaultLocale): array
     {
         $attributesArray = [];
         foreach ($this->customAttributeData as $customAttribute) {

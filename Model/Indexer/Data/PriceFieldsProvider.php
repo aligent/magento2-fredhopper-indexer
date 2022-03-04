@@ -7,6 +7,7 @@ use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
 use Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Search\Request\IndexScopeResolverInterface;
 use Magento\Store\Model\Indexer\WebsiteDimensionProvider;
 use Magento\Store\Model\StoreManagerInterface;
@@ -34,7 +35,6 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
      */
     protected $tableResolver;
 
-
     public function __construct(
         ResourceConnection $resourceConnection,
         StoreManagerInterface $storeManager,
@@ -51,8 +51,10 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
 
     /**
      * @inheritDoc
+     * @throws NoSuchEntityException
+     * @throws \Zend_Db_Select_Exception
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         $result = [];
         $useCustomerGroup = $this->pricingAttributeConfig->getUseCustomerGroup();
@@ -74,7 +76,7 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
             $result[$productId] = [];
             foreach ($customerGroupPriceData as $customerGroupId => $prices) {
                 foreach ($indexFields as $fieldName) {
-                    $attributeName = $fieldName . ($useCustomerGroup ? "_{$customerGroupId}" : "");
+                    $attributeName = $fieldName . ($useCustomerGroup ? "_$customerGroupId" : "");
                     $result[$productId][$attributeName] = $prices[$fieldName];
                 }
             }
@@ -82,7 +84,15 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
         return $result;
     }
 
-    protected function getPriceIndexData(array $productIds, $storeId, $indexFields)
+    /**
+     * @param array $productIds
+     * @param $storeId
+     * @param $indexFields
+     * @return array
+     * @throws NoSuchEntityException
+     * @throws \Zend_Db_Select_Exception
+     */
+    protected function getPriceIndexData(array $productIds, $storeId, $indexFields): array
     {
         $connection = $this->resourceConnection->getConnection();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();

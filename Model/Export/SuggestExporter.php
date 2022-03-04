@@ -4,6 +4,7 @@ namespace Aligent\FredhopperIndexer\Model\Export;
 use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
 use Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface;
 use Aligent\FredhopperIndexer\Model\Export\Upload\SuggestUpload;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
@@ -45,6 +46,9 @@ class SuggestExporter implements ExporterInterface
         $this->logger = $logger;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public function export() : bool
     {
         $this->logger->info('Performing suggest export');
@@ -53,7 +57,7 @@ class SuggestExporter implements ExporterInterface
             $this->filesystem->createDirectory($directory);
         } catch (\Exception $e) {
             $this->logger->critical(
-                "Could not create directory {$directory} for export",
+                "Could not create directory $directory for export",
                 ['exception' => $e]
             );
             return false;

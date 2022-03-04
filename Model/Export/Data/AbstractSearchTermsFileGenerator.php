@@ -55,7 +55,7 @@ abstract class AbstractSearchTermsFileGenerator implements FileGeneratorInterfac
         }
     }
 
-    protected function addRow(array $data)
+    protected function addRow(array $data): string
     {
         $rowContent = '';
         foreach ($data as $column) {

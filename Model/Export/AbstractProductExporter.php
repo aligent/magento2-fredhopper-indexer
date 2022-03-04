@@ -8,6 +8,8 @@ use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
 use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
 use Aligent\FredhopperIndexer\Model\Export\Data\Products;
 use Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json;
 use Psr\Log\LoggerInterface;
@@ -110,6 +112,12 @@ abstract class AbstractProductExporter implements ExporterInterface
         $this->upload->setDryRun($isDryRun);
     }
 
+    /**
+     * @param bool $isIncremental
+     * @return bool
+     * @throws FileSystemException
+     * @throws LocalizedException
+     */
     protected function doExport(bool $isIncremental) : bool
     {
         // create a new temp directory for files to be sent to fredhopper
@@ -118,7 +126,7 @@ abstract class AbstractProductExporter implements ExporterInterface
             $this->filesystem->createDirectory($this->directory);
         } catch (\Exception $e) {
             $this->logger->critical(
-                "Could not create directory {$this->directory} for export",
+                "Could not create directory $this->directory for export",
                 ['exception' => $e]
             );
             return false;
@@ -141,7 +149,7 @@ abstract class AbstractProductExporter implements ExporterInterface
             $minProducts = $this->sanityConfig->getMinTotalProducts();
             $errs = [];
             if ($productCount < $minProducts) {
-                $errs[] = "Full export has {$productCount} products, below minimum threshold of {$minProducts}";
+                $errs[] = "Full export has $productCount products, below minimum threshold of $minProducts";
             }
             $errs = array_merge($errs, $this->validateCategories($metaContent, $productData));
 
@@ -157,10 +165,10 @@ abstract class AbstractProductExporter implements ExporterInterface
                 return false;
             }
 
-            $msg = "Generating JSON for full export of {$productCount} products (meets minimum of {$minProducts})";
+            $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
             $this->logger->info($msg);
         } elseif ($this->config->getDebugLogging()) {
-            $this->logger->debug("Generating JSON for {$productCount} products");
+            $this->logger->debug("Generating JSON for $productCount products");
         }
         if (!$this->generateProductsJson($productData)) {
             return false;
@@ -185,7 +193,8 @@ abstract class AbstractProductExporter implements ExporterInterface
     }
 
     /**
-     * @return array|bool
+     * @return array[]|false
+     * @throws LocalizedException
      */
     protected function generateMetaJson()
     {
@@ -196,7 +205,7 @@ abstract class AbstractProductExporter implements ExporterInterface
         } catch (\Exception $e) {
             // couldn't create a required file, so abort
             $this->logger->critical(
-                "Error saving meta file {$filePath}",
+                "Error saving meta file $filePath",
                 ['exception' => $e]
             );
             return false;
@@ -259,7 +268,7 @@ abstract class AbstractProductExporter implements ExporterInterface
             }
         }
 
-        $tierReqd = [
+        $tierRequired = [
             1 => $this->sanityConfig->getMinProductsCategoryTier1(),
             2 => $this->sanityConfig->getMinProductsCategoryTier2(),
         ];
@@ -273,10 +282,10 @@ abstract class AbstractProductExporter implements ExporterInterface
                 $tierMin[$tier] = $cat;
             }
 
-            $required = $tierReqd[$tier];
+            $required = $tierRequired[$tier];
             if ($cat['product_count'] < $required) {
-                $errMsg = "Insufficient products in tier {$tier} category {$cat['name']}";
-                $errMsg .= ": {$cat['product_count']} (expected {$required})";
+                $errMsg = "Insufficient products in tier $tier category {$cat['name']}";
+                $errMsg .= ": {$cat['product_count']} (expected $required)";
                 $errors[] = $errMsg;
                 $sufficientProducts = false;
             }
@@ -284,7 +293,7 @@ abstract class AbstractProductExporter implements ExporterInterface
 
         if ($sufficientProducts) {
             foreach ($tierMin as $tier => $cat) {
-                $msg = "Category {$cat['name']} has fewest products in tier {$tier}: {$cat['product_count']}";
+                $msg = "Category {$cat['name']} has fewest products in tier $tier: {$cat['product_count']}";
                 $this->logger->info($msg);
             }
         }
@@ -296,7 +305,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @param array $productData
      * @return bool
      */
-    protected function generateProductsJson(array $productData)
+    protected function generateProductsJson(array $productData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($productData, $this->productLimit) as $products) {
@@ -306,7 +315,7 @@ abstract class AbstractProductExporter implements ExporterInterface
                 $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
             } catch (\Exception $e) {
                 $this->logger->critical(
-                    "Error saving products file {$filePath}",
+                    "Error saving products file $filePath",
                     ['exception' => $e]
                 );
                 return false;
@@ -321,7 +330,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @param array $variantData
      * @return bool
      */
-    protected function generateVariantsJson(array $variantData)
+    protected function generateVariantsJson(array $variantData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($variantData, $this->productLimit) as $products) {
@@ -331,7 +340,7 @@ abstract class AbstractProductExporter implements ExporterInterface
                 $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
             } catch (\Exception $e) {
                 $this->logger->critical(
-                    "Error saving variants file {$filePath}",
+                    "Error saving variants file $filePath",
                     ['exception' => $e]
                 );
                 return false;

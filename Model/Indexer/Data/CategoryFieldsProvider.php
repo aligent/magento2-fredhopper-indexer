@@ -48,10 +48,10 @@ class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
     /**
      * @inheritDoc
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         if (!isset($this->allowCategories)) {
-            $this->rootCategoryId = (int)$this->config->getRootCategoryId();
+            $this->rootCategoryId = $this->config->getRootCategoryId();
             $collection = $this->relevantCategory->getCollection();
             $allowCategories = [];
             foreach ($collection as $category) {

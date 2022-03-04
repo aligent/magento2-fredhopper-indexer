@@ -23,7 +23,7 @@ class Engine implements EngineInterface
     /**
      * @inheritDoc
      */
-    public function getAllowedVisibility()
+    public function getAllowedVisibility(): array
     {
         return $this->visibility->getVisibleInSiteIds();
     }
@@ -31,7 +31,7 @@ class Engine implements EngineInterface
     /**
      * @inheritDoc
      */
-    public function allowAdvancedIndex()
+    public function allowAdvancedIndex(): bool
     {
         return false;
     }
@@ -47,15 +47,12 @@ class Engine implements EngineInterface
     /**
      * @inheritDoc
      */
-    public function prepareEntityIndex($index, $separator = ' ')
+    public function prepareEntityIndex($index, $separator = ' '): array
     {
         return $index;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }

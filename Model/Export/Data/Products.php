@@ -95,7 +95,6 @@ class Products
      */
     protected $siteVariantCustomAttributes = [];
 
-
     public function __construct(
         GeneralConfig $generalConfig,
         AttributeConfig $attributeConfig,
@@ -136,7 +135,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    public function getProductData(bool $isIncremental)
+    public function getProductData(bool $isIncremental): array
     {
         return $this->getProcessedProductData($isIncremental);
     }
@@ -145,7 +144,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    public function getVariantData(bool $isIncremental)
+    public function getVariantData(bool $isIncremental): array
     {
         return $this->getProcessedProductData($isIncremental, true);
     }
@@ -155,7 +154,7 @@ class Products
      * @param bool $isVariants
      * @return array
      */
-    protected function getProcessedProductData(bool $isIncremental, bool $isVariants = false)
+    protected function getProcessedProductData(bool $isIncremental, bool $isVariants = false): array
     {
         $rawProductData = $this->getRawProductData($isIncremental, $isVariants);
         return $this->processProductData(
@@ -179,7 +178,7 @@ class Products
                 'attribute_data' => 'attribute_data'
             ])
             ->where($isIncremental ? "operation_type is not null" : "ifnull(operation_type, '') <> 'd'")
-            ->where("product_type = '{$productType}'");
+            ->where("product_type = '$productType'");
         return $connection->fetchAll($select);
     }
 
@@ -207,7 +206,7 @@ class Products
      * @param array $productData
      * @return array
      */
-    protected function collateProductData(array $productData)
+    protected function collateProductData(array $productData): array
     {
         $productStoreData = [];
         foreach ($productData as $row) {
@@ -220,16 +219,22 @@ class Products
         return $productStoreData;
     }
 
+    /**
+     * @param array $productStoreData
+     * @param bool $isVariants
+     * @param bool $isIncremental
+     * @return array
+     */
     protected function convertProductDataToFredhopperFormat(
         array $productStoreData,
         bool $isVariants,
         bool $isIncremental
-    ) {
+    ): array {
         $defaultLocale = $this->generalConfig->getDefaultLocale();
         $products = [];
         foreach ($productStoreData as $productId => $productData) {
             $product = [
-                'product_id' => "{$this->generalConfig->getProductPrefix()}{$productId}",
+                'product_id' => "{$this->generalConfig->getProductPrefix()}$productId",
                 'attributes' => $this->convertAttributeDataToFredhopperFormat($productData, $defaultLocale),
                 'locales' => [
                     $defaultLocale
@@ -237,7 +242,7 @@ class Products
             ];
             if ($isVariants) {
                 $product['product_id'] = "{$this->generalConfig->getProductPrefix()}{$productData['parent_id']}";
-                $product['variant_id'] = "{$this->generalConfig->getVariantPrefix()}{$productId}";
+                $product['variant_id'] = "{$this->generalConfig->getVariantPrefix()}$productId";
             }
             if ($isIncremental) {
                 $product['operation'] = self::OPERATION_TYPE_MAPPING[$productData['operation_type']];
@@ -253,7 +258,7 @@ class Products
      * @param $defaultLocale
      * @return array
      */
-    protected function convertAttributeDataToFredhopperFormat($productData, $defaultLocale)
+    protected function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
     {
         $attributes = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
@@ -365,10 +370,10 @@ class Products
                 !empty(array_filter($this->siteVariantPriceAttributes, function ($code) use ($attributeCode) {
                     return strpos($attributeCode, $code) === 0;
                 }))) {
-                return "{$attributeCode}_{$siteVariant}";
+                return "{$attributeCode}_$siteVariant";
             }
         }
         // when not using store variants, only retain attributes in the default store
-        return $storeId === (int)$defaultStoreId ? $attributeCode : false;
+        return $storeId === $defaultStoreId ? $attributeCode : false;
     }
 }

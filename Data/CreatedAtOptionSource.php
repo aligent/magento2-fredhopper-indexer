@@ -21,7 +21,7 @@ class CreatedAtOptionSource implements OptionSourceInterface
         $this->dataProvider = $dataProvider;
     }
 
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         if ($this->options === null) {
             $options = [

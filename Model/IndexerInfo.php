@@ -5,13 +5,13 @@ namespace Aligent\FredhopperIndexer\Model;
 
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\Indexer\StateInterface;
 use Magento\Framework\Mview\View;
 use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Magento\Indexer\Model\Indexer\DependencyDecorator;
+use Zend_Db_Select;
 
 /**
  * Gets information about Magento indexers, and temp tables used by the Fredhopper indexer
@@ -115,14 +115,13 @@ class IndexerInfo
         $baseTable = DataHandler::INDEX_TABLE_NAME;
         $result = [];
 
-        /** @var Select $select */
         $select = $conn->select();
         $select->from($baseTable);
-        $select->reset(Select::COLUMNS);
+        $select->reset(Zend_Db_Select::COLUMNS);
         $select->columns(['store' => 'store_id', 'type' => 'product_type']);
         foreach ($ops as $op => $label) {
             // N.B. both values are defined in code; safe SQL-injection
-            $select->columns([$label => "SUM(operation_type = '{$op}')"]);
+            $select->columns([$label => "SUM(operation_type = '$op')"]);
         }
         $select->group(['store_id', 'product_type']);
         try {
@@ -146,7 +145,7 @@ class IndexerInfo
         foreach ($storeIds as $storeId => $ignore) {
             $select = $conn->select();
             $select->from($baseTable . '_scope' . $storeId);
-            $select->reset(Select::COLUMNS);
+            $select->reset(Zend_Db_Select::COLUMNS);
             $select->columns(['product_type', 'total_count' => 'COUNT(*)']);
             $select->group('product_type');
             try {

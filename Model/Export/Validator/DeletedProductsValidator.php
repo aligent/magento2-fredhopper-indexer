@@ -5,8 +5,8 @@ use Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface;
 use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\DB\Select;
 use Magento\Framework\Validation\ValidationException;
+use Zend_Db_Select;
 
 class DeletedProductsValidator implements PreExportValidatorInterface
 {
@@ -30,6 +30,7 @@ class DeletedProductsValidator implements PreExportValidatorInterface
 
     /**
      * @inheritDoc
+     * @throws \Zend_Db_Statement_Exception
      */
     public function validateState()
     {
@@ -37,7 +38,7 @@ class DeletedProductsValidator implements PreExportValidatorInterface
         $connection = $this->resourceConnection->getConnection();
         $select = $connection->select()
             ->from(DataHandler::INDEX_TABLE_NAME)
-            ->reset(Select::COLUMNS)
+            ->reset(Zend_Db_Select::COLUMNS)
             ->columns('count(1)')
             ->where('operation_type = ?', DataHandler::OPERATION_TYPE_DELETE);
         $result = $connection->query($select);

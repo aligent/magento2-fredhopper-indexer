@@ -60,7 +60,10 @@ class AttributeConfig extends GeneralConfig
         $this->dataProvider = $dataProvider;
     }
 
-    public function getUseVariantProducts()
+    /**
+     * @return bool
+     */
+    public function getUseVariantProducts(): bool
     {
         if ($this->useVariantProducts === null) {
             $this->useVariantProducts = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_VARIANT_PRODUCTS);
@@ -68,22 +71,28 @@ class AttributeConfig extends GeneralConfig
         return $this->useVariantProducts;
     }
 
-    public function getProductAttributes()
+    /**
+     * @return array
+     */
+    public function getProductAttributes(): array
     {
         if ($this->productAttributes === null) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_ATTRIBUTES);
-            $productAttributes = $this->json->unserialize($configValue) ?? [];
+            $productAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
             $this->addMagentoAttributeData($productAttributes);
             $this->productAttributes = $productAttributes;
         }
         return $this->productAttributes;
     }
 
-    public function getVariantAttributes()
+    /**
+     * @return array
+     */
+    public function getVariantAttributes(): array
     {
         if ($this->variantAttributes === null) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_ATTRIBUTES);
-            $variantAttributes = $this->json->unserialize($configValue) ?? [];
+            $variantAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
             $this->addMagentoAttributeData($variantAttributes);
             $this->variantAttributes = $variantAttributes;
         }
@@ -91,7 +100,10 @@ class AttributeConfig extends GeneralConfig
         return $this->variantAttributes;
     }
 
-    public function getAllAttributes()
+    /**
+     * @return array
+     */
+    public function getAllAttributes(): array
     {
         if ($this->allAttributes === null) {
             $this->allAttributes = array_merge($this->getProductAttributes(), $this->getVariantAttributes());
@@ -99,7 +111,10 @@ class AttributeConfig extends GeneralConfig
         return $this->allAttributes;
     }
 
-    public function getBooleanAttributes()
+    /**
+     * @return array
+     */
+    public function getBooleanAttributes(): array
     {
         if ($this->booleanAttributes === null) {
             $this->booleanAttributes = array_filter($this->getAllAttributes(), function ($attribute) {
@@ -109,7 +124,10 @@ class AttributeConfig extends GeneralConfig
         return $this->booleanAttributes;
     }
 
-    public function getProductAttributeCodes()
+    /**
+     * @return string[]
+     */
+    public function getProductAttributeCodes(): array
     {
         if ($this->productAttributeCodes === null) {
             $attributeCodes = [];
@@ -121,7 +139,10 @@ class AttributeConfig extends GeneralConfig
         return $this->productAttributeCodes;
     }
 
-    public function getVariantAttributeCodes()
+    /**
+     * @return string[]
+     */
+    public function getVariantAttributeCodes(): array
     {
         if ($this->variantAttributeCodes === null) {
             $attributeCodes = [];
@@ -133,7 +154,10 @@ class AttributeConfig extends GeneralConfig
         return $this->variantAttributeCodes;
     }
 
-    protected function getSearchableAttributes()
+    /**
+     * @return array
+     */
+    protected function getSearchableAttributes(): array
     {
         if ($this->searchableAttributes === null) {
             $this->searchableAttributes = $this->dataProvider->getSearchableAttributes();
@@ -141,7 +165,10 @@ class AttributeConfig extends GeneralConfig
         return $this->searchableAttributes;
     }
 
-    protected function addMagentoAttributeData(array &$attributesConfig)
+    /**
+     * @param array $attributesConfig
+     */
+    protected function addMagentoAttributeData(array &$attributesConfig): void
     {
         $defaultStoreId = $this->getDefaultStore();
         $searchableAttributes = $this->getSearchableAttributes();
@@ -159,7 +186,10 @@ class AttributeConfig extends GeneralConfig
         }
     }
 
-    public function getStaticAttributes()
+    /**
+     * @return array
+     */
+    public function getStaticAttributes(): array
     {
         if ($this->staticAttributes === null) {
             $staticAttributes = [];
@@ -173,7 +203,10 @@ class AttributeConfig extends GeneralConfig
         return $this->staticAttributes;
     }
 
-    public function getAttributesWithFredhopperType()
+    /**
+     * @return array
+     */
+    public function getAttributesWithFredhopperType(): array
     {
         if ($this->attributesWithFredhopperType === null) {
             $attributesWithFredhopperType = [];
@@ -186,7 +219,10 @@ class AttributeConfig extends GeneralConfig
         return $this->attributesWithFredhopperType;
     }
 
-    public function getEavAttributesByType()
+    /**
+     * @return array
+     */
+    public function getEavAttributesByType(): array
     {
         if ($this->eavAttributesByType === null) {
             $eavAttributesByType = [];
@@ -206,7 +242,10 @@ class AttributeConfig extends GeneralConfig
         return $this->eavAttributesByType;
     }
 
-    public function getSiteVariantAttributes()
+    /**
+     * @return array
+     */
+    public function getSiteVariantAttributes(): array
     {
         if ($this->siteVariantAttributes === null) {
             $siteVariantAttributes = [];

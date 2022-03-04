@@ -31,7 +31,7 @@ class AgeFieldsProvider implements AdditionalFieldsProviderInterface
     /**
      * @inheritDoc
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         if (!$this->ageAttributeConfig->getSendNewIndicator() && !$this->ageAttributeConfig->getSendDaysOnline()) {
             return [];

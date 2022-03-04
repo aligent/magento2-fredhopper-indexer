@@ -18,7 +18,10 @@ class AgeAttributeConfig extends GeneralConfig
     /** @var bool */
     protected $useSiteVariantAge;
 
-    public function getSendNewIndicator()
+    /**
+     * @return bool
+     */
+    public function getSendNewIndicator(): bool
     {
         if ($this->sendNewIndicator === null) {
             $this->sendNewIndicator = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_NEW_INDICATOR);
@@ -26,7 +29,10 @@ class AgeAttributeConfig extends GeneralConfig
         return $this->sendNewIndicator;
     }
 
-    public function getSendDaysOnline()
+    /**
+     * @return bool
+     */
+    public function getSendDaysOnline(): bool
     {
         if ($this->sendDaysOnline === null) {
             $this->sendDaysOnline = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_DAYS_ONLINE);
@@ -34,15 +40,21 @@ class AgeAttributeConfig extends GeneralConfig
         return $this->sendDaysOnline;
     }
 
-    public function getCreatedAtFieldName()
+    /**
+     * @return string
+     */
+    public function getCreatedAtFieldName(): string
     {
         if ($this->createdAtFieldName === null) {
-            $this->createdAtFieldName = $this->scopeConfig->getValue(self::XML_PATH_CREATED_AT_FIELD);
+            $this->createdAtFieldName = (string)$this->scopeConfig->getValue(self::XML_PATH_CREATED_AT_FIELD);
         }
         return $this->createdAtFieldName;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
         if ($this->useSiteVariantAge === null) {
             $this->useSiteVariantAge = parent::getUseSiteVariant() &&
@@ -51,7 +63,10 @@ class AgeAttributeConfig extends GeneralConfig
         return $this->useSiteVariantAge;
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         return $this->getUseSiteVariant() ? parent::getAllSiteVariantSuffixes() : [''];
     }

@@ -139,7 +139,7 @@ class DataHandler implements IndexerInterface
     /**
      * Final processing of attributes to ensure attributes are sent at correct level (product/variant), and that
      * site variants are appended where needed.
-     * Also provide pre/post processors for custom code to hook into
+     * Also provide pre- / post-processors for custom code to hook into
      * @param array $documents
      * @param $scopeId
      */
@@ -386,7 +386,7 @@ class DataHandler implements IndexerInterface
     /**
      * Function used to "reset" main index table after performing an incremental update
      */
-    public function resetIndexAfterExport()
+    public function resetIndexAfterExport(): bool
     {
         $connection = $this->resource->getConnection();
         $indexTableName = self::INDEX_TABLE_NAME;
@@ -428,7 +428,7 @@ class DataHandler implements IndexerInterface
     /**
      * @inheritDoc
      */
-    public function isAvailable($dimensions = [])
+    public function isAvailable($dimensions = []): bool
     {
         return $this->resource->getConnection()->isTableExists($this->getTableName($dimensions));
     }

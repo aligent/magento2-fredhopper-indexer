@@ -18,12 +18,19 @@ class FullPlugin
         $this->fredhopperDataProvider = $fredhopperDataProvider;
     }
 
+    /**
+     * @param Full $subject
+     * @param callable $proceed
+     * @param $storeId
+     * @param $productIds
+     * @return \Generator
+     */
     public function aroundRebuildStoreIndex(
         Full $subject,
         callable $proceed,
         $storeId,
         $productIds = null
-    ) {
+    ): \Generator {
         return $this->fredhopperDataProvider->rebuildStoreIndex($storeId, $productIds);
     }
 }

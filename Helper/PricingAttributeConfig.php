@@ -15,7 +15,10 @@ class PricingAttributeConfig extends GeneralConfig
     /** @var bool */
     protected $useRange;
 
-    public function getUseCustomerGroup()
+    /**
+     * @return bool
+     */
+    public function getUseCustomerGroup(): bool
     {
         if ($this->useCustomerGroup === null) {
             $this->useCustomerGroup = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_CUSTOMER_GROUP);
@@ -23,7 +26,10 @@ class PricingAttributeConfig extends GeneralConfig
         return $this->useCustomerGroup;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
         if ($this->useSiteVariantPricing === null) {
             $this->useSiteVariantPricing = parent::getUseSiteVariant() &&
@@ -32,7 +38,10 @@ class PricingAttributeConfig extends GeneralConfig
         return $this->useSiteVariantPricing;
     }
 
-    public function getUseRange()
+    /**
+     * @return bool
+     */
+    public function getUseRange(): bool
     {
         if ($this->useRange === null) {
             $this->useRange = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_RANGE);
@@ -40,7 +49,10 @@ class PricingAttributeConfig extends GeneralConfig
         return $this->useRange;
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         return $this->getUseSiteVariant() ? parent::getAllSiteVariantSuffixes() : [''];
     }

@@ -32,7 +32,7 @@ class FHAttributeTypes extends Select
      * @return $this
      * @throws LocalizedException
      */
-    public function setInputName($value)
+    public function setInputName($value): Select
     {
         return $this->setName($value);
     }
@@ -40,7 +40,7 @@ class FHAttributeTypes extends Select
     /**
      * @return string
      */
-    public function _toHtml()
+    public function _toHtml(): string
     {
         if (empty($this->getOptions())) {
             foreach (self::ATTRIBUTE_TYPES as $attributeType) {

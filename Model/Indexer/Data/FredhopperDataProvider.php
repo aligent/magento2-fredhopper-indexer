@@ -79,9 +79,11 @@ class FredhopperDataProvider
         while (count($products) > 0) {
             $allProductIds = array_column($products, 'entity_id');
             $relatedProducts = $this->getRelatedProducts($products);
-            foreach ($relatedProducts as $productId => $relatedArray) {
-                $allProductIds = array_unique(array_merge($allProductIds, $relatedArray));
+            $relatedProductIds = [];
+            foreach ($relatedProducts as $relatedArray) {
+                $relatedProductIds[] = $relatedArray;
             }
+            $allProductIds = array_merge($allProductIds, ...$relatedProductIds);
 
             // ensure that status attribute is always included
             $eavAttributesByType = $this->attributeConfig->getEavAttributesByType();
@@ -142,7 +144,11 @@ class FredhopperDataProvider
         return $productIndex;
     }
 
-    protected function getRelatedProducts($products)
+    /**
+     * @param $products
+     * @return array
+     */
+    protected function getRelatedProducts($products): array
     {
         $relatedProducts = [];
         foreach ($products as $productData) {
@@ -154,7 +160,12 @@ class FredhopperDataProvider
         return array_filter($relatedProducts);
     }
 
-    protected function isProductEnabled($productId, array $productsAttributes)
+    /**
+     * @param $productId
+     * @param array $productsAttributes
+     * @return bool
+     */
+    protected function isProductEnabled($productId, array $productsAttributes): bool
     {
         $status = $this->searchDataProvider->getSearchableAttribute('status');
         $allowedStatuses = $this->catalogProductStatus->getVisibleStatusIds();
@@ -162,7 +173,11 @@ class FredhopperDataProvider
             in_array($productsAttributes[$productId][$status->getId()], $allowedStatuses);
     }
 
-    protected function addStaticAttributes(array &$productsAttributes, array $staticAttributes)
+    /**
+     * @param array $productsAttributes
+     * @param array $staticAttributes
+     */
+    protected function addStaticAttributes(array &$productsAttributes, array $staticAttributes): void
     {
         if (count($productsAttributes) == 0 || count($staticAttributes) == 0) {
             return;
@@ -183,12 +198,19 @@ class FredhopperDataProvider
         }
     }
 
+    /**
+     * @param array $productIndex
+     * @param array $productData
+     * @param int $storeId
+     * @param array $additionalFields
+     * @return array
+     */
     protected function prepareProductIndex(
         array $productIndex,
         array $productData,
         int $storeId,
         array $additionalFields
-    ) {
+    ): array {
         $productId = $productData['entity_id'];
         $typeId = $productData['type_id'];
 
@@ -213,7 +235,11 @@ class FredhopperDataProvider
         return $indexData;
     }
 
-    protected function populateBooleanAttributes(array &$indexData)
+    /**
+     * @param array $indexData
+     * @return void
+     */
+    protected function populateBooleanAttributes(array &$indexData): void
     {
         // all boolean attributes are of type "int"
         $booleanAttributes = $this->attributeConfig->getBooleanAttributes();
@@ -221,7 +247,7 @@ class FredhopperDataProvider
             if (!isset($indexData['product'][$attribute['attribute']])) {
                 $indexData['product'][$attribute['attribute']] = '0';
             }
-            foreach ($indexData['variants'] as $variantId => &$variantData) {
+            foreach ($indexData['variants'] as &$variantData) {
                 if (!isset($variantData[$attribute['attribute']])) {
                     $variantData[$attribute['attribute']] = '0';
                 }

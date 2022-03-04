@@ -103,7 +103,8 @@ class ProductMapper
                 if ($productId === $id) {
                     $productData[$attributeCode] = $value;
                 } elseif ($typeId === Configurable::TYPE_CODE) {
-                    // only want to have variant information for configurable products// map variant id to parent for use later
+                    // only want to have variant information for configurable products
+                    // map variant id to parent for use later
                     $variantData[$id] = $variantData[$id] ?? [];
                     $variantData[$id][$attributeCode] = $value;
                 }
@@ -295,9 +296,9 @@ class ProductMapper
         if ($isMultiSelect) {
             $values = [];
             foreach ($attributeValues as $valueArray) {
-                $values = array_merge($values, $valueArray);
+                $values[] = $valueArray;
             }
-            $attributeValues = array_unique($values);
+            $attributeValues = array_unique(array_merge([], ...$values));
         }
 
         foreach ($attributeValues as $attributeValue) {
@@ -330,7 +331,7 @@ class ProductMapper
 
     /**
      * Retrieve value for field. If field have only one value this method return it.
-     * Otherwise will be returned array of these values.
+     * Otherwise, will be returned array of these values.
      * Note: array of values must have index keys, not as associative array.
      *
      * @param array $values

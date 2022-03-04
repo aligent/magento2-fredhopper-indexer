@@ -69,55 +69,76 @@ class GeneralConfig extends AbstractHelper
         $this->storeManager = $storeManager;
     }
 
-    public function getUsername()
+    /**
+     * @return string
+     */
+    public function getUsername(): string
     {
         if (!$this->username) {
-            $this->username = $this->scopeConfig->getValue(self::XML_PATH_USERNAME);
+            $this->username = (string)$this->scopeConfig->getValue(self::XML_PATH_USERNAME);
         }
         return $this->username;
     }
 
-    public function getPassword()
+    /**
+     * @return string
+     */
+    public function getPassword(): string
     {
         if (!$this->password) {
-            $this->password = $this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
+            $this->password = (string)$this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
         }
         return $this->password;
     }
 
-    public function getEnvironmentName()
+    /**
+     * @return string
+     */
+    public function getEnvironmentName(): string
     {
         if (!$this->environmentName) {
-            $this->environmentName = $this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
+            $this->environmentName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
         }
         return $this->environmentName;
     }
 
-    public function getEndpointName()
+    /**
+     * @return string
+     */
+    public function getEndpointName(): string
     {
         if (!$this->endpointName) {
-            $this->endpointName = $this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
+            $this->endpointName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
         }
         return $this->endpointName;
     }
 
-    public function getProductPrefix()
+    /**
+     * @return string
+     */
+    public function getProductPrefix(): string
     {
         if (!$this->productPrefix) {
-            $this->productPrefix = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
+            $this->productPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
         }
         return $this->productPrefix;
     }
 
-    public function getVariantPrefix()
+    /**
+     * @return string
+     */
+    public function getVariantPrefix(): string
     {
         if (!$this->variantPrefix) {
-            $this->variantPrefix = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
+            $this->variantPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
         }
         return $this->variantPrefix;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
         if ($this->useSiteVariant === null) {
             $this->useSiteVariant = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
@@ -125,15 +146,21 @@ class GeneralConfig extends AbstractHelper
         return $this->useSiteVariant;
     }
 
-    public function getDefaultStore()
+    /**
+     * @return int
+     */
+    public function getDefaultStore(): int
     {
         if (!$this->defaultStore) {
-            $this->defaultStore = $this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
+            $this->defaultStore = (int)$this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
         }
         return $this->defaultStore;
     }
 
-    public function getDefaultLocale()
+    /**
+     * @return string
+     */
+    public function getDefaultLocale(): string
     {
         if (!$this->defaultLocale) {
             $this->localeResolver->emulate($this->getDefaultStore());
@@ -143,7 +170,11 @@ class GeneralConfig extends AbstractHelper
         return $this->defaultLocale;
     }
 
-    public function getSiteVariant($storeId = null)
+    /**
+     * @param $storeId
+     * @return string|null
+     */
+    public function getSiteVariant($storeId = null): ?string
     {
         if (!isset($this->siteVariants[$storeId ?? 'default'])) {
             $this->siteVariants[$storeId ?? 'default'] = $this->scopeConfig->getValue(
@@ -155,7 +186,10 @@ class GeneralConfig extends AbstractHelper
         return $this->siteVariants[$storeId ?? 'default'];
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         if ($this->allSiteVariantSuffixes === null) {
             if (!$this->getUseSiteVariant()) {
@@ -169,7 +203,10 @@ class GeneralConfig extends AbstractHelper
         return $this->allSiteVariantSuffixes;
     }
 
-    public function getRootCategoryId()
+    /**
+     * @return int
+     */
+    public function getRootCategoryId(): int
     {
         if (!isset($this->rootCategoryId)) {
             $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
@@ -180,7 +217,10 @@ class GeneralConfig extends AbstractHelper
         return $this->rootCategoryId;
     }
 
-    public function getDebugLogging()
+    /**
+     * @return bool
+     */
+    public function getDebugLogging(): bool
     {
         if (!$this->debugLogging) {
             $this->debugLogging = $this->scopeConfig->isSetFlag(self::XML_PATH_DEBUG_LOGGING);

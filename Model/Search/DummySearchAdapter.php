@@ -4,7 +4,6 @@ namespace Aligent\FredhopperIndexer\Model\Search;
 use Aligent\FredhopperIndexer\Model\Search\Adapter\DummyResponseFactory;
 use Magento\Framework\Search\AdapterInterface;
 use Magento\Framework\Search\RequestInterface;
-use Magento\Framework\Search\Response\QueryResponse;
 
 class DummySearchAdapter implements AdapterInterface
 {

@@ -8,6 +8,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Catalog\Model\View\Asset\ImageFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\ConfigInterface;
 use Magento\Store\Model\App\Emulation;
 
@@ -66,8 +67,9 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 
     /**
      * @inheritDoc
+     * @throws LocalizedException
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         if (empty($this->imageAttributeConfig)) {
             return [];
@@ -75,7 +77,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         $collection = $this->productCollectionFactory->create();
         $collection->addIdFilter($productIds);
         $collection->addStoreFilter($storeId);
-        foreach ($this->imageAttributeConfig as $fredhopperAttribute => $imageConfig) {
+        foreach ($this->imageAttributeConfig as $imageConfig) {
             $collection->addAttributeToSelect($imageConfig['attribute_code']);
         }
 
@@ -95,7 +97,12 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         return $result;
     }
 
-    protected function getImageParamsForStore($imageDisplayArea, $storeId)
+    /**
+     * @param $imageDisplayArea
+     * @param $storeId
+     * @return array
+     */
+    protected function getImageParamsForStore($imageDisplayArea, $storeId): array
     {
         if (!isset($this->imageParams[$imageDisplayArea][$storeId])) {
             try {
@@ -121,7 +128,11 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         return $this->imageParams[$imageDisplayArea][$storeId];
     }
 
-    public function getImageParams($imageDisplayArea)
+    /**
+     * @param $imageDisplayArea
+     * @return array
+     */
+    public function getImageParams($imageDisplayArea): array
     {
         return $this->presentationConfig->getViewConfig()->getMediaAttributes(
             'Magento_Catalog',
