@@ -313,85 +313,74 @@ class DataHandler implements IndexerInterface
         $storeId = $this->getScopeId($dimensions);
 
         // insert any new records and mark as "add"
-        /*
-         * INSERT IGNORE INTO fredhopper_product_data_index
-         * SELECT :scopeId as store_id, product_type, product_id, attribute_data, 'a' as operation_type
-         *   FROM fredhopper_product_data_index_store<id>;
-         *
-         */
-        $insertQuery = "INSERT IGNORE INTO {$indexTableName}" .
-            " (store_id, product_type, product_id, parent_id, attribute_data, operation_type)" .
-            " SELECT :store_id, product_type, product_id, parent_id, attribute_data, :operation_type" .
-            " FROM {$scopeTableName}";
-        $connection->query($insertQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_ADD
-        ]);
-
+        $insertSelect = $connection->select();
+        $insertSelect->from(
+            ['scope_table' => $scopeTableName],
+            ['product_type', 'product_id', 'parent_id', 'attribute_data']
+        );
+        $insertSelect->columns(
+            [
+                'operation_type' => new \Zend_Db_Expr($connection->quote(self::OPERATION_TYPE_ADD)),
+                'store_id' => new \Zend_Db_Expr($storeId)
+            ]
+        );
+        $connection->insertFromSelect(
+            $insertSelect,
+            $indexTableName,
+            ['product_type', 'product_id', 'parent_id', 'attribute_data', 'operation_type', 'store_id'],
+            AdapterInterface::INSERT_IGNORE // ignore mode so only records that do not exist will be inserted
+        );
 
         // check for deleted records and mark as "delete"
-        /**
-         * UPDATE fredhopper_product_data_index main
-         *    SET operation_type = 'd'
-         *  WHERE store_id = :scopeId
-         *    AND (product_id IN (:affectedProductIds) or :affectedProductIds = -1)
-         *    AND NOT EXISTS (SELECT 1
-         *                      FROM fredhopper_product_data_index_store<id> store_index
-         *                     WHERE store_index.product_id = main.product_id
-         *                       AND store_index.product_type = main.product_type)
-         */
-        $deleteQuery = "UPDATE {$indexTableName} main_table" .
-            " SET operation_type = :operation_type " .
-            " WHERE store_id = :store_id AND NOT EXISTS (SELECT 1 from {$scopeTableName} scope_table " .
+        $deleteWhereClause = "store_id = $storeId AND NOT EXISTS (SELECT 1 from $scopeTableName scope_table " .
             " WHERE scope_table.product_id = main_table.product_id " .
             " AND scope_table.product_type = main_table.product_type)";
-        $connection->query($deleteQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_DELETE
-        ]);
+        $connection->update(
+            $indexTableName,
+            ['operation_type' => self::OPERATION_TYPE_DELETE],
+            $deleteWhereClause
+        );
 
-        // compare
-        /**
-         * UPDATE fredhopper_product_data_index main,
-         *        fredhopper_product_data_index_store<id> store_index
-         *    SET main.operation_type = 'r',
-         *        main.attribute_data = store_index.attribute_data
-         *  WHERE main.store_id = :scopeId
-         *    AND main.product_type = store_index.product_type
-         *    AND main.product_id = store_index.product_id
-         *    AND main.attribute_data != store_index.attribute_data
-         */
-        $updateQuery = "UPDATE {$indexTableName} main_table, {$scopeTableName} scope_table" .
-            " SET main_table.operation_type = :operation_type, main_table.attribute_data = scope_table.attribute_data" .
-            " WHERE main_table.store_id = :store_id" .
-            " AND main_table.product_id = scope_table.product_id" .
-            " AND main_table.product_type = scope_table.product_type" .
-            " AND main_table.attribute_data <> scope_table.attribute_data";
-        $connection->query($updateQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_UPDATE
-        ]);
+        // find records to be updated - where attribute_data has changed
+        $updateSubSelect = $connection->select();
+        $updateSubSelect->from(
+            false,
+            ['operation_type' => $connection->quote(self::OPERATION_TYPE_UPDATE)] // used for setting value
+        );
+        $updateSubSelect->join(
+            ['scope_table' => $scopeTableName],
+            'main_table.product_id = scope_table.product_id AND main_table.product_type = scope_table.product_type',
+            ['attribute_data']
+        );
+        $updateSubSelect->where('main_table.store_id = ?', $storeId);
+        $updateSubSelect->where('main_table.attribute_data <> scope_table.attribute_data');
 
-        // restore incorrectly deleted  products
-        /**
-         * UPDATE fredhopper_product_data_index main,
-         *        fredhopper_product_data_index_store<id> store_index
-         *    SET main.operation_type = null
-         *  WHERE main.store_id = :scopeId
-         *    AND main.product_type = store_index.product_type
-         *    AND main.product_id = store_index.product_id
-         *    AND main.operation_type = :operation_type
-         */
-        $restoreQuery = "UPDATE {$indexTableName} main_table, {$scopeTableName} scope_table" .
-            " SET main_table.operation_type = NULL" .
-            " WHERE main_table.store_id = :store_id" .
-            " AND main_table.product_id = scope_table.product_id" .
-            " AND main_table.product_type = scope_table.product_type" .
-            " AND main_table.operation_type = :operation_type";
-        $connection->query($restoreQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_DELETE
-        ]);
+        $updateQuery = $connection->updateFromSelect(
+            $updateSubSelect,
+            ['main_table' => $indexTableName]
+        );
+        $connection->query($updateQuery);
+
+        // Restore incorrectly deleted  products by clearing operation_type
+        // Find records that are no longer missing from the scope table but are marked for deletion
+        $restoreSubSelect = $connection->select();
+        $restoreSubSelect->from(
+            false,
+            ['operation_type' => 'NULL'] // used for setting value
+        );
+        $restoreSubSelect->join(
+            ['scope_table' => $scopeTableName],
+            'main_table.product_id = scope_table.product_id AND main_table.product_type = scope_table.product_type',
+            []
+        );
+        $restoreSubSelect->where('main_table.store_id = ?', $storeId);
+        $restoreSubSelect->where('main_table.operation_type = ?', self::OPERATION_TYPE_DELETE);
+
+        $restoreQuery = $connection->updateFromSelect(
+            $restoreSubSelect,
+            ['main_table' => $indexTableName]
+        );
+        $connection->query($restoreQuery);
     }
 
     /**
@@ -402,13 +391,15 @@ class DataHandler implements IndexerInterface
         $connection = $this->resource->getConnection();
         $indexTableName = self::INDEX_TABLE_NAME;
         // first, remove any records marked for deletion
-        $deleteQuery = "DELETE FROM {$indexTableName} WHERE operation_type = :operation_type";
-        $connection->query($deleteQuery, ['operation_type' => self::OPERATION_TYPE_DELETE]);
+        $connection->delete($indexTableName, ['operation_type = ?' => self::OPERATION_TYPE_DELETE]);
 
         // where clause is not technically needed, but operation_type column is indexed, so this should reduce the
         // amount of work and maintain/improve performance
-        $updateQuery = "UPDATE {$indexTableName} SET operation_type = NULL WHERE operation_type IS NOT NULL";
-        $connection->query($updateQuery);
+        $connection->update(
+            $indexTableName,
+            ['operation_type' => new \Zend_Db_Expr('NULL')],
+            'operation_type IS NOT NULL'
+        );
         return true;
     }
 
