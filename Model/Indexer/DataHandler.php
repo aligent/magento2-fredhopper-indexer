@@ -1,9 +1,21 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer;
 
+use Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\ScopeResolverInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Indexer\IndexStructureInterface;
+use Magento\Framework\Indexer\SaveHandler\Batch;
+use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
+use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 use Magento\Framework\Search\Request\Dimension;
+use Magento\Framework\Serialize\Serializer\Json;
 
-class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInterface
+class DataHandler implements IndexerInterface
 {
     const BATCH_SIZE = 1000;
     const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
@@ -15,47 +27,47 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
     const OPERATION_TYPE_REPLACE = 'r';
 
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     protected $resource;
     /**
-     * @var \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver
+     * @var IndexScopeResolver
      */
     protected $indexScopeResolver;
     /**
-     * @var \Magento\Framework\Indexer\SaveHandler\Batch
+     * @var Batch
      */
     protected $batch;
     /**
-     * @var \Magento\Framework\App\ScopeResolverInterface
+     * @var ScopeResolverInterface
      */
     protected $scopeResolver;
     /**
-     * @var \Magento\Framework\Indexer\IndexStructureInterface
+     * @var IndexStructureInterface
      */
     protected $indexStructure;
     /**
-     * @var \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider
+     * @var FredhopperDataProvider
      */
     protected $dataProvider;
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $json;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
+     * @var GeneralConfig
      */
     protected $generalConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
+     * @var AttributeConfig
      */
     protected $attributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface[]
+     * @var DocumentProcessorInterface[]
      */
     protected $documentPreProcessors;
     /**
-     * @var \Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface[]
+     * @var DocumentProcessorInterface[]
      */
     protected $documentPostProcessors;
     /**
@@ -71,15 +83,15 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
     ];
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver $indexScopeResolver,
-        \Magento\Framework\Indexer\SaveHandler\Batch $batch,
-        \Magento\Framework\App\ScopeResolverInterface $scopeResolver,
-        \Magento\Framework\Indexer\IndexStructureInterface $indexStructure,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider $dataProvider,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
+        ResourceConnection $resource,
+        IndexScopeResolver $indexScopeResolver,
+        Batch $batch,
+        ScopeResolverInterface $scopeResolver,
+        IndexStructureInterface $indexStructure,
+        Json $json,
+        FredhopperDataProvider $dataProvider,
+        GeneralConfig $generalConfig,
+        AttributeConfig $attributeConfig,
         array $documentPreProcessors = [],
         array $documentPostProcessors = [],
         $batchSize = 1000
@@ -108,7 +120,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $variants = [];
         foreach ($this->batch->getItems($documents, self::BATCH_SIZE) as $documents) {
             $this->processDocuments($documents, $scopeId);
-            foreach($documents as $productId => $productData) {
+            foreach ($documents as $productId => $productData) {
                 $products[$productId] = $productData['product'];
                 foreach ($productData['variants'] as $variantId => $variantData) {
                     $variants[$variantId] = $variantData;
@@ -139,84 +151,116 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         if (!empty($documents)) {
             // if using variants, need to ensure each product has a variant
             if ($this->attributeConfig->getUseVariantProducts()) {
-                $productAttributeCodes = [];
-                foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
-                    $productAttributeCodes[$code] = true;
-                }
-                foreach ($documents as $productId => &$data) {
-                    // copy product data to variant
-                    if (empty($data['variants'])) {
-                        $data['variants'] =[
-                            $productId => $data['product']
-                        ];
-                    }
-
-                    // remove any variant-level attributes from parent product, ensuring it is set on each variant
-                    foreach ($data['product'] as $attributeCode => $productData) {
-                        if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
-                            foreach ($data['variants'] as $variantId => &$variantData) {
-                                $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
-                            }
-                            if (!isset($productAttributeCodes[$attributeCode])) {
-                                unset($data['product'][$attributeCode]);
-                            }
-                            continue; // continue with the next attribute
-                        }
-                        // check pricing attributes
-                        // need to use strpos as we can have customer group pricing
-                        foreach ($this->variantPriceAttributes as $priceAttributePrefix) {
-                            if (strpos($attributeCode, $priceAttributePrefix) === 0) {
-                                foreach ($data['variants'] as $variantId => &$variantData) {
-                                    $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
-                                }
-                                unset($data['product'][$attributeCode]);
-                                break; // skip the rest of the pricing attribute loop
-                            }
-                        }
-                    }
-
-                    // remove product-level attributes from variants
-                    foreach ($data['variants'] as &$variantData) {
-                        foreach ($variantData as $attributeCode => $attributeValue) {
-                            if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
-                                unset($variantData[$attributeCode]);
-                            }
-                        }
-                    }
-                }
+                $this->processVariants($documents);
             } else {
-                // need to collate variant level attributes at product level
-                // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
-                // of parent data
-                foreach ($documents as $productId => &$data) {
-                    foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
-                        // convert product attribute to an array if it's not already
-                        if (isset($data['product'][$variantAttributeCode]) &&
-                            !is_array($data['product'][$variantAttributeCode])) {
-                            $data['product'][$variantAttributeCode] = [$data['product'][$variantAttributeCode]];
-                        }
-                        $valueArray = [];
-                        foreach ($data['variants'] as $variantId => $variantData) {
-                            if (isset($variantData[$variantAttributeCode])) {
-                                $value = $variantData[$variantAttributeCode];
-                                $value = is_array($value) ? $value : [$value];
-                                $valueArray = array_merge($valueArray, $value);
-                            }
-                        }
-                        // if there are variant values to include, ensure product value is set
-                        if (!empty($valueArray)) {
-                            $data['product'][$variantAttributeCode] = $data['product'][$variantAttributeCode] ?? [];
-                            $data['product'][$variantAttributeCode] = array_merge(
-                                $data['product'][$variantAttributeCode],
-                                $valueArray
-                            );
-                        }
-                    }
-                }
+                $this->processProducts($documents);
             }
         }
         foreach ($this->documentPostProcessors as $postProcessor) {
             $postProcessor->processDocuments($documents, $scopeId);
+        }
+    }
+
+    /**
+     * Handles the processing of variant-level attributes for products
+     * @param array $documents passed by reference
+     * @return void
+     */
+    private function processVariants(array &$documents)
+    {
+        $productAttributeCodes = [];
+        foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
+            $productAttributeCodes[$code] = true;
+        }
+        foreach ($documents as $productId => &$data) {
+            // copy product data to variant
+            if (empty($data['variants'])) {
+                $data['variants'] =[
+                    $productId => $data['product']
+                ];
+            }
+
+            // remove any variant-level attributes from parent product, ensuring it is set on each variant
+            foreach ($data['product'] as $attributeCode => $productData) {
+                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                    foreach ($data['variants'] as &$variantData) {
+                        $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
+                    }
+                    if (!isset($productAttributeCodes[$attributeCode])) {
+                        unset($data['product'][$attributeCode]);
+                    }
+                    continue; // continue with the next attribute
+                }
+                // check pricing attributes
+                // need to use strpos as we can have customer group pricing
+                foreach ($this->variantPriceAttributes as $priceAttributePrefix) {
+                    if (strpos($attributeCode, $priceAttributePrefix) === 0) {
+                        foreach ($data['variants'] as &$variantData) {
+                            $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
+                        }
+                        unset($data['product'][$attributeCode]);
+                        break; // skip the rest of the pricing attribute loop
+                    }
+                }
+            }
+
+            // remove product-level attributes from variants
+            foreach ($data['variants'] as &$variantData) {
+                foreach ($variantData as $attributeCode => $attributeValue) {
+                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                        unset($variantData[$attributeCode]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Collates variant-level attributes into the parent product
+     * @param array $documents passed by reference
+     * @return void
+     */
+    private function processProducts(array &$documents)
+    {
+        // need to collate variant level attributes at product level
+        // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
+        // of parent data
+        foreach ($documents as &$data) {
+            foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
+                $this->processProductVariantAttribute($data, $variantAttributeCode);
+            }
+        }
+    }
+
+    /**
+     * Collates the variant-level values for a single attribute
+     * @param array $data passed by reference
+     * @param $variantAttributeCode
+     * @return void
+     */
+    private function processProductVariantAttribute(array &$data, $variantAttributeCode)
+    {
+        // convert product attribute to an array if it's not already
+        if (isset($data['product'][$variantAttributeCode]) &&
+            !is_array($data['product'][$variantAttributeCode])) {
+            $data['product'][$variantAttributeCode] = [$data['product'][$variantAttributeCode]];
+        }
+        $valueArray = [];
+        foreach ($data['variants'] as $variantData) {
+            if (isset($variantData[$variantAttributeCode])) {
+                $value = $variantData[$variantAttributeCode];
+                $valueArray[] = is_array($value) ? $value : [$value];
+            }
+        }
+        $valueArray = array_merge([], ...$valueArray);
+
+        // if there are variant values to include, ensure product value is set
+        if (!empty($valueArray)) {
+            $data['product'][$variantAttributeCode] = $data['product'][$variantAttributeCode] ?? [];
+            $data['product'][$variantAttributeCode] = array_merge(
+                $data['product'][$variantAttributeCode],
+                $valueArray
+            );
         }
     }
 
@@ -240,7 +284,8 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
             $variantRows[] = [
                 'product_type' => self::TYPE_VARIANT,
                 'product_id' => $variantId,
-                'parent_id' => $variantIdParentMapping[$variantId] ?? $variantId, // dummy variants have themselves as parents
+                // dummy variants have themselves as parents
+                'parent_id' => $variantIdParentMapping[$variantId] ?? $variantId,
                 'attribute_data' => $this->json->serialize($this->sortArray($attributeData))
             ];
         }
