@@ -1,10 +1,12 @@
 <?php
 namespace Aligent\FredhopperIndexer\Plugin\Model\Indexer\Fulltext\Action;
 
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+
 class DataProviderPlugin
 {
     public function afterPrepareProductIndex(
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $subject,
+        DataProvider $subject,
         $result,
         $indexData,
         $productData

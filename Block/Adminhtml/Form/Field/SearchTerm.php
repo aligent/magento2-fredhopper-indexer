@@ -1,7 +1,9 @@
 <?php
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class SearchTerm extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+
+class SearchTerm extends AbstractFieldArray
 {
     protected function _prepareToRender()
     {

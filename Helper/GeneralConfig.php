@@ -1,7 +1,12 @@
 <?php
 namespace Aligent\FredhopperIndexer\Helper;
 
+use Magento\Catalog\Model\Category;
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Locale\Resolver;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class GeneralConfig extends AbstractHelper
 {
@@ -46,18 +51,18 @@ class GeneralConfig extends AbstractHelper
     protected $debugLogging;
 
     /**
-     * @var \Magento\Framework\Locale\Resolver
+     * @var Resolver
      */
     protected $localeResolver;
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     protected $storeManager;
 
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        Context $context,
+        Resolver $localeResolver,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->localeResolver = $localeResolver;
@@ -143,7 +148,7 @@ class GeneralConfig extends AbstractHelper
         if (!isset($this->siteVariants[$storeId ?? 'default'])) {
             $this->siteVariants[$storeId ?? 'default'] = $this->scopeConfig->getValue(
                 self::XML_PATH_SITE_VARIANT,
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                ScopeInterface::SCOPE_STORE,
                 $storeId
             );
         }
@@ -169,7 +174,7 @@ class GeneralConfig extends AbstractHelper
         if (!isset($this->rootCategoryId)) {
             $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
             if ($this->rootCategoryId <= 0) {
-                $this->rootCategoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+                $this->rootCategoryId = Category::TREE_ROOT_ID;
             }
         }
         return $this->rootCategoryId;

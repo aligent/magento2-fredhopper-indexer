@@ -1,22 +1,27 @@
 <?php
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class Attributes extends \Magento\Framework\View\Element\Html\Select
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Context;
+use Magento\Framework\View\Element\Html\Select;
+
+class Attributes extends Select
 {
     /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
+     * @var DataProvider
      */
     protected $dataProvider;
 
     /**
      * Attributes constructor.
-     * @param \Magento\Framework\View\Element\Context $context
-     * @param \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider
+     * @param Context $context
+     * @param DataProvider $dataProvider
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\View\Element\Context $context,
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
+        Context $context,
+        DataProvider $dataProvider,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -26,7 +31,7 @@ class Attributes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function setInputName($value)
     {
@@ -51,5 +56,4 @@ class Attributes extends \Magento\Framework\View\Element\Html\Select
 
         return parent::_toHtml();
     }
-
 }

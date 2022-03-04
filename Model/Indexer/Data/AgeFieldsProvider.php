@@ -1,14 +1,18 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
-class AgeFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+
+class AgeFieldsProvider implements AdditionalFieldsProviderInterface
 {
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
+     * @var CollectionFactory
      */
     protected $productCollectionFactory;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig
+     * @var AgeAttributeConfig
      */
     protected $ageAttributeConfig;
     /**
@@ -17,8 +21,8 @@ class AgeFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMap
     protected $currentTime;
 
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
-        \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig $ageAttributeConfig
+        CollectionFactory $productCollectionFactory,
+        AgeAttributeConfig $ageAttributeConfig
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
         $this->ageAttributeConfig = $ageAttributeConfig;

@@ -2,41 +2,50 @@
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
+use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Model\RelevantCategory;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Model\Category;
+use Magento\Customer\Api\GroupRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class Meta
 {
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
     /**
-     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
+     * @var RelevantCategory
      */
     protected $relevantCategory;
     /**
-     * @var \Magento\Catalog\Api\CategoryRepositoryInterface
+     * @var CategoryRepositoryInterface
      */
     protected $categoryRepository;
     /**
-     * @var \Magento\Customer\Api\GroupRepositoryInterface
+     * @var GroupRepositoryInterface
      */
     protected $customerGroupRepository;
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @var SearchCriteriaBuilder
      */
     protected $searchCriteriaBuilder;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
+     * @var AttributeConfig
      */
     protected $attributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
+     * @var PricingAttributeConfig
      */
     protected $pricingAttributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\StockAttributeConfig
+     * @var StockAttributeConfig
      */
     protected $stockAttributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig
+     * @var AgeAttributeConfig
      */
     protected $ageAttributeConfig;
     /**
@@ -50,17 +59,16 @@ class Meta
     protected $rootCategoryId = 1;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
-        \Magento\Catalog\Api\CategoryRepositoryInterface $categoryRepository,
-        \Magento\Customer\Api\GroupRepositoryInterface $customerGroupRepository,
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\StockAttributeConfig $stockAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig $ageAttributeConfig,
+        RelevantCategory $relevantCategory,
+        CategoryRepositoryInterface $categoryRepository,
+        GroupRepositoryInterface $customerGroupRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        AttributeConfig $attributeConfig,
+        PricingAttributeConfig $pricingAttributeConfig,
+        StockAttributeConfig $stockAttributeConfig,
+        AgeAttributeConfig $ageAttributeConfig,
         $customAttributeData = []
-    )
-    {
+    ) {
         $this->relevantCategory = $relevantCategory;
         $this->categoryRepository = $categoryRepository;
         $this->customerGroupRepository = $customerGroupRepository;
@@ -104,7 +112,7 @@ class Meta
          *
          */
         $allAttributes = $this->attributeConfig->getAllAttributes();
-        foreach($allAttributes as $attributeData) {
+        foreach ($allAttributes as $attributeData) {
             if ($attributeData['append_site_variant']) {
                 $suffixes = $siteVariantSuffixes;
             } else {
@@ -150,7 +158,7 @@ class Meta
             ];
         }
 
-        $attributeArray = array_merge(
+        return array_merge(
             $attributeArray,
             $this->getPriceAttributesArray($defaultLocale),
             $this->getStockAttributesArray($defaultLocale),
@@ -158,7 +166,6 @@ class Meta
             $this->getAgeAttributesArray($defaultLocale),
             $this->getCustomAttributesArray($defaultLocale)
         );
-        return $attributeArray;
     }
 
     protected function getPriceAttributesArray(string $defaultLocale)
@@ -309,7 +316,8 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getCustomAttributesArray(string $defaultLocale) {
+    protected function getCustomAttributesArray(string $defaultLocale)
+    {
         $attributesArray = [];
         foreach ($this->customAttributeData as $customAttribute) {
             // check if attribute has already been processed as price/stock/image attribute
@@ -336,14 +344,14 @@ class Meta
 
         $allCategories = $categoryCollection->getItems();
 
-        /** @var \Magento\Catalog\Model\Category $rootCategory */
+        /** @var Category $rootCategory */
         $this->rootCategoryId = $this->attributeConfig->getRootCategoryId();
         $rootCategory = $allCategories[$this->rootCategoryId] ?? null;
         return $this->getCategoryDataWithChildren($rootCategory, $allCategories);
     }
 
     protected function getCategoryDataWithChildren(
-        \Magento\Catalog\Model\Category $category,
+        Category $category,
         array $allCategories
     ) : array {
         $categoryId = $category->getId();
@@ -360,9 +368,11 @@ class Meta
 
         // add child category information
         $children = array_filter(
-            explode(',', $category->getChildren()), function ($id) {
+            explode(',', $category->getChildren()),
+            function ($id) {
                 return !empty($id);
-        });
+            }
+        );
         if (empty($children)) {
             $categoryData['children'] = [];
         } else {

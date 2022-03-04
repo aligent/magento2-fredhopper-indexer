@@ -1,12 +1,20 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Image\ParamsBuilder;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Catalog\Model\View\Asset\ImageFactory;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\View\ConfigInterface;
+use Magento\Store\Model\App\Emulation;
 
-class ImageFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 {
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory
+     * @var CollectionFactory
      */
     protected $productCollectionFactory;
     /**
@@ -14,19 +22,19 @@ class ImageFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
      */
     protected $paramsBuilder;
     /**
-     * @var \Magento\Catalog\Model\View\Asset\ImageFactory
+     * @var ImageFactory
      */
     protected $imageAssetFactory;
     /**
-     * @var \Magento\Framework\View\ConfigInterface
+     * @var ConfigInterface
      */
     protected $presentationConfig;
     /**
-     * @var \Magento\Framework\App\State
+     * @var State
      */
     protected $appState;
     /**
-     * @var \Magento\Store\Model\App\Emulation
+     * @var Emulation
      */
     protected $emulation;
     /**
@@ -39,12 +47,12 @@ class ImageFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
     protected $imageParams = [];
 
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory,
-        \Magento\Catalog\Model\Product\Image\ParamsBuilder $paramsBuilder,
-        \Magento\Catalog\Model\View\Asset\ImageFactory $imageAssetFactory,
-        \Magento\Framework\View\ConfigInterface $presentationConfig,
-        \Magento\Framework\App\State $appState,
-        \Magento\Store\Model\App\Emulation $emulation,
+        CollectionFactory $productCollectionFactory,
+        ParamsBuilder $paramsBuilder,
+        ImageFactory $imageAssetFactory,
+        ConfigInterface $presentationConfig,
+        State $appState,
+        Emulation $emulation,
         $imageAttributeConfig = []
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
@@ -87,16 +95,17 @@ class ImageFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
         return $result;
     }
 
-    protected function getImageParamsForStore($imageDisplayArea, $storeId) {
+    protected function getImageParamsForStore($imageDisplayArea, $storeId)
+    {
         if (!isset($this->imageParams[$imageDisplayArea][$storeId])) {
             try {
                 $this->emulation->startEnvironmentEmulation(
                     $storeId,
-                    \Magento\Framework\App\Area::AREA_FRONTEND,
+                    Area::AREA_FRONTEND,
                     true
                 );
                 $imageArguments = $this->appState->emulateAreaCode(
-                    \Magento\Framework\App\Area::AREA_FRONTEND,
+                    Area::AREA_FRONTEND,
                     [$this, 'getImageParams'],
                     ['imageDisplayArea' => $imageDisplayArea]
                 );
@@ -112,10 +121,11 @@ class ImageFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
         return $this->imageParams[$imageDisplayArea][$storeId];
     }
 
-    public function getImageParams($imageDisplayArea) {
+    public function getImageParams($imageDisplayArea)
+    {
         return $this->presentationConfig->getViewConfig()->getMediaAttributes(
             'Magento_Catalog',
-            \Magento\Catalog\Helper\Image::MEDIA_TYPE_CONFIG_NODE,
+            Image::MEDIA_TYPE_CONFIG_NODE,
             $imageDisplayArea
         );
     }

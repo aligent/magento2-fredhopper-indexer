@@ -1,7 +1,13 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export;
 
-class SuggestExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterInterface
+use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
+use Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface;
+use Aligent\FredhopperIndexer\Model\Export\Upload\SuggestUpload;
+use Magento\Framework\Filesystem\Driver\File;
+use Psr\Log\LoggerInterface;
+
+class SuggestExporter implements ExporterInterface
 {
     const ZIP_FILE_NAME = 'data.zip';
     /**
@@ -13,23 +19,23 @@ class SuggestExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterI
      */
     protected $upload;
     /**
-     * @var \Magento\Framework\Filesystem\Driver\File
+     * @var File
      */
     protected $filesystem;
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
     /**
-     * @var \Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface[]
+     * @var FileGeneratorInterface[]
      */
     protected $fileGenerators;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Export\ZipFile $zipFile,
-        \Aligent\FredhopperIndexer\Model\Export\Upload\SuggestUpload $upload,
-        \Magento\Framework\Filesystem\Driver\File $filesystem,
-        \Psr\Log\LoggerInterface $logger,
+        ZipFile $zipFile,
+        SuggestUpload $upload,
+        File $filesystem,
+        LoggerInterface $logger,
         array $fileGenerators = []
     ) {
         $this->fileGenerators = $fileGenerators;

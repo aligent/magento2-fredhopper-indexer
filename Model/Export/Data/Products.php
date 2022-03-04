@@ -3,7 +3,13 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Serialize\Serializer\Json;
 
 class Products
 {
@@ -23,19 +29,19 @@ class Products
     ];
 
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
+     * @var GeneralConfig
      */
     protected $generalConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
+     * @var AttributeConfig
      */
     protected $attributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
+     * @var PricingAttributeConfig
      */
     protected $pricingAttributeConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\StockAttributeConfig
+     * @var StockAttributeConfig
      */
     protected $stockAttributeConfig;
     /**
@@ -47,11 +53,11 @@ class Products
      */
     protected $metaData;
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $json;
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     protected $resource;
     /**
@@ -91,21 +97,20 @@ class Products
 
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\StockAttributeConfig $stockAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig $ageAttributeConfig,
-        \Aligent\FredhopperIndexer\Model\Export\Data\Meta $metaData,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Magento\Framework\App\ResourceConnection $resource,
+        GeneralConfig $generalConfig,
+        AttributeConfig $attributeConfig,
+        PricingAttributeConfig $pricingAttributeConfig,
+        StockAttributeConfig $stockAttributeConfig,
+        AgeAttributeConfig $ageAttributeConfig,
+        Meta $metaData,
+        Json $json,
+        ResourceConnection $resource,
         $siteVariantPriceAttributes = [],
         $siteVariantStockAttributes = [],
         $siteVariantImageAttributes = [],
         $siteVariantAgeAttributes = [],
         $siteVariantCustomAttributes = []
-    )
-    {
+    ) {
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->pricingAttributeConfig = $pricingAttributeConfig;
@@ -202,7 +207,8 @@ class Products
      * @param array $productData
      * @return array
      */
-    protected function collateProductData(array $productData) {
+    protected function collateProductData(array $productData)
+    {
         $productStoreData = [];
         foreach ($productData as $row) {
             $productStoreData[$row['product_id']] = $productStoreData[$row['product_id']] ?? [];
@@ -310,7 +316,8 @@ class Products
      * @param string $attributeCode
      * @return bool|string
      */
-    protected function getAttributeFredhopperTypeByCode(string $attributeCode) {
+    protected function getAttributeFredhopperTypeByCode(string $attributeCode)
+    {
         // categories attribute is hierarchical
         if ($attributeCode === 'categories') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL;
@@ -364,6 +371,4 @@ class Products
         // when not using store variants, only retain attributes in the default store
         return $storeId === (int)$defaultStoreId ? $attributeCode : false;
     }
-
-
 }

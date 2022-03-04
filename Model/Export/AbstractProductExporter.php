@@ -1,7 +1,18 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export;
 
-abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterInterface
+use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\Email;
+use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
+use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
+use Aligent\FredhopperIndexer\Model\Export\Data\Products;
+use Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Log\LoggerInterface;
+
+abstract class AbstractProductExporter implements ExporterInterface
 {
     protected const ZIP_FILE_FULL = 'data.zip';
     protected const ZIP_FILE_INCREMENTAL = 'data-incremental.zip';
@@ -26,27 +37,27 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      */
     protected $upload;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
+     * @var AttributeConfig
      */
     protected $config;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\SanityCheckConfig
+     * @var SanityCheckConfig
      */
     protected $sanityConfig;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\Email
+     * @var Email
      */
     protected $emailHelper;
     /**
-     * @var \Magento\Framework\Filesystem\Driver\File
+     * @var File
      */
     protected $filesystem;
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $json;
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
     /**
@@ -63,16 +74,16 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     protected $productLimit;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Export\Data\Products $products,
-        \Aligent\FredhopperIndexer\Model\Export\Data\Meta $meta,
-        \Aligent\FredhopperIndexer\Model\Export\ZipFile $zipFile,
-        \Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload $upload,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $config,
-        \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
-        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
-        \Magento\Framework\Filesystem\Driver\File $filesystem,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Psr\Log\LoggerInterface $logger,
+        Products $products,
+        Meta $meta,
+        ZipFile $zipFile,
+        FasUpload $upload,
+        AttributeConfig $config,
+        SanityCheckConfig $sanityConfig,
+        Email $emailHelper,
+        File $filesystem,
+        Json $json,
+        LoggerInterface $logger,
         $productLimit = 1000
     ) {
         $this->products = $products;
@@ -88,11 +99,11 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $this->productLimit = $productLimit;
     }
 
-    public abstract function export(): bool;
+    abstract public function export(): bool;
 
-    protected abstract function getDirectory() : string;
+    abstract protected function getDirectory() : string;
 
-    protected abstract function getZipFileName() : string;
+    abstract protected function getZipFileName() : string;
 
     public function setDryRun(bool $isDryRun): void
     {
@@ -176,7 +187,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     /**
      * @return array|bool
      */
-    protected  function generateMetaJson()
+    protected function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();

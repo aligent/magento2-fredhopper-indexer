@@ -1,11 +1,19 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export;
 
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\Email;
+use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Log\LoggerInterface;
+
 class IncrementalExporter extends AbstractProductExporter
 {
 
     /**
-     * @var \Aligent\FredhopperIndexer\Model\Indexer\DataHandler
+     * @var DataHandler
      */
     protected $dataHandler;
 
@@ -14,13 +22,13 @@ class IncrementalExporter extends AbstractProductExporter
         Data\Meta $meta,
         ZipFile $zipFile,
         Upload\FasUpload $upload,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $config,
-        \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
-        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
-        \Magento\Framework\Filesystem\Driver\File $filesystem,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Psr\Log\LoggerInterface $logger,
-        \Aligent\FredhopperIndexer\Model\Indexer\DataHandler $dataHandler,
+        AttributeConfig $config,
+        SanityCheckConfig $sanityConfig,
+        Email $emailHelper,
+        File $filesystem,
+        Json $json,
+        LoggerInterface $logger,
+        DataHandler $dataHandler,
         $productLimit = 1000
     ) {
         parent::__construct(

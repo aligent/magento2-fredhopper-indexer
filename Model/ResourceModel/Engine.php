@@ -3,17 +3,19 @@
 
 namespace Aligent\FredhopperIndexer\Model\ResourceModel;
 
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\CatalogSearch\Model\ResourceModel\EngineInterface;
 
-class Engine implements \Magento\CatalogSearch\Model\ResourceModel\EngineInterface
+class Engine implements EngineInterface
 {
 
     /**
-     * @var \Magento\Catalog\Model\Product\Visibility
+     * @var Visibility
      */
     protected $visibility;
 
     public function __construct(
-        \Magento\Catalog\Model\Product\Visibility $visibility
+        Visibility $visibility
     ) {
         $this->visibility = $visibility;
     }

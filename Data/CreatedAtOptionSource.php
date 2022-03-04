@@ -3,17 +3,20 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Data;
 
-class CreatedAtOptionSource implements \Magento\Framework\Data\OptionSourceInterface
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\Data\OptionSourceInterface;
+
+class CreatedAtOptionSource implements OptionSourceInterface
 {
     /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
+     * @var DataProvider
      */
     protected $dataProvider;
 
     protected $options = null;
 
     public function __construct(
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider
+        DataProvider $dataProvider
     ) {
         $this->dataProvider = $dataProvider;
     }

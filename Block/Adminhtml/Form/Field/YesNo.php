@@ -1,7 +1,11 @@
 <?php
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class YesNo extends \Magento\Framework\View\Element\Html\Select
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Context;
+use Magento\Framework\View\Element\Html\Select;
+
+class YesNo extends Select
 {
     /**
      * @var \Magento\Config\Model\Config\Source\Yesno
@@ -9,7 +13,7 @@ class YesNo extends \Magento\Framework\View\Element\Html\Select
     protected $sourceConfig;
 
     public function __construct(
-        \Magento\Framework\View\Element\Context $context,
+        Context $context,
         \Magento\Config\Model\Config\Source\Yesno $sourceConfig,
         array $data = []
     ) {
@@ -20,7 +24,7 @@ class YesNo extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function setInputName($value)
     {

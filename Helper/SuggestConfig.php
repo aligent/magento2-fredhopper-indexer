@@ -1,6 +1,11 @@
 <?php
 namespace Aligent\FredhopperIndexer\Helper;
 
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Store\Model\StoreManagerInterface;
+
 class SuggestConfig extends GeneralConfig
 {
     public const XML_PATH_PREFIX = 'fredhopper_indexer/suggest/';
@@ -8,7 +13,7 @@ class SuggestConfig extends GeneralConfig
     public const XML_PATH_WHITELIST_TERMS = self::XML_PATH_PREFIX . 'whitelist_terms';
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $json;
 
@@ -18,16 +23,17 @@ class SuggestConfig extends GeneralConfig
     protected $whitelistSearchTerms;
 
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\Serialize\Serializer\Json $json
+        Context $context,
+        Resolver $localeResolver,
+        StoreManagerInterface $storeManager,
+        Json $json
     ) {
         parent::__construct($context, $localeResolver, $storeManager);
         $this->json = $json;
     }
 
-    public function getBlacklistSearchTerms() {
+    public function getBlacklistSearchTerms()
+    {
         if ($this->blacklistSearchTerms === null) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_BLACKLIST_TERMS);
             $this->blacklistSearchTerms = $this->json->unserialize($configValue ?? '[]');
@@ -35,7 +41,8 @@ class SuggestConfig extends GeneralConfig
         return $this->blacklistSearchTerms;
     }
 
-    public function getWhitelistSearchTerms() {
+    public function getWhitelistSearchTerms()
+    {
         if ($this->whitelistSearchTerms === null) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_WHITELIST_TERMS);
             $this->whitelistSearchTerms = $this->json->unserialize($configValue ?? '[]');

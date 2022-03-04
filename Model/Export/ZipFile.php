@@ -1,14 +1,16 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export;
 
+use Psr\Log\LoggerInterface;
+
 class ZipFile
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
 
-    public function __construct(\Psr\Log\LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
@@ -16,7 +18,7 @@ class ZipFile
     /**
      * @param string $zipFilePath
      * @param array $files
-     * @return false|string
+     * @return bool
      */
     public function createZipFile(string $zipFilePath, array $files)
     {

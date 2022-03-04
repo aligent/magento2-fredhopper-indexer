@@ -1,24 +1,27 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer;
 
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
+use Magento\Framework\Indexer\IndexStructureInterface;
+use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 use Magento\Framework\Search\Request\Dimension;
 
-class StructureHandler implements \Magento\Framework\Indexer\IndexStructureInterface
+class StructureHandler implements IndexStructureInterface
 {
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     protected $resource;
     /**
-     * @var \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver
+     * @var IndexScopeResolver
      */
     protected $indexScopeResolver;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver $indexScopeResolver
+        ResourceConnection $resource,
+        IndexScopeResolver $indexScopeResolver
     ) {
         $this->resource = $resource;
         $this->indexScopeResolver = $indexScopeResolver;

@@ -1,22 +1,26 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
+use Aligent\FredhopperIndexer\Model\RelevantCategory;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\AdvancedSearch\Model\ResourceModel\Index;
 
-class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
 {
     /**
-     * @var \Magento\AdvancedSearch\Model\ResourceModel\Index
+     * @var Index
      */
     protected $index;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
+     * @var RelevantCategory
      */
     protected $relevantCategory;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
+     * @var GeneralConfig
      */
     protected $config;
 
@@ -32,9 +36,9 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     protected $allowCategories = null;
 
     public function __construct(
-        \Magento\AdvancedSearch\Model\ResourceModel\Index $index,
-        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $config
+        Index $index,
+        RelevantCategory $relevantCategory,
+        GeneralConfig $config
     ) {
         $this->index = $index;
         $this->relevantCategory = $relevantCategory;

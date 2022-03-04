@@ -1,30 +1,36 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\App\ResourceConnection;
+
 class FredhopperDataProvider
 {
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     protected $resource;
     /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
+     * @var DataProvider
      */
     protected $searchDataProvider;
     /**
-     * @var \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+     * @var AdditionalFieldsProviderInterface
      */
     protected $additionalFieldsProvider;
     /**
-     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
+     * @var Status
      */
     protected $catalogProductStatus;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
+     * @var AttributeConfig
      */
     protected $attributeConfig;
     /**
-     * @var  \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper
+     * @var  ProductMapper
      */
     protected $productMapper;
     /**
@@ -37,12 +43,12 @@ class FredhopperDataProvider
     protected $variantIdParentMapping = [];
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
-        \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface $additionalFieldsProvider,
-        \Magento\Catalog\Model\Product\Attribute\Source\Status $catalogProductStatus,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper $productMapper,
+        ResourceConnection $resource,
+        DataProvider $dataProvider,
+        AdditionalFieldsProviderInterface $additionalFieldsProvider,
+        Status $catalogProductStatus,
+        AttributeConfig $attributeConfig,
+        ProductMapper $productMapper,
         $batchSize = 500
     ) {
         $this->resource = $resource;

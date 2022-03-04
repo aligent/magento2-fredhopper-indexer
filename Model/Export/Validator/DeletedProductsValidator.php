@@ -1,13 +1,14 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export\Validator;
 
+use Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface;
 use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Validation\ValidationException;
 
-class DeletedProductsValidator implements \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface
+class DeletedProductsValidator implements PreExportValidatorInterface
 {
     /**
      * @var SanityCheckConfig

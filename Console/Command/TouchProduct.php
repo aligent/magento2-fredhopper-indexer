@@ -3,19 +3,22 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Console\Command;
 
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TouchProduct extends \Symfony\Component\Console\Command\Command
+class TouchProduct extends Command
 {
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     private $resourceConnection;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
+        ResourceConnection $resourceConnection,
         string $name = null
     ) {
         $this->resourceConnection = $resourceConnection;
@@ -44,7 +47,7 @@ EOH
         }
 
         /**
-         * @var \Magento\Framework\DB\Adapter\AdapterInterface $conn
+         * @var AdapterInterface $conn
          */
         $conn = $this->resourceConnection->getConnection();
         $productFetch = $conn->select()

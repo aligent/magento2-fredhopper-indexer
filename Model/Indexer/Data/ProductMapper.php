@@ -339,7 +339,7 @@ class ProductMapper
     protected function retrieveFieldValue(array $values)
     {
         $values = array_unique($values);
-        $values = array_filter($values, function($el) {
+        $values = array_filter($values, function ($el) {
             return $el !== null;
         });
 

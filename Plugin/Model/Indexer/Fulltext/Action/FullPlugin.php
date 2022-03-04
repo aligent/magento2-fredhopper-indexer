@@ -2,21 +2,24 @@
 
 namespace Aligent\FredhopperIndexer\Plugin\Model\Indexer\Fulltext\Action;
 
+use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full;
+
 class FullPlugin
 {
     /**
-     * @var \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider
+     * @var FredhopperDataProvider
      */
     protected $fredhopperDataProvider;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider $fredhopperDataProvider
+        FredhopperDataProvider $fredhopperDataProvider
     ) {
         $this->fredhopperDataProvider = $fredhopperDataProvider;
     }
 
     public function aroundRebuildStoreIndex(
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full $subject,
+        Full $subject,
         callable $proceed,
         $storeId,
         $productIds = null

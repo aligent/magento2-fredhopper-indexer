@@ -1,6 +1,14 @@
 <?php
 namespace Aligent\FredhopperIndexer\Model\Export\Upload;
 
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DriverInterface as FilesystemDriverInterface;
+use Magento\Framework\Filesystem\Io\File;
+use Psr\Log\LoggerInterface;
+use Zend\Http\Client;
+use Zend\Http\Request;
+
 abstract class AbstractUpload
 {
     protected const FAS_ENDPOINT = 'fas';
@@ -9,27 +17,39 @@ abstract class AbstractUpload
     protected const SUGGEST_TRIGGER_ENDPOINT = 'generate';
 
     /**
-     * @var \Zend\Http\Client
+     * @var Client
      */
     protected $httpClient;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
+     * @var GeneralConfig
      */
     protected $generalConfig;
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var FilesystemDriverInterface
+     */
+    protected $filesystemDriver;
+    /**
+     * @var File
+     */
+    protected $file;
+    /**
+     * @var LoggerInterface
      */
     protected $logger;
 
     protected $dryRun = false;
 
     public function __construct(
-        \Zend\Http\Client $httpClient,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Psr\Log\LoggerInterface $logger
+        Client $httpClient,
+        GeneralConfig $generalConfig,
+        File $file,
+        FilesystemDriverInterface $filesystemDriver,
+        LoggerInterface $logger
     ) {
         $this->httpClient = $httpClient;
         $this->generalConfig = $generalConfig;
+        $this->file = $file;
+        $this->filesystemDriver = $filesystemDriver;
         $this->logger = $logger;
     }
 
@@ -38,12 +58,19 @@ abstract class AbstractUpload
         $this->dryRun = $isDryRun;
     }
 
-    public function uploadZipFile($zipFilePath)
+    /**
+     * @param string $zipFilePath
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function uploadZipFile(string $zipFilePath): bool
     {
         if ($this->generalConfig->getDebugLogging()) {
             $this->logger->debug("Uploading zip file: {$zipFilePath}");
         }
-        $zipContent = file_get_contents($zipFilePath);
+        $zipContent = $this->filesystemDriver->fileGetContents($zipFilePath);
+        // md5 used for checksum, not for hashing password or secret information
+        // phpcs:ignore Magento2.Security.InsecureFunction.FoundWithAlternative
         $checksum = md5($zipContent);
         if ($this->generalConfig->getDebugLogging()) {
             $this->logger->debug("Checksum of file: {$checksum}");
@@ -91,7 +118,7 @@ abstract class AbstractUpload
         return (isset($response['status_code']) && $response['status_code'] == 201);
     }
 
-    protected function generateRequest($url, $parameters, $method = \Zend\Http\Request::METHOD_PUT)
+    protected function generateRequest($url, $parameters, $method = Request::METHOD_PUT)
     {
         $request = $this->httpClient->getRequest();
         $request->setMethod($method);
@@ -116,7 +143,8 @@ abstract class AbstractUpload
 
     protected function getUploadUrl($filePath)
     {
-        $fileName = basename($filePath);
+        $fileInfo = $this->file->getPathInfo($filePath);
+        $fileName = $fileInfo['basename'];
         return $this->getBaseUrl() . '/data/input/' .$fileName;
     }
 
@@ -134,12 +162,12 @@ abstract class AbstractUpload
     /**
      * @return string
      */
-    protected abstract function getFredhopperUploadEndpoint() : string;
+    abstract protected function getFredhopperUploadEndpoint() : string;
 
     /**
      * @return string
      */
-    protected abstract function getFredhopperTriggerEndpoint() : string;
+    abstract protected function getFredhopperTriggerEndpoint() : string;
 
     protected function sendRequest($request)
     {

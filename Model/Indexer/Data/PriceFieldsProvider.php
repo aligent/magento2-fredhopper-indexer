@@ -3,39 +3,44 @@
 
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
-
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Search\Request\IndexScopeResolverInterface;
 use Magento\Store\Model\Indexer\WebsiteDimensionProvider;
+use Magento\Store\Model\StoreManagerInterface;
 
-class PriceFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class PriceFieldsProvider implements AdditionalFieldsProviderInterface
 {
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var ResourceConnection
      */
     protected $resourceConnection;
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     protected $storeManager;
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
+     * @var PricingAttributeConfig
      */
     protected $pricingAttributeConfig;
     /**
-     * @var \Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory
+     * @var DimensionCollectionFactory
      */
     protected $dimensionCollectionFactory;
     /**
-     * @var \Magento\Framework\Search\Request\IndexScopeResolverInterface
+     * @var IndexScopeResolverInterface
      */
     protected $tableResolver;
 
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory $dimensionCollectionFactory,
-        \Magento\Framework\Search\Request\IndexScopeResolverInterface $tableResolver
+        ResourceConnection $resourceConnection,
+        StoreManagerInterface $storeManager,
+        PricingAttributeConfig $pricingAttributeConfig,
+        DimensionCollectionFactory $dimensionCollectionFactory,
+        IndexScopeResolverInterface $tableResolver
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->storeManager = $storeManager;

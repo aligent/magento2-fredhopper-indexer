@@ -3,34 +3,43 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Helper;
 
-class Email extends \Magento\Framework\App\Helper\AbstractHelper
+use Aligent\FredhopperIndexer\Model\IndexerInfo;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Escaper;
+use Magento\Framework\Mail\Template\TransportBuilder;
+use Magento\Framework\Translate\Inline\StateInterface;
+use Magento\Store\Model\Store;
+
+class Email extends AbstractHelper
 {
     /**
-     * @var \Magento\Framework\Mail\Template\TransportBuilder
+     * @var TransportBuilder
      */
     protected $transportBuilder;
 
     /**
-     * @var \Magento\Framework\Translate\Inline\StateInterface
+     * @var StateInterface
      */
     protected $inlineTranslation;
 
     /**
-     * @var \Magento\Framework\Escaper
+     * @var Escaper
      */
     protected $escaper;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Model\IndexerInfo
+     * @var IndexerInfo
      */
     protected $indexerInfo;
 
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
-        \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
-        \Magento\Framework\Escaper $escaper,
-        \Aligent\FredhopperIndexer\Model\IndexerInfo $indexerInfo
+        Context $context,
+        TransportBuilder $transportBuilder,
+        StateInterface $inlineTranslation,
+        Escaper $escaper,
+        IndexerInfo $indexerInfo
     ) {
         parent::__construct($context);
         $this->transportBuilder = $transportBuilder;
@@ -102,9 +111,8 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param $template
      * @param array $to
-     * @param array $data
+     * @param array $errors
      * @return bool
      */
     public function sendErrorEmail(array $to, array $errors): bool
@@ -120,8 +128,8 @@ class Email extends \Magento\Framework\App\Helper\AbstractHelper
                 ->setTemplateIdentifier(SanityCheckConfig::EMAIL_TEMPLATE)
                 ->setTemplateOptions(
                     [
-                        'area' => \Magento\Framework\App\Area::AREA_ADMINHTML,
-                        'store' => \Magento\Store\Model\Store::DEFAULT_STORE_ID,
+                        'area' => Area::AREA_ADMINHTML,
+                        'store' => Store::DEFAULT_STORE_ID,
                     ]
                 )
                 ->setTemplateVars($templateVars)

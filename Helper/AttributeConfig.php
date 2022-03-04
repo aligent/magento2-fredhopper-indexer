@@ -1,6 +1,12 @@
 <?php
 namespace Aligent\FredhopperIndexer\Helper;
 
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Store\Model\StoreManagerInterface;
+
 class AttributeConfig extends GeneralConfig
 {
     public const XML_PATH_PREFIX = 'fredhopper_indexer/product_config/';
@@ -9,11 +15,11 @@ class AttributeConfig extends GeneralConfig
     public const XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $json;
     /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
+     * @var DataProvider
      */
     protected $dataProvider;
 
@@ -43,11 +49,11 @@ class AttributeConfig extends GeneralConfig
     protected $siteVariantAttributes;
 
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider
+        Context $context,
+        Resolver $localeResolver,
+        StoreManagerInterface $storeManager,
+        Json $json,
+        DataProvider $dataProvider
     ) {
         parent::__construct($context, $localeResolver, $storeManager);
         $this->json = $json;

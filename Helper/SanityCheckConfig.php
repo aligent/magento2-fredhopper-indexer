@@ -36,7 +36,6 @@ class SanityCheckConfig extends GeneralConfig
     public function getErrorEmailRecipients(): array
     {
         $rawConfig = $this->scopeConfig->getValue(self::XML_PATH_REPORT_EMAIL);
-        $emails = array_filter(preg_split('/,\s*/', $rawConfig));
-        return $emails;
+        return array_filter(preg_split('/,\s*/', $rawConfig));
     }
 }

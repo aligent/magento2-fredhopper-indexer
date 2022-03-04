@@ -1,7 +1,10 @@
 <?php
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Html\Select;
+
+class FHAttributeTypes extends Select
 {
     public const ATTRIBUTE_TYPE_INT = 'int';
     public const ATTRIBUTE_TYPE_FLOAT = 'float';
@@ -27,7 +30,7 @@ class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function setInputName($value)
     {

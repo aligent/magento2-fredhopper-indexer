@@ -3,36 +3,41 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Console\Command;
 
+use Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface;
+use Aligent\FredhopperIndexer\Model\Export\FullExporter;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FullExport extends \Symfony\Component\Console\Command\Command
+class FullExport extends Command
 {
     /**
-     * @var \Magento\Framework\App\State
+     * @var State
      */
     protected $appState;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Model\Export\FullExporter
+     * @var FullExporter
      */
     protected $exporter;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[]
+     * @var PreExportValidatorInterface[]
      */
     protected $preExportValidators;
 
     /**
-     * @param \Magento\Framework\App\State $appState
-     * @param \Aligent\FredhopperIndexer\Model\Export\FullExporter $exporter
-     * @param \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[] $preExportValidators
+     * @param State $appState
+     * @param FullExporter $exporter
+     * @param PreExportValidatorInterface[] $preExportValidators
      * @param string|null $name
      */
     public function __construct(
-        \Magento\Framework\App\State $appState,
-        \Aligent\FredhopperIndexer\Model\Export\FullExporter $exporter,
+        State $appState,
+        FullExporter $exporter,
         array $preExportValidators = [],
         string $name = null
     ) {
@@ -56,7 +61,7 @@ class FullExport extends \Symfony\Component\Console\Command\Command
         try {
             $this->appState->getAreaCode();
         } catch (\Exception $e) {
-            $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
+            $this->appState->setAreaCode(Area::AREA_ADMINHTML);
         }
 
         $this->exporter->setDryRun($input->getOption('dry-run'));

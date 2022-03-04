@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Console\Command;
 
+use Magento\Framework\Serialize\Serializer\Json;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ValidateProductExport extends \Symfony\Component\Console\Command\Command
+class ValidateProductExport extends Command
 {
     /**
      * @var int
@@ -15,12 +17,12 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
     protected $maxLength = 200;
 
     /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
+     * @var Json
      */
     protected $jsonSerializer;
 
     public function __construct(
-        \Magento\Framework\Serialize\Serializer\Json $jsonSerializer,
+        Json $jsonSerializer,
         string $name = null
     ) {
         $this->jsonSerializer = $jsonSerializer;
@@ -88,7 +90,6 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
             $data = $this->jsonSerializer->unserialize(file_get_contents($filePath));
         } catch (\Exception $ex) {
             // No drama, the check for $data['products'] will handle this
-            ;
         }
 
         if (empty($data['products'])) {
@@ -145,7 +146,8 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
         return $skuProducts;
     }
 
-    protected function formatTime(int $timeDiff) {
+    protected function formatTime(int $timeDiff)
+    {
         $measures = [
             'd' => 86400, // 24hr
             'h' => 3600,
@@ -210,7 +212,6 @@ class ValidateProductExport extends \Symfony\Component\Console\Command\Command
                                     $isJson = true;
                                 } catch (\Exception $ex) {
                                     // looked like JSON, but wasn't valid JSON, so treat as normal string
-                                    ;
                                 }
                             }
                             if (!$isJson && strlen($vals) > $this->maxLength) {
