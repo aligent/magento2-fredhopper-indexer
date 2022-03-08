@@ -157,16 +157,20 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                     continue;
                 }
                 $opCount[$op] = ($opCount[$op] ?? 0) + 1;
-                if ($op == 'delete') {
-                    foreach ($product['attributes'] as $attr) {
-                        if ($attr['attribute_id'] == 'sku') {
-                            $value = reset($attr['values']);
-                            if (isset($value['value'])) {
-                                $deleteSkus[] = $value['value'];
-                            }
-                            break;
-                        }
+
+                // Collate SKUs to delete for inclusion in logging
+                if ($op != 'delete') {
+                    continue;
+                }
+                foreach ($product['attributes'] as $attr) {
+                    if ($attr['attribute_id'] != 'sku') {
+                        continue;
                     }
+                    $value = reset($attr['values']);
+                    if (isset($value['value'])) {
+                        $deleteSkus[] = $value['value'];
+                    }
+                    break;
                 }
             }
             $msg = "Generating JSON for increment export of {$productCount} products: ";
