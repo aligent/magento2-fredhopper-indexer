@@ -88,11 +88,11 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $this->productLimit = $productLimit;
     }
 
-    public abstract function export(): bool;
+    abstract public function export(): bool;
 
-    protected abstract function getDirectory() : string;
+    abstract protected function getDirectory() : string;
 
-    protected abstract function getZipFileName() : string;
+    abstract protected function getZipFileName() : string;
 
     public function setDryRun(bool $isDryRun): void
     {
@@ -210,7 +210,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     /**
      * @return array|bool
      */
-    protected  function generateMetaJson()
+    protected function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();
