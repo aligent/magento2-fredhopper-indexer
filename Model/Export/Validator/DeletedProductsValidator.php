@@ -34,20 +34,27 @@ class DeletedProductsValidator implements \Aligent\FredhopperIndexer\Api\Export\
     {
         // check the number of deleted products does not reach the threshold
         $connection = $this->resourceConnection->getConnection();
+
+        /** @var \Magento\Framework\DB\Select $select */
         $select = $connection->select()
             ->from(DataHandler::INDEX_TABLE_NAME)
             ->reset(Select::COLUMNS)
-            ->columns('count(1)')
-            ->where('operation_type = ?', DataHandler::OPERATION_TYPE_DELETE);
+            ->columns(['store_id', 'product_count' => 'count(1)'])
+            ->where('product_type = ?', DataHandler::TYPE_PRODUCT)
+            ->where('operation_type = ?', DataHandler::OPERATION_TYPE_DELETE)
+            ->group(['store_id'])
+            ->order(['product_count DESC', 'store_id'])
+            ->limit(1);
         $result = $connection->query($select);
-        $productCount = $result->fetchColumn();
+        $row = $result->fetch();
 
         $maxDeletes = $this->sanityCheckConfig->getMaxDeleteProducts();
-        if ($productCount > $maxDeletes) {
+        if ($row['product_count'] > $maxDeletes) {
             throw new ValidationException(
                 __(
-                    'Number of deleted products (%1) exceeds threshold (%2)',
-                    $productCount,
+                    'Number of deleted products (%1) in store %2 exceeds threshold (%3)',
+                    $row['product_count'],
+                    $row['store_id'],
                     $maxDeletes
                 )
             );
