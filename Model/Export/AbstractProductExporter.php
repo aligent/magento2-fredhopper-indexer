@@ -88,11 +88,11 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         $this->productLimit = $productLimit;
     }
 
-    public abstract function export(): bool;
+    abstract public function export(): bool;
 
-    protected abstract function getDirectory() : string;
+    abstract protected function getDirectory() : string;
 
-    protected abstract function getZipFileName() : string;
+    abstract protected function getZipFileName() : string;
 
     public function setDryRun(bool $isDryRun): void
     {
@@ -157,13 +157,20 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                     continue;
                 }
                 $opCount[$op] = ($opCount[$op] ?? 0) + 1;
+
+                // Collate SKUs to delete for inclusion in logging
+                if ($op != 'delete') {
+                    continue;
+                }
                 foreach ($product['attributes'] as $attr) {
-                    if ($attr['attribute_id'] == 'sku') {
-                        $value = reset($attr['values']);
-                        if (isset($value['value'])) {
-                            $deleteSkus[] = $value['value'];
-                        }
+                    if ($attr['attribute_id'] != 'sku') {
+                        continue;
                     }
+                    $value = reset($attr['values']);
+                    if (isset($value['value'])) {
+                        $deleteSkus[] = $value['value'];
+                    }
+                    break;
                 }
             }
             $msg = "Generating JSON for increment export of {$productCount} products: ";
@@ -203,7 +210,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     /**
      * @return array|bool
      */
-    protected  function generateMetaJson()
+    protected function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();
