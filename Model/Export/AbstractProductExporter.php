@@ -167,8 +167,42 @@ abstract class AbstractProductExporter implements ExporterInterface
 
             $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
             $this->logger->info($msg);
-        } elseif ($this->config->getDebugLogging()) {
-            $this->logger->debug("Generating JSON for $productCount products");
+        } else {
+            $deleteSkus = [];
+            $opCount = [];
+            foreach ($productData as $product) {
+                $op = $product['operation'] ?? null;
+                if (!$op) {
+                    continue;
+                }
+                $opCount[$op] = ($opCount[$op] ?? 0) + 1;
+
+                // Collate SKUs to delete for inclusion in logging
+                if ($op != 'delete') {
+                    continue;
+                }
+                foreach ($product['attributes'] as $attr) {
+                    if ($attr['attribute_id'] != 'sku') {
+                        continue;
+                    }
+                    $value = reset($attr['values']);
+                    if (isset($value['value'])) {
+                        $deleteSkus[] = $value['value'];
+                    }
+                    break;
+                }
+            }
+            $msg = "Generating JSON for increment export of $productCount products: ";
+            $msg .= $this->json->serialize($opCount);
+            $this->logger->info($msg);
+
+            if (!empty($deleteSkus)) {
+                $msg = "Deleted SKUs: " . implode(', ', array_slice($deleteSkus, 0, 10));
+                if (count($deleteSkus) > 10) {
+                    $msg .= ', ...';
+                }
+                $this->logger->info($msg);
+            }
         }
         if (!$this->generateProductsJson($productData)) {
             return false;
