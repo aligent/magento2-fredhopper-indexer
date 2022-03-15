@@ -12,14 +12,9 @@ use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 
 class StructureHandler implements IndexStructureInterface
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resource;
-    /**
-     * @var IndexScopeResolver
-     */
-    protected $indexScopeResolver;
+
+    private ResourceConnection $resource;
+    private IndexScopeResolver $indexScopeResolver;
 
     public function __construct(
         ResourceConnection $resource,
@@ -53,7 +48,7 @@ class StructureHandler implements IndexStructureInterface
      * @param $tableName
      * @throws \Zend_Db_Exception
      */
-    protected function createWorkingIndexTable($tableName)
+    private function createWorkingIndexTable($tableName)
     {
         $table = $this->resource->getConnection()->newTable($tableName)
             ->addColumn(

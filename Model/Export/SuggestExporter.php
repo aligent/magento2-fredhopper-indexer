@@ -13,27 +13,16 @@ use Psr\Log\LoggerInterface;
 
 class SuggestExporter implements ExporterInterface
 {
-    const ZIP_FILE_NAME = 'data.zip';
-    /**
-     * @var ZipFile
-     */
-    protected $zipFile;
-    /**
-     * @var Upload\SuggestUpload
-     */
-    protected $upload;
-    /**
-     * @var File
-     */
-    protected $filesystem;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    private const ZIP_FILE_NAME = 'data.zip';
+
+    private ZipFile $zipFile;
+    private SuggestUpload $upload;
+    private File $filesystem;
+    private LoggerInterface $logger;
     /**
      * @var FileGeneratorInterface[]
      */
-    protected $fileGenerators;
+    protected array $fileGenerators;
 
     public function __construct(
         ZipFile $zipFile,

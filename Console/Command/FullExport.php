@@ -17,20 +17,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FullExport extends Command
 {
-    /**
-     * @var State
-     */
-    protected $appState;
 
-    /**
-     * @var FullExporter
-     */
-    protected $exporter;
+    private State $appState;
+    private FullExporter $exporter;
 
     /**
      * @var PreExportValidatorInterface[]
      */
-    protected $preExportValidators;
+    private array $preExportValidators;
 
     /**
      * @param State $appState
@@ -62,7 +56,7 @@ class FullExport extends Command
     /**
      * @inheritDoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->appState->getAreaCode();

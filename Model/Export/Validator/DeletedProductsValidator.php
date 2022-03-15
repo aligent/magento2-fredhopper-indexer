@@ -13,15 +13,9 @@ use Zend_Db_Select;
 
 class DeletedProductsValidator implements PreExportValidatorInterface
 {
-    /**
-     * @var SanityCheckConfig
-     */
-    protected $sanityCheckConfig;
 
-    /**
-     * @var ResourceConnection
-     */
-    protected $resourceConnection;
+    private SanityCheckConfig $sanityCheckConfig;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         SanityCheckConfig $sanityCheckConfig,

@@ -14,14 +14,9 @@ use Magento\Framework\App\ResourceConnection;
  */
 class StockFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resourceConnection;
-    /**
-     * @var StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
+
+    private ResourceConnection $resourceConnection;
+    private StockAttributeConfig $stockAttributeConfig;
 
     public function __construct(
         ResourceConnection $resourceConnection,

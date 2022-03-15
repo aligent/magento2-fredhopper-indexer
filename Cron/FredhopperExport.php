@@ -12,25 +12,15 @@ use Magento\Framework\Validation\ValidationException;
 
 class FredhopperExport
 {
-    /**
-     * @var ExporterInterface
-     */
-    protected $fredhopperExporter;
 
-    /**
-     * @var SanityCheckConfig
-     */
-    protected $sanityConfig;
-
-    /**
-     * @var Email
-     */
-    protected $emailHelper;
+    private ExporterInterface $fredhopperExporter;
+    private SanityCheckConfig $sanityConfig;
+    private Email $emailHelper;
 
     /**
      * @var PreExportValidatorInterface[]
      */
-    protected $preExportValidators;
+    private array $preExportValidators;
 
     /**
      * FredhopperExport constructor.
@@ -54,7 +44,7 @@ class FredhopperExport
     /**
      * @throws ValidationException
      */
-    public function export()
+    public function export(): void
     {
         try {
             foreach ($this->preExportValidators as $preExportValidator) {

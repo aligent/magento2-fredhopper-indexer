@@ -11,19 +11,16 @@ class StockAttributeConfig extends GeneralConfig
     public const XML_PATH_SEND_STOCK_COUNT = self::XML_PATH_PREFIX . 'send_stock_count';
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
 
-    /** @var bool */
-    protected $sendStockStatus;
-    /** @var bool */
-    protected $sendStockCount;
-    /** @var bool */
-    protected $useSiteVariantStock;
+    private bool $sendStockStatus;
+    private bool $sendStockCount;
+    private bool $useSiteVariantStock;
 
     /**
      * @return bool
      */
     public function getSendStockStatus(): bool
     {
-        if ($this->sendStockStatus === null) {
+        if (!isset($this->sendStockStatus)) {
             $this->sendStockStatus = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_STOCK_STATUS);
         }
         return $this->sendStockStatus;
@@ -34,7 +31,7 @@ class StockAttributeConfig extends GeneralConfig
      */
     public function getSendStockCount(): bool
     {
-        if ($this->sendStockCount === null) {
+        if (!isset($this->sendStockCount)) {
             $this->sendStockCount = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_STOCK_COUNT);
         }
         return $this->sendStockCount;
@@ -45,7 +42,7 @@ class StockAttributeConfig extends GeneralConfig
      */
     public function getUseSiteVariant(): bool
     {
-        if ($this->useSiteVariantStock === null) {
+        if (!isset($this->useSiteVariantStock)) {
             $this->useSiteVariantStock = parent::getUseSiteVariant() &&
                 $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
         }

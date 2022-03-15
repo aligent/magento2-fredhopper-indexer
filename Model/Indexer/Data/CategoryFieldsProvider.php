@@ -12,31 +12,15 @@ use Magento\AdvancedSearch\Model\ResourceModel\Index;
 
 class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var Index
-     */
-    protected $index;
 
-    /**
-     * @var RelevantCategory
-     */
-    protected $relevantCategory;
-
-    /**
-     * @var GeneralConfig
-     */
-    protected $config;
-
-    /**
-     * @var int
-     */
-    protected $rootCategoryId;
-
+    private Index $index;
+    private RelevantCategory $relevantCategory;
+    private GeneralConfig $config;
+    private int $rootCategoryId;
     /**
      * Array has form [int:category id => bool:allowed?]
-     * @var array|null
      */
-    protected $allowCategories = null;
+    private array $allowCategories;
 
     public function __construct(
         Index $index,

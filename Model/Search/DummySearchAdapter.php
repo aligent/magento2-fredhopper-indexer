@@ -11,13 +11,12 @@ use Magento\Framework\Search\RequestInterface;
 class DummySearchAdapter implements AdapterInterface
 {
     /**
-     * @var Adapter\DummyResponseFactory
+     * @var DummyResponseFactory
      */
-    protected $responseFactory;
+    private DummyResponseFactory $responseFactory;
 
     public function __construct(DummyResponseFactory $responseFactory)
     {
-
         $this->responseFactory = $responseFactory;
     }
 

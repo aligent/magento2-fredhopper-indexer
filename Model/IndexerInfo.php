@@ -19,15 +19,9 @@ use Zend_Db_Select;
  */
 class IndexerInfo
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resourceConnection;
 
-    /**
-     * @var CollectionFactory
-     */
-    protected $indexerCollectionFactory;
+    private ResourceConnection $resourceConnection;
+    private CollectionFactory $indexerCollectionFactory;
 
     public function __construct(
         ResourceConnection $resourceConnection,
@@ -59,6 +53,10 @@ class IndexerInfo
         return $status;
     }
 
+    /**
+     * @param ViewInterface $view
+     * @return int
+     */
     public function getPendingCount(ViewInterface $view): int
     {
         $changelog = $view->getChangelog();
@@ -72,6 +70,9 @@ class IndexerInfo
         return count($changelog->getList($state->getVersionId(), $currentVersionId));
     }
 
+    /**
+     * @return array
+     */
     public function getIndexState(): array
     {
         $rows = [];
@@ -103,6 +104,9 @@ class IndexerInfo
         return $rows;
     }
 
+    /**
+     * @return array
+     */
     public function getFredhopperIndexState(): array
     {
         $conn = $this->resourceConnection->getConnection();

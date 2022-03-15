@@ -19,7 +19,7 @@ class FHAttributeTypes extends Select
     public const ATTRIBUTE_TYPE_ASSET = 'asset';
     public const ATTRIBUTE_TYPE_HIERARCHICAL = 'hierarchical'; // only for categories
 
-    protected const ATTRIBUTE_TYPES = [
+    private const ATTRIBUTE_TYPES = [
         self::ATTRIBUTE_TYPE_INT,
         self::ATTRIBUTE_TYPE_FLOAT,
         self::ATTRIBUTE_TYPE_LIST,

@@ -11,10 +11,8 @@ use Magento\Framework\View\Element\Html\Select;
 
 class Attributes extends Select
 {
-    /**
-     * @var DataProvider
-     */
-    protected $dataProvider;
+
+    private DataProvider $dataProvider;
 
     /**
      * Attributes constructor.

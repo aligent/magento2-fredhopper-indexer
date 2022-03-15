@@ -12,21 +12,17 @@ class AgeAttributeConfig extends GeneralConfig
     public const XML_PATH_CREATED_AT_FIELD = self::XML_PATH_PREFIX . 'created_at_field';
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
 
-    /** @var bool */
-    protected $sendNewIndicator;
-    /** @var bool */
-    protected $sendDaysOnline;
-    /** @var string */
-    protected $createdAtFieldName;
-    /** @var bool */
-    protected $useSiteVariantAge;
+    private bool $sendNewIndicator;
+    private bool $sendDaysOnline;
+    private string $createdAtFieldName;
+    private bool $useSiteVariantAge;
 
     /**
      * @return bool
      */
     public function getSendNewIndicator(): bool
     {
-        if ($this->sendNewIndicator === null) {
+        if (!isset($this->sendNewIndicator)) {
             $this->sendNewIndicator = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_NEW_INDICATOR);
         }
         return $this->sendNewIndicator;
@@ -37,7 +33,7 @@ class AgeAttributeConfig extends GeneralConfig
      */
     public function getSendDaysOnline(): bool
     {
-        if ($this->sendDaysOnline === null) {
+        if (!isset($this->sendDaysOnline)) {
             $this->sendDaysOnline = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_DAYS_ONLINE);
         }
         return $this->sendDaysOnline;
@@ -48,7 +44,7 @@ class AgeAttributeConfig extends GeneralConfig
      */
     public function getCreatedAtFieldName(): string
     {
-        if ($this->createdAtFieldName === null) {
+        if (!isset($this->createdAtFieldName)) {
             $this->createdAtFieldName = (string)$this->scopeConfig->getValue(self::XML_PATH_CREATED_AT_FIELD);
         }
         return $this->createdAtFieldName;
@@ -59,7 +55,7 @@ class AgeAttributeConfig extends GeneralConfig
      */
     public function getUseSiteVariant(): bool
     {
-        if ($this->useSiteVariantAge === null) {
+        if (!isset($this->useSiteVariantAge)) {
             $this->useSiteVariantAge = parent::getUseSiteVariant() &&
                 $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
         }

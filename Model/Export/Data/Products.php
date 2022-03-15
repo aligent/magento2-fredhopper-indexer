@@ -19,54 +19,30 @@ class Products
     public const PRODUCT_TYPE_PRODUCT = 'p';
     public const PRODUCT_TYPE_VARIANT = 'v';
 
-    protected const OPERATION_TYPE_ADD = 'add';
-    protected const OPERATION_TYPE_UPDATE = 'update';
-    protected const OPERATION_TYPE_REPLACE = 'replace';
-    protected const OPERATION_TYPE_DELETE = 'delete';
+    private const OPERATION_TYPE_ADD = 'add';
+    private const OPERATION_TYPE_UPDATE = 'update';
+    private const OPERATION_TYPE_REPLACE = 'replace';
+    private const OPERATION_TYPE_DELETE = 'delete';
 
-    protected const OPERATION_TYPE_MAPPING = [
+    private const OPERATION_TYPE_MAPPING = [
         DataHandler::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
         DataHandler::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
         DataHandler::OPERATION_TYPE_REPLACE => self::OPERATION_TYPE_REPLACE,
         DataHandler::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
     ];
 
-    /**
-     * @var GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
-    /**
-     * @var AgeAttributeConfig
-     */
-    protected $ageAttributeConfig;
-    /**
-     * @var Meta
-     */
-    protected $metaData;
-    /**
-     * @var Json
-     */
-    protected $json;
-    /**
-     * @var ResourceConnection
-     */
-    protected $resource;
+    private GeneralConfig $generalConfig;
+    private AttributeConfig $attributeConfig;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private StockAttributeConfig $stockAttributeConfig;
+    private AgeAttributeConfig $ageAttributeConfig;
+    private Meta $metaData;
+    private Json $json;
+    private ResourceConnection $resource;
     /**
      * @var string[]
      */
-    protected $siteVariantPriceAttributes = [
+    private array $siteVariantPriceAttributes = [
         'regular_price',
         'special_price',
         'min_price',
@@ -75,28 +51,28 @@ class Products
     /**
      * @var string[]
      */
-    protected $siteVariantStockAttributes = [
+    private array $siteVariantStockAttributes = [
         'stock_qty',
         'stock_status'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantImageAttributes = [
+    private array $siteVariantImageAttributes = [
         '_imageurl',
         '_thumburl'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantAgeAttributes = [
+    private array $siteVariantAgeAttributes = [
         'is_new',
         'days_online'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantCustomAttributes = [];
+    private array $siteVariantCustomAttributes = [];
 
     public function __construct(
         GeneralConfig $generalConfig,
@@ -157,7 +133,7 @@ class Products
      * @param bool $isVariants
      * @return array
      */
-    protected function getProcessedProductData(bool $isIncremental, bool $isVariants = false): array
+    private function getProcessedProductData(bool $isIncremental, bool $isVariants = false): array
     {
         $rawProductData = $this->getRawProductData($isIncremental, $isVariants);
         return $this->processProductData(
@@ -167,7 +143,12 @@ class Products
         );
     }
 
-    protected function getRawProductData(bool $isIncremental, bool $isVariants) : array
+    /**
+     * @param bool $isIncremental
+     * @param bool $isVariants
+     * @return array
+     */
+    private function getRawProductData(bool $isIncremental, bool $isVariants) : array
     {
         $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
         $connection = $this->resource->getConnection();
@@ -192,7 +173,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    protected function processProductData(array $rawProductData, bool $isVariants, bool $isIncremental) : array
+    private function processProductData(array $rawProductData, bool $isVariants, bool $isIncremental) : array
     {
         // collect store records for each product into a single array
         $productStoreData = $this->collateProductData($rawProductData);
@@ -209,7 +190,7 @@ class Products
      * @param array $productData
      * @return array
      */
-    protected function collateProductData(array $productData): array
+    private function collateProductData(array $productData): array
     {
         $productStoreData = [];
         foreach ($productData as $row) {
@@ -228,7 +209,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    protected function convertProductDataToFredhopperFormat(
+    private function convertProductDataToFredhopperFormat(
         array $productStoreData,
         bool $isVariants,
         bool $isIncremental
@@ -261,7 +242,7 @@ class Products
      * @param $defaultLocale
      * @return array
      */
-    protected function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
+    private function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
     {
         $attributes = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
@@ -324,7 +305,7 @@ class Products
      * @param string $attributeCode
      * @return bool|string
      */
-    protected function getAttributeFredhopperTypeByCode(string $attributeCode)
+    private function getAttributeFredhopperTypeByCode(string $attributeCode)
     {
         // categories attribute is hierarchical
         if ($attributeCode === 'categories') {
@@ -359,7 +340,7 @@ class Products
      * @param int $storeId
      * @return bool|string
      */
-    protected function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
+    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
     {
         $defaultStoreId = $this->generalConfig->getDefaultStore();
         $siteVariantAttributes = $this->attributeConfig->getSiteVariantAttributes();

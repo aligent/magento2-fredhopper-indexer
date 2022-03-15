@@ -9,12 +9,10 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class CreatedAtOptionSource implements OptionSourceInterface
 {
-    /**
-     * @var DataProvider
-     */
-    protected $dataProvider;
 
-    protected $options = null;
+    private DataProvider $dataProvider;
+
+    private array $options;
 
     public function __construct(
         DataProvider $dataProvider
@@ -24,7 +22,7 @@ class CreatedAtOptionSource implements OptionSourceInterface
 
     public function toOptionArray(): array
     {
-        if ($this->options === null) {
+        if (!isset($this->options)) {
             $options = [
                 ['value' => 'created_at', 'label' => __('Created at')],
             ];

@@ -6,7 +6,6 @@ namespace Aligent\FredhopperIndexer\Model\Indexer;
 
 use Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
-use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\ScopeResolverInterface;
@@ -20,67 +19,41 @@ use Magento\Framework\Serialize\Serializer\Json;
 
 class DataHandler implements IndexerInterface
 {
-    const BATCH_SIZE = 1000;
-    const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
-    const TYPE_PRODUCT = 'p';
-    const TYPE_VARIANT = 'v';
-    const OPERATION_TYPE_ADD = 'a';
-    const OPERATION_TYPE_DELETE = 'd';
-    const OPERATION_TYPE_UPDATE = 'u';
-    const OPERATION_TYPE_REPLACE = 'r';
+    public const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
+    public const OPERATION_TYPE_ADD = 'a';
+    public const OPERATION_TYPE_DELETE = 'd';
+    public const OPERATION_TYPE_UPDATE = 'u';
+    public const OPERATION_TYPE_REPLACE = 'r';
+
+    private const BATCH_SIZE = 1000;
+    private const TYPE_PRODUCT = 'p';
+    private const TYPE_VARIANT = 'v';
+
+    private ResourceConnection $resource;
+    private IndexScopeResolver $indexScopeResolver;
+    private Batch $batch;
+    private ScopeResolverInterface $scopeResolver;
+    private IndexStructureInterface $indexStructure;
+    private FredhopperDataProvider $dataProvider;
+    private Json $json;
+    private AttributeConfig $attributeConfig;
 
     /**
-     * @var ResourceConnection
+     * @var DocumentProcessorInterface[]
      */
-    protected $resource;
-    /**
-     * @var IndexScopeResolver
-     */
-    protected $indexScopeResolver;
-    /**
-     * @var Batch
-     */
-    protected $batch;
-    /**
-     * @var ScopeResolverInterface
-     */
-    protected $scopeResolver;
-    /**
-     * @var IndexStructureInterface
-     */
-    protected $indexStructure;
-    /**
-     * @var FredhopperDataProvider
-     */
-    protected $dataProvider;
-    /**
-     * @var Json
-     */
-    protected $json;
-    /**
-     * @var GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var AttributeConfig
-     */
-    protected $attributeConfig;
+    private array $documentPreProcessors;
     /**
      * @var DocumentProcessorInterface[]
      */
-    protected $documentPreProcessors;
-    /**
-     * @var DocumentProcessorInterface[]
-     */
-    protected $documentPostProcessors;
+    private array $documentPostProcessors;
     /**
      * @var int
      */
-    protected $batchSize;
+    private int $batchSize;
     /**
      * @var string[]
      */
-    protected $variantPriceAttributes = [
+    private array $variantPriceAttributes = [
         'regular_price',
         'special_price'
     ];
@@ -93,7 +66,6 @@ class DataHandler implements IndexerInterface
         IndexStructureInterface $indexStructure,
         Json $json,
         FredhopperDataProvider $dataProvider,
-        GeneralConfig $generalConfig,
         AttributeConfig $attributeConfig,
         array $documentPreProcessors = [],
         array $documentPostProcessors = [],
@@ -106,7 +78,6 @@ class DataHandler implements IndexerInterface
         $this->indexStructure = $indexStructure;
         $this->json = $json;
         $this->dataProvider = $dataProvider;
-        $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->documentPreProcessors = $documentPreProcessors;
         $this->documentPostProcessors = $documentPostProcessors;
@@ -267,7 +238,14 @@ class DataHandler implements IndexerInterface
         }
     }
 
-    protected function insertProductData(
+    /**
+     * @param $dimensions
+     * @param array $products
+     * @param array $variants
+     * @param array $variantIdParentMapping
+     * @return void
+     */
+    private function insertProductData(
         $dimensions,
         array $products,
         array $variants,
@@ -308,7 +286,7 @@ class DataHandler implements IndexerInterface
      * Ensures correct deltas are sent to Fredhopper
      * @param $dimensions
      */
-    protected function applyProductChanges($dimensions) : void
+    private function applyProductChanges($dimensions) : void
     {
         $connection = $this->resource->getConnection();
         $indexTableName = self::INDEX_TABLE_NAME;
@@ -388,6 +366,7 @@ class DataHandler implements IndexerInterface
 
     /**
      * Function used to "reset" main index table after performing an incremental update
+     * @return bool
      */
     public function resetIndexAfterExport(): bool
     {
@@ -440,7 +419,7 @@ class DataHandler implements IndexerInterface
      * @param Dimension[] $dimensions
      * @return int
      */
-    public function getScopeId(array $dimensions) : int
+    private function getScopeId(array $dimensions) : int
     {
         $dimension = current($dimensions);
         return $this->scopeResolver->getScope($dimension->getValue())->getId();
@@ -450,7 +429,7 @@ class DataHandler implements IndexerInterface
      * @param Dimension[] $dimensions
      * @return string
      */
-    protected function getTableName(array $dimensions) : string
+    private function getTableName(array $dimensions) : string
     {
         return $this->indexScopeResolver->resolve(self::INDEX_TABLE_NAME, $dimensions);
     }
@@ -460,7 +439,7 @@ class DataHandler implements IndexerInterface
      * @param array $array
      * @return array
      */
-    protected function sortArray(array $array) : array
+    private function sortArray(array $array) : array
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {

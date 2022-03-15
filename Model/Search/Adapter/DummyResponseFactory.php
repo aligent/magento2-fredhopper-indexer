@@ -11,20 +11,12 @@ use Magento\Framework\Search\Response\QueryResponse;
 
 class DummyResponseFactory
 {
-    /**
-     * @var DocumentFactory
-     */
-    protected $documentFactory;
-    /**
-     * @var ObjectManagerInterface
-     */
-    protected $objectManager;
+
+    private ObjectManagerInterface $objectManager;
 
     public function __construct(
-        ObjectManagerInterface $objectManager,
-        DocumentFactory $documentFactory
+        ObjectManagerInterface $objectManager
     ) {
-        $this->documentFactory = $documentFactory;
         $this->objectManager = $objectManager;
     }
 

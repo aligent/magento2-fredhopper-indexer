@@ -17,38 +17,16 @@ use Magento\Store\Model\App\Emulation;
 
 class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var CollectionFactory
-     */
-    protected $productCollectionFactory;
-    /**
-     * @var ParamsBuilder
-     */
-    protected $paramsBuilder;
-    /**
-     * @var ImageFactory
-     */
-    protected $imageAssetFactory;
-    /**
-     * @var ConfigInterface
-     */
-    protected $presentationConfig;
-    /**
-     * @var State
-     */
-    protected $appState;
-    /**
-     * @var Emulation
-     */
-    protected $emulation;
-    /**
-     * @var array
-     */
-    protected $imageAttributeConfig;
-    /**
-     * @var array
-     */
-    protected $imageParams = [];
+
+    private CollectionFactory $productCollectionFactory;
+    private ParamsBuilder $paramsBuilder;
+    private ImageFactory $imageAssetFactory;
+    private ConfigInterface $presentationConfig;
+    private State $appState;
+    private Emulation $emulation;
+
+    private array $imageAttributeConfig;
+    private array $imageParams = [];
 
     public function __construct(
         CollectionFactory $productCollectionFactory,
@@ -105,7 +83,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
      * @param $storeId
      * @return array
      */
-    protected function getImageParamsForStore($imageDisplayArea, $storeId): array
+    private function getImageParamsForStore($imageDisplayArea, $storeId): array
     {
         if (!isset($this->imageParams[$imageDisplayArea][$storeId])) {
             try {

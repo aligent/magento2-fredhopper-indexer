@@ -11,16 +11,12 @@ use Magento\Framework\Filesystem\Driver\File;
 abstract class AbstractSearchTermsFileGenerator implements FileGeneratorInterface
 {
     protected const FILENAME = '';
-    protected const HEADER_ROW = ['searchterm', 'locale'];
-    protected const DELIMITER = "\t\t";
-    /**
-     * @var SuggestConfig
-     */
-    protected $suggestConfig;
-    /**
-     * @var File
-     */
-    protected $fileSystem;
+    private const HEADER_ROW = ['searchterm', 'locale'];
+    private const DELIMITER = "\t\t";
+
+    protected SuggestConfig $suggestConfig;
+
+    private File $fileSystem;
 
     public function __construct(
         SuggestConfig $suggestConfig,
@@ -58,7 +54,11 @@ abstract class AbstractSearchTermsFileGenerator implements FileGeneratorInterfac
         }
     }
 
-    protected function addRow(array $data): string
+    /**
+     * @param array $data
+     * @return string
+     */
+    private function addRow(array $data): string
     {
         $rowContent = '';
         foreach ($data as $column) {

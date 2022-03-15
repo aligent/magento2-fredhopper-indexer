@@ -10,18 +10,10 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 
 class AgeFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var CollectionFactory
-     */
-    protected $productCollectionFactory;
-    /**
-     * @var AgeAttributeConfig
-     */
-    protected $ageAttributeConfig;
-    /**
-     * @var int
-     */
-    protected $currentTime;
+
+    private CollectionFactory $productCollectionFactory;
+    private AgeAttributeConfig $ageAttributeConfig;
+    private int $currentTime;
 
     public function __construct(
         CollectionFactory $productCollectionFactory,

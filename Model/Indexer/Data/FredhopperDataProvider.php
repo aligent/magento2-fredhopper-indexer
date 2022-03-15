@@ -12,38 +12,16 @@ use Magento\Framework\App\ResourceConnection;
 
 class FredhopperDataProvider
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resource;
-    /**
-     * @var DataProvider
-     */
-    protected $searchDataProvider;
-    /**
-     * @var AdditionalFieldsProviderInterface
-     */
-    protected $additionalFieldsProvider;
-    /**
-     * @var Status
-     */
-    protected $catalogProductStatus;
-    /**
-     * @var AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var  ProductMapper
-     */
-    protected $productMapper;
-    /**
-     * @var int
-     */
-    protected $batchSize;
-    /**
-     * @var array
-     */
-    protected $variantIdParentMapping = [];
+
+    private ResourceConnection $resource;
+    private DataProvider $searchDataProvider;
+    private AdditionalFieldsProviderInterface $additionalFieldsProvider;
+    private Status $catalogProductStatus;
+    private AttributeConfig $attributeConfig;
+    private ProductMapper $productMapper;
+
+    private int $batchSize;
+    private array $variantIdParentMapping = [];
 
     public function __construct(
         ResourceConnection $resource,
@@ -63,6 +41,11 @@ class FredhopperDataProvider
         $this->batchSize = $batchSize;
     }
 
+    /**
+     * @param $storeId
+     * @param $productIds
+     * @return \Generator
+     */
     public function rebuildStoreIndex($storeId, $productIds) : \Generator
     {
         if ($productIds !== null) {
@@ -132,7 +115,13 @@ class FredhopperDataProvider
         }
     }
 
-    protected function getChildProductsIndex(
+    /**
+     * @param int $parentId
+     * @param array $relatedProducts
+     * @param array $productsAttributes
+     * @return array
+     */
+    private function getChildProductsIndex(
         int $parentId,
         array $relatedProducts,
         array $productsAttributes
@@ -151,7 +140,7 @@ class FredhopperDataProvider
      * @param $products
      * @return array
      */
-    protected function getRelatedProducts($products): array
+    private function getRelatedProducts($products): array
     {
         $relatedProducts = [];
         foreach ($products as $productData) {
@@ -168,7 +157,7 @@ class FredhopperDataProvider
      * @param array $productsAttributes
      * @return bool
      */
-    protected function isProductEnabled($productId, array $productsAttributes): bool
+    private function isProductEnabled($productId, array $productsAttributes): bool
     {
         $status = $this->searchDataProvider->getSearchableAttribute('status');
         $allowedStatuses = $this->catalogProductStatus->getVisibleStatusIds();
@@ -180,7 +169,7 @@ class FredhopperDataProvider
      * @param array $productsAttributes
      * @param array $staticAttributes
      */
-    protected function addStaticAttributes(array &$productsAttributes, array $staticAttributes): void
+    private function addStaticAttributes(array &$productsAttributes, array $staticAttributes): void
     {
         if (count($productsAttributes) == 0 || count($staticAttributes) == 0) {
             return;
@@ -208,7 +197,7 @@ class FredhopperDataProvider
      * @param array $additionalFields
      * @return array
      */
-    protected function prepareProductIndex(
+    private function prepareProductIndex(
         array $productIndex,
         array $productData,
         int $storeId,
@@ -242,7 +231,7 @@ class FredhopperDataProvider
      * @param array $indexData
      * @return void
      */
-    protected function populateBooleanAttributes(array &$indexData): void
+    private function populateBooleanAttributes(array &$indexData): void
     {
         // all boolean attributes are of type "int"
         $booleanAttributes = $this->attributeConfig->getBooleanAttributes();
@@ -258,6 +247,9 @@ class FredhopperDataProvider
         }
     }
 
+    /**
+     * @return array
+     */
     public function getVariantIdParentMapping() : array
     {
         return $this->variantIdParentMapping;

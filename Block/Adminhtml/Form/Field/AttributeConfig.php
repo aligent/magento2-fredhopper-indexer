@@ -11,18 +11,10 @@ use Magento\Framework\View\Element\Html\Select;
 
 class AttributeConfig extends AbstractFieldArray
 {
-    /**
-     * @var Select
-     */
-    protected $attributeRenderer;
-    /**
-     * @var Select
-     */
-    protected $fhAttributeTypeRenderer;
-    /**
-     * @var Select
-     */
-    protected $appendSiteVariantRenderer;
+
+    private Select $attributeRenderer;
+    private Select $fhAttributeTypeRenderer;
+    private Select $appendSiteVariantRenderer;
 
     /**
      * @throws LocalizedException
@@ -62,7 +54,7 @@ class AttributeConfig extends AbstractFieldArray
      */
     protected function getAttributeRenderer(): Select
     {
-        if (!$this->attributeRenderer) {
+        if (!isset($this->attributeRenderer)) {
             $this->attributeRenderer = $this->getLayout()->createBlock(
                 Attributes::class,
                 '',
@@ -83,7 +75,7 @@ class AttributeConfig extends AbstractFieldArray
      */
     protected function getFHAttributeTypeRenderer(): Select
     {
-        if (!$this->fhAttributeTypeRenderer) {
+        if (!isset($this->fhAttributeTypeRenderer)) {
             $this->fhAttributeTypeRenderer = $this->getLayout()->createBlock(
                 FHAttributeTypes::class,
                 '',
@@ -104,7 +96,7 @@ class AttributeConfig extends AbstractFieldArray
      */
     protected function getAppendSiteVariantRenderer(): Select
     {
-        if (!$this->appendSiteVariantRenderer) {
+        if (!isset($this->appendSiteVariantRenderer)) {
             $this->appendSiteVariantRenderer = $this->getLayout()->createBlock(
                 YesNo::class,
                 '',

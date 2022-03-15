@@ -21,62 +21,30 @@ abstract class AbstractProductExporter implements ExporterInterface
 {
     protected const ZIP_FILE_FULL = 'data.zip';
     protected const ZIP_FILE_INCREMENTAL = 'data-incremental.zip';
-    protected const META_FILE = 'meta.json';
-    protected const PRODUCT_FILE_PREFIX = 'products-';
-    protected const VARIANT_FILE_PREFIX = 'variants-';
 
-    /**
-     * @var Data\Products
-     */
-    protected $products;
-    /**
-     * @var Data\Meta
-     */
-    protected $meta;
-    /**
-     * @var ZipFile
-     */
-    protected $zipFile;
-    /**
-     * @var Upload\FasUpload
-     */
-    protected $upload;
-    /**
-     * @var AttributeConfig
-     */
-    protected $config;
-    /**
-     * @var SanityCheckConfig
-     */
-    protected $sanityConfig;
-    /**
-     * @var Email
-     */
-    protected $emailHelper;
-    /**
-     * @var File
-     */
-    protected $filesystem;
-    /**
-     * @var Json
-     */
-    protected $json;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var string
-     */
-    protected $directory;
+    private const META_FILE = 'meta.json';
+    private const PRODUCT_FILE_PREFIX = 'products-';
+    private const VARIANT_FILE_PREFIX = 'variants-';
+
+    protected Products $products;
+    protected Meta $meta;
+    protected ZipFile $zipFile;
+    protected FasUpload $upload;
+    protected AttributeConfig $config;
+    protected SanityCheckConfig $sanityConfig;
+    protected Email $emailHelper;
+    protected File $filesystem;
+    protected Json $json;
+    protected LoggerInterface $logger;
+    protected string $directory;
     /**
      * @var string[]
      */
-    protected $files = [];
+    protected array $files = [];
     /**
      * @var int
      */
-    protected $productLimit;
+    protected int $productLimit;
 
     public function __construct(
         Products $products,
@@ -110,6 +78,10 @@ abstract class AbstractProductExporter implements ExporterInterface
 
     abstract protected function getZipFileName() : string;
 
+    /**
+     * @param bool $isDryRun
+     * @return void
+     */
     public function setDryRun(bool $isDryRun): void
     {
         $this->upload->setDryRun($isDryRun);
@@ -233,7 +205,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @return array[]|false
      * @throws LocalizedException
      */
-    protected function generateMetaJson()
+    private function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();
@@ -256,7 +228,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @param array $productData Format as per Data\Products::getProductData()
      * @return string[] Errors found in categories, if any
      */
-    protected function validateCategories(array $metaContent, array $productData): array
+    private function validateCategories(array $metaContent, array $productData): array
     {
         $errors = [];
         $categories = [];
@@ -342,7 +314,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @param array $productData
      * @return bool
      */
-    protected function generateProductsJson(array $productData): bool
+    private function generateProductsJson(array $productData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($productData, $this->productLimit) as $products) {
@@ -367,7 +339,7 @@ abstract class AbstractProductExporter implements ExporterInterface
      * @param array $variantData
      * @return bool
      */
-    protected function generateVariantsJson(array $variantData): bool
+    private function generateVariantsJson(array $variantData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($variantData, $this->productLimit) as $products) {

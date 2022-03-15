@@ -13,22 +13,12 @@ use Magento\Store\Model\Store;
 
 class RelevantCategory
 {
-    /**
-     * @var CategoryRepositoryInterface
-     */
-    protected $categoryRepository;
 
-    /**
-     * @var CollectionFactory
-     */
-    protected $categoryCollectionFactory;
+    private CategoryRepositoryInterface $categoryRepository;
+    private CollectionFactory $categoryCollectionFactory;
+    private GeneralConfig $config;
 
-    /**
-     * @var GeneralConfig
-     */
-    protected $config;
-
-    protected $ancestorCategories = null;
+    protected array $ancestorCategories;
 
     public function __construct(
         CategoryRepositoryInterface $categoryRepository,
@@ -45,7 +35,7 @@ class RelevantCategory
      */
     public function getAncestorCategoryIds(): array
     {
-        if ($this->ancestorCategories !== null) {
+        if (isset($this->ancestorCategories)) {
             return $this->ancestorCategories;
         }
 
@@ -65,6 +55,9 @@ class RelevantCategory
         return $this->ancestorCategories;
     }
 
+    /**
+     * @return Collection
+     */
     public function getCollection(): Collection
     {
         $ancestorIds = $this->getAncestorCategoryIds();

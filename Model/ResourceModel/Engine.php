@@ -10,10 +10,7 @@ use Magento\CatalogSearch\Model\ResourceModel\EngineInterface;
 class Engine implements EngineInterface
 {
 
-    /**
-     * @var Visibility
-     */
-    protected $visibility;
+    private Visibility $visibility;
 
     public function __construct(
         Visibility $visibility
@@ -53,6 +50,9 @@ class Engine implements EngineInterface
         return $index;
     }
 
+    /**
+     * @return bool
+     */
     public function isAvailable(): bool
     {
         return true;

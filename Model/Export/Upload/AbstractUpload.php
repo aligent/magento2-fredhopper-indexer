@@ -19,28 +19,13 @@ abstract class AbstractUpload
     protected const FAS_TRIGGER_ENDPOINT = 'load-data';
     protected const SUGGEST_TRIGGER_ENDPOINT = 'generate';
 
-    /**
-     * @var Client
-     */
-    protected $httpClient;
-    /**
-     * @var GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var FilesystemDriverInterface
-     */
-    protected $filesystemDriver;
-    /**
-     * @var File
-     */
-    protected $file;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    private Client $httpClient;
+    private GeneralConfig $generalConfig;
+    private FilesystemDriverInterface $filesystemDriver;
+    private File $file;
+    private LoggerInterface $logger;
 
-    protected $dryRun = false;
+    private bool $dryRun = false;
 
     public function __construct(
         Client $httpClient,
@@ -56,6 +41,10 @@ abstract class AbstractUpload
         $this->logger = $logger;
     }
 
+    /**
+     * @param bool $isDryRun
+     * @return void
+     */
     public function setDryRun(bool $isDryRun): void
     {
         $this->dryRun = $isDryRun;
@@ -104,7 +93,11 @@ abstract class AbstractUpload
         return false;
     }
 
-    protected function triggerDataLoad($dataIdString): bool
+    /**
+     * @param $dataIdString
+     * @return bool
+     */
+    private function triggerDataLoad($dataIdString): bool
     {
         if ($this->generalConfig->getDebugLogging()) {
             $this->logger->debug("Triggering load of data: $dataIdString");
@@ -124,13 +117,12 @@ abstract class AbstractUpload
     /**
      * @param string $url
      * @param array $parameters
-     * @param string $method
      * @return Request
      */
-    protected function generateRequest(string $url, array $parameters, string $method = Request::METHOD_PUT): Request
+    private function generateRequest(string $url, array $parameters): Request
     {
         $request = $this->httpClient->getRequest();
-        $request->setMethod($method);
+        $request->setMethod(Request::METHOD_PUT);
         $request->setUri($url);
         if (isset($parameters['headers'])) {
             $headers = $request->getHeaders();
@@ -150,19 +142,19 @@ abstract class AbstractUpload
         return $request;
     }
 
-    protected function getUploadUrl($filePath): string
+    private function getUploadUrl($filePath): string
     {
         $fileInfo = $this->file->getPathInfo($filePath);
         $fileName = $fileInfo['basename'];
         return $this->getBaseUrl() . '/data/input/' .$fileName;
     }
 
-    protected function getTriggerUrl(): string
+    private function getTriggerUrl(): string
     {
         return $this->getBaseUrl() . '/trigger/' . $this->getFredhopperTriggerEndpoint();
     }
 
-    protected function getBaseUrl(): string
+    private function getBaseUrl(): string
     {
         return 'https://my.' . $this->generalConfig->getEndpointName() . '.fredhopperservices.com/' .
             $this->getFredhopperUploadEndpoint() .':' . $this->generalConfig->getEnvironmentName();
@@ -178,7 +170,11 @@ abstract class AbstractUpload
      */
     abstract protected function getFredhopperTriggerEndpoint() : string;
 
-    protected function sendRequest($request)
+    /**
+     * @param $request
+     * @return array|false
+     */
+    private function sendRequest($request)
     {
         if ($this->dryRun) {
             $this->logger->info("Dry run; not exporting");
@@ -199,7 +195,10 @@ abstract class AbstractUpload
         ];
     }
 
-    protected function getAuth(): array
+    /**
+     * @return array
+     */
+    private function getAuth(): array
     {
         return [
             'username' => $this->generalConfig->getUsername(),

@@ -9,10 +9,8 @@ use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full;
 
 class FullPlugin
 {
-    /**
-     * @var FredhopperDataProvider
-     */
-    protected $fredhopperDataProvider;
+
+    private FredhopperDataProvider $fredhopperDataProvider;
 
     public function __construct(
         FredhopperDataProvider $fredhopperDataProvider

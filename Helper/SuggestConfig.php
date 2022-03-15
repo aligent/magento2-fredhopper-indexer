@@ -15,15 +15,12 @@ class SuggestConfig extends GeneralConfig
     public const XML_PATH_BLACKLIST_TERMS = self::XML_PATH_PREFIX . 'blacklist_terms';
     public const XML_PATH_WHITELIST_TERMS = self::XML_PATH_PREFIX . 'whitelist_terms';
 
-    /**
-     * @var Json
-     */
-    protected $json;
+    private Json $json;
 
     /** @var string[] */
-    protected $blacklistSearchTerms;
+    private array $blacklistSearchTerms;
     /** @var string[] */
-    protected $whitelistSearchTerms;
+    private array $whitelistSearchTerms;
 
     public function __construct(
         Context $context,
@@ -35,18 +32,24 @@ class SuggestConfig extends GeneralConfig
         $this->json = $json;
     }
 
-    public function getBlacklistSearchTerms()
+    /**
+     * @return array
+     */
+    public function getBlacklistSearchTerms(): array
     {
-        if ($this->blacklistSearchTerms === null) {
+        if (!isset($this->blacklistSearchTerms)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_BLACKLIST_TERMS);
             $this->blacklistSearchTerms = $this->json->unserialize($configValue ?? '[]');
         }
         return $this->blacklistSearchTerms;
     }
 
-    public function getWhitelistSearchTerms()
+    /**
+     * @return array
+     */
+    public function getWhitelistSearchTerms(): array
     {
-        if ($this->whitelistSearchTerms === null) {
+        if (!isset($this->whitelistSearchTerms)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_WHITELIST_TERMS);
             $this->whitelistSearchTerms = $this->json->unserialize($configValue ?? '[]');
         }

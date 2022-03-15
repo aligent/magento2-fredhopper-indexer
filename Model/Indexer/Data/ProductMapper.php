@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
-use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute;
@@ -12,37 +11,19 @@ use Magento\Elasticsearch\Model\Adapter\FieldType\Date as DateFieldType;
 
 class ProductMapper
 {
-    /**
-     * @var Visibility
-     */
-    protected $visibility;
 
-    /**
-     * @var DataProvider
-     */
-    protected $dataProvider;
+    private DataProvider $dataProvider;
+    private DateFieldType $dateFieldType;
 
-    /**
-     * @var array
-     */
-    private $attributeOptionsCache;
-
-    /**
-     * @var DateFieldType
-     */
-    protected $dateFieldType;
-
-    /**
-     * @var array
-     */
-    private $excludedAttributes;
+    private array $excludedAttributes;
+    private array $attributeOptionsCache;
 
     /**
      * List of attributes which will be skipped during mapping
      *
      * @var string[]
      */
-    private $defaultExcludedAttributes = [
+    private array $defaultExcludedAttributes = [
         'price',
         'media_gallery',
         'tier_price',
@@ -54,7 +35,7 @@ class ProductMapper
     /**
      * @var string[]
      */
-    private $attributesExcludedFromMerge = [
+    private array $attributesExcludedFromMerge = [
         'status',
         'visibility',
         'tax_class_id'
@@ -62,18 +43,15 @@ class ProductMapper
 
     /**
      * ProductMapper constructor.
-     * @param Visibility $visibility
      * @param DataProvider $dataProvider
      * @param DateFieldType $dateFieldType
      * @param array $excludedAttributes
      */
     public function __construct(
-        Visibility $visibility,
         DataProvider $dataProvider,
         DateFieldType $dateFieldType,
         array $excludedAttributes = []
     ) {
-        $this->visibility = $visibility;
         $this->dataProvider = $dataProvider;
         $this->dateFieldType = $dateFieldType;
         $this->excludedAttributes = array_merge($this->defaultExcludedAttributes, $excludedAttributes);
@@ -136,7 +114,7 @@ class ProductMapper
      * @param int $storeId
      * @return array
      */
-    protected function convertToProductData(int $productId, array $indexData, int $storeId): array
+    private function convertToProductData(int $productId, array $indexData, int $storeId): array
     {
         $productAttributes = [];
 
@@ -170,7 +148,7 @@ class ProductMapper
      * @param array $attributeValues
      * @return array
      */
-    protected function convertAttribute(
+    private function convertAttribute(
         Attribute $attribute,
         array $attributeValues
     ): array {
@@ -225,7 +203,7 @@ class ProductMapper
      * @param int $storeId
      * @return array
      */
-    protected function prepareAttributeValues(
+    private function prepareAttributeValues(
         int $productId,
         Attribute $attribute,
         array $attributeValues,
@@ -256,7 +234,7 @@ class ProductMapper
      * @param array $values
      * @return array
      */
-    protected function prepareMultiselectValues(array $values): array
+    private function prepareMultiselectValues(array $values): array
     {
         return array_map(function (string $value) {
             return explode(',', $value);
@@ -269,7 +247,7 @@ class ProductMapper
      * @param Attribute $attribute
      * @return bool
      */
-    protected function isAttributeDate(Attribute $attribute): bool
+    private function isAttributeDate(Attribute $attribute): bool
     {
         return $attribute->getFrontendInput() === 'date'
             || in_array($attribute->getBackendType(), ['datetime', 'timestamp'], true);
@@ -283,7 +261,7 @@ class ProductMapper
      * @param bool $isMultiSelect
      * @return array
      */
-    protected function getValuesLabels(
+    private function getValuesLabels(
         Attribute $attribute,
         array $attributeValues,
         bool $isMultiSelect
@@ -319,7 +297,7 @@ class ProductMapper
      * @param Attribute $attribute
      * @return array
      */
-    protected function getAttributeOptions(Attribute $attribute): array
+    private function getAttributeOptions(Attribute $attribute): array
     {
         if (!isset($this->attributeOptionsCache[$attribute->getId()])) {
             $options = [];
@@ -340,7 +318,7 @@ class ProductMapper
      * @param array $values
      * @return array|string
      */
-    protected function retrieveFieldValue(array $values)
+    private function retrieveFieldValue(array $values)
     {
         $values = array_unique($values);
         $values = array_filter($values, function ($el) {

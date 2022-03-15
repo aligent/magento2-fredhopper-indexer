@@ -15,25 +15,11 @@ use Magento\Store\Model\Store;
 
 class Email extends AbstractHelper
 {
-    /**
-     * @var TransportBuilder
-     */
-    protected $transportBuilder;
 
-    /**
-     * @var StateInterface
-     */
-    protected $inlineTranslation;
-
-    /**
-     * @var Escaper
-     */
-    protected $escaper;
-
-    /**
-     * @var IndexerInfo
-     */
-    protected $indexerInfo;
+    private TransportBuilder $transportBuilder;
+    private StateInterface $inlineTranslation;
+    private Escaper $escaper;
+    private IndexerInfo $indexerInfo;
 
     public function __construct(
         Context $context,
@@ -49,6 +35,10 @@ class Email extends AbstractHelper
         $this->indexerInfo = $indexerInfo;
     }
 
+    /**
+     * @param array $errors
+     * @return string
+     */
     public function getErrorHtml(array $errors): string
     {
         if (empty($errors)) {
@@ -62,6 +52,9 @@ class Email extends AbstractHelper
         return $output;
     }
 
+    /**
+     * @return string
+     */
     public function getIndexInfoTables(): string
     {
         $html = '';

@@ -9,14 +9,9 @@ use Psr\Log\LoggerInterface;
 
 class ZipFile
 {
-    /**
-     * @var File
-     */
-    protected $file;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+
+    private File $file;
+    private LoggerInterface $logger;
 
     public function __construct(
         File $file,

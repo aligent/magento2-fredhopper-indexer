@@ -16,19 +16,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ValidateProductExport extends Command
 {
-    /**
-     * @var int
-     */
-    protected $maxLength = 200;
 
-    /**
-     * @var Json
-     */
-    protected $jsonSerializer;
-    /**
-     * @var FilesystemDriverInterface
-     */
-    protected $filesystemDriver;
+    private int $maxLength = 200;
+
+    private Json $jsonSerializer;
+    private FilesystemDriverInterface $filesystemDriver;
 
     public function __construct(
         Json $jsonSerializer,
@@ -96,7 +88,7 @@ class ValidateProductExport extends Command
      * @param OutputInterface $output
      * @return array [sku => [attribute_code => value]]
      */
-    protected function extractSkus(string $filePath, array $skus, OutputInterface $output): array
+    private function extractSkus(string $filePath, array $skus, OutputInterface $output): array
     {
         try {
             $data = $this->jsonSerializer->unserialize($this->filesystemDriver->fileGetContents($filePath));
@@ -158,7 +150,7 @@ class ValidateProductExport extends Command
         return $skuProducts;
     }
 
-    protected function formatTime(int $timeDiff): string
+    private function formatTime(int $timeDiff): string
     {
         $measures = [
             'd' => 86400, // 24hr

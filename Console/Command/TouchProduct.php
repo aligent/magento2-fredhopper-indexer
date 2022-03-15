@@ -13,10 +13,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TouchProduct extends Command
 {
-    /**
-     * @var ResourceConnection
-     */
-    private $resourceConnection;
+
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         ResourceConnection $resourceConnection,

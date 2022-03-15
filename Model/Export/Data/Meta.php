@@ -10,7 +10,6 @@ use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -20,51 +19,19 @@ class Meta
 {
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
-    /**
-     * @var RelevantCategory
-     */
-    protected $relevantCategory;
-    /**
-     * @var CategoryRepositoryInterface
-     */
-    protected $categoryRepository;
-    /**
-     * @var GroupRepositoryInterface
-     */
-    protected $customerGroupRepository;
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    protected $searchCriteriaBuilder;
-    /**
-     * @var AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
-    /**
-     * @var AgeAttributeConfig
-     */
-    protected $ageAttributeConfig;
-    /**
-     * @var array
-     */
-    protected $customAttributeData;
+    private RelevantCategory $relevantCategory;
+    private GroupRepositoryInterface $customerGroupRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
+    private AttributeConfig $attributeConfig;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private StockAttributeConfig $stockAttributeConfig;
+    private AgeAttributeConfig $ageAttributeConfig;
+    private array $customAttributeData;
 
-    /**
-     * @var int
-     */
-    protected $rootCategoryId = 1;
+    private int $rootCategoryId = 1;
 
     public function __construct(
         RelevantCategory $relevantCategory,
-        CategoryRepositoryInterface $categoryRepository,
         GroupRepositoryInterface $customerGroupRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         AttributeConfig $attributeConfig,
@@ -74,7 +41,6 @@ class Meta
         $customAttributeData = []
     ) {
         $this->relevantCategory = $relevantCategory;
-        $this->categoryRepository = $categoryRepository;
         $this->customerGroupRepository = $customerGroupRepository;
         $this->attributeConfig = $attributeConfig;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -112,7 +78,7 @@ class Meta
     /**
      * @throws LocalizedException
      */
-    protected function getAttributesArray() : array
+    private function getAttributesArray() : array
     {
         $attributeArray = [];
         $defaultLocale = $this->attributeConfig->getDefaultLocale();
@@ -184,7 +150,7 @@ class Meta
      * @return array
      * @throws LocalizedException
      */
-    protected function getPriceAttributesArray(string $defaultLocale): array
+    private function getPriceAttributesArray(string $defaultLocale): array
     {
         $priceAttributes = [
             'regular_price' => 'Regular Price',
@@ -237,7 +203,7 @@ class Meta
      * @param string $defaultLocale
      * @return array
      */
-    protected function getStockAttributesArray(string $defaultLocale): array
+    private function getStockAttributesArray(string $defaultLocale): array
     {
         $stockAttributes = [];
         if ($this->stockAttributeConfig->getSendStockCount()) {
@@ -278,7 +244,7 @@ class Meta
      * @param string $defaultLocale
      * @return array
      */
-    protected function getImageAttributesArray(string $defaultLocale): array
+    private function getImageAttributesArray(string $defaultLocale): array
     {
         $imageAttributes = [
             '_imageurl' => 'Image URL',
@@ -314,7 +280,7 @@ class Meta
      * @param string $defaultLocale
      * @return array
      */
-    protected function getAgeAttributesArray(string $defaultLocale): array
+    private function getAgeAttributesArray(string $defaultLocale): array
     {
         $ageAttributes = [];
         if ($this->ageAttributeConfig->getSendNewIndicator()) {
@@ -348,7 +314,7 @@ class Meta
      * @param string $defaultLocale
      * @return array
      */
-    protected function getCustomAttributesArray(string $defaultLocale): array
+    private function getCustomAttributesArray(string $defaultLocale): array
     {
         $attributesArray = [];
         foreach ($this->customAttributeData as $customAttribute) {
@@ -370,7 +336,10 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getCategoryArray() : array
+    /**
+     * @return string[]
+     */
+    private function getCategoryArray() : array
     {
         $categoryCollection = $this->relevantCategory->getCollection();
 
@@ -382,7 +351,12 @@ class Meta
         return $this->getCategoryDataWithChildren($rootCategory, $allCategories);
     }
 
-    protected function getCategoryDataWithChildren(
+    /**
+     * @param Category $category
+     * @param array $allCategories
+     * @return string[]
+     */
+    private function getCategoryDataWithChildren(
         Category $category,
         array $allCategories
     ) : array {

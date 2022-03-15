@@ -15,26 +15,12 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class PriceFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resourceConnection;
-    /**
-     * @var StoreManagerInterface
-     */
-    protected $storeManager;
-    /**
-     * @var PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var DimensionCollectionFactory
-     */
-    protected $dimensionCollectionFactory;
-    /**
-     * @var IndexScopeResolverInterface
-     */
-    protected $tableResolver;
+
+    private ResourceConnection $resourceConnection;
+    private StoreManagerInterface $storeManager;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private DimensionCollectionFactory $dimensionCollectionFactory;
+    private IndexScopeResolverInterface $tableResolver;
 
     public function __construct(
         ResourceConnection $resourceConnection,
@@ -93,7 +79,7 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
      * @throws NoSuchEntityException
      * @throws \Zend_Db_Select_Exception
      */
-    protected function getPriceIndexData(array $productIds, $storeId, $indexFields): array
+    private function getPriceIndexData(array $productIds, $storeId, $indexFields): array
     {
         $connection = $this->resourceConnection->getConnection();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();

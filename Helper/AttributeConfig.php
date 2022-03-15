@@ -17,39 +17,21 @@ class AttributeConfig extends GeneralConfig
     public const XML_PATH_PRODUCT_ATTRIBUTES = self::XML_PATH_PREFIX . 'product_attributes';
     public const XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
 
-    /**
-     * @var Json
-     */
-    protected $json;
-    /**
-     * @var DataProvider
-     */
-    protected $dataProvider;
+    private Json $json;
+    private DataProvider $dataProvider;
 
-    /** @var bool */
-    protected $useVariantProducts;
-    /** @var array */
-    protected $productAttributes;
-    /** @var array */
-    protected $variantAttributes;
-    /** @var array */
-    protected $allAttributes;
-    /** @var array */
-    protected $booleanAttributes;
-    /** @var string[] */
-    protected $productAttributeCodes;
-    /** @var string[] */
-    protected $variantAttributeCodes;
-    /** @var array */
-    protected $searchableAttributes;
-    /** @var array */
-    protected $staticAttributes;
-    /** @var array */
-    protected $attributesWithFredhopperType;
-    /** @var array */
-    protected $eavAttributesByType;
-    /** @var array */
-    protected $siteVariantAttributes;
+    private bool $useVariantProducts;
+    private array $productAttributes;
+    private array $variantAttributes;
+    private array $allAttributes;
+    private array $booleanAttributes;
+    private array $productAttributeCodes;
+    private array $variantAttributeCodes;
+    private array $searchableAttributes;
+    private array $staticAttributes;
+    private array $attributesWithFredhopperType;
+    private array $eavAttributesByType;
+    private array $siteVariantAttributes;
 
     public function __construct(
         Context $context,
@@ -68,7 +50,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getUseVariantProducts(): bool
     {
-        if ($this->useVariantProducts === null) {
+        if (!isset($this->useVariantProducts)) {
             $this->useVariantProducts = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_VARIANT_PRODUCTS);
         }
         return $this->useVariantProducts;
@@ -79,7 +61,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getProductAttributes(): array
     {
-        if ($this->productAttributes === null) {
+        if (!isset($this->productAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_ATTRIBUTES);
             $productAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
             $this->addMagentoAttributeData($productAttributes);
@@ -93,7 +75,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getVariantAttributes(): array
     {
-        if ($this->variantAttributes === null) {
+        if (!isset($this->variantAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_ATTRIBUTES);
             $variantAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
             $this->addMagentoAttributeData($variantAttributes);
@@ -108,7 +90,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getAllAttributes(): array
     {
-        if ($this->allAttributes === null) {
+        if (!isset($this->allAttributes)) {
             $this->allAttributes = array_merge($this->getProductAttributes(), $this->getVariantAttributes());
         }
         return $this->allAttributes;
@@ -119,7 +101,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getBooleanAttributes(): array
     {
-        if ($this->booleanAttributes === null) {
+        if (!isset($this->booleanAttributes)) {
             $this->booleanAttributes = array_filter($this->getAllAttributes(), function ($attribute) {
                 return isset($attribute['frontend_input']) && $attribute['frontend_input'] === 'boolean';
             });
@@ -132,7 +114,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getProductAttributeCodes(): array
     {
-        if ($this->productAttributeCodes === null) {
+        if (!isset($this->productAttributeCodes)) {
             $attributeCodes = [];
             foreach ($this->getProductAttributes() as $attributeConfig) {
                 $attributeCodes[] = $attributeConfig['attribute'];
@@ -147,7 +129,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getVariantAttributeCodes(): array
     {
-        if ($this->variantAttributeCodes === null) {
+        if (!isset($this->variantAttributeCodes)) {
             $attributeCodes = [];
             foreach ($this->getVariantAttributes() as $attributeConfig) {
                 $attributeCodes[] = $attributeConfig['attribute'];
@@ -160,9 +142,9 @@ class AttributeConfig extends GeneralConfig
     /**
      * @return array
      */
-    protected function getSearchableAttributes(): array
+    private function getSearchableAttributes(): array
     {
-        if ($this->searchableAttributes === null) {
+        if (!isset($this->searchableAttributes)) {
             $this->searchableAttributes = $this->dataProvider->getSearchableAttributes();
         }
         return $this->searchableAttributes;
@@ -171,7 +153,7 @@ class AttributeConfig extends GeneralConfig
     /**
      * @param array $attributesConfig
      */
-    protected function addMagentoAttributeData(array &$attributesConfig): void
+    private function addMagentoAttributeData(array &$attributesConfig): void
     {
         $defaultStoreId = $this->getDefaultStore();
         $searchableAttributes = $this->getSearchableAttributes();
@@ -194,7 +176,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getStaticAttributes(): array
     {
-        if ($this->staticAttributes === null) {
+        if (!isset($this->staticAttributes)) {
             $staticAttributes = [];
             foreach ($this->getAllAttributes() as $productAttribute) {
                 if ($productAttribute['backend_type'] === 'static') {
@@ -211,7 +193,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getAttributesWithFredhopperType(): array
     {
-        if ($this->attributesWithFredhopperType === null) {
+        if (!isset($this->attributesWithFredhopperType)) {
             $attributesWithFredhopperType = [];
             $allAttributes = $this->getAllAttributes();
             foreach ($allAttributes as $attribute) {
@@ -227,7 +209,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getEavAttributesByType(): array
     {
-        if ($this->eavAttributesByType === null) {
+        if (!isset($this->eavAttributesByType)) {
             $eavAttributesByType = [];
             $allAttributes = $this->getAllAttributes();
             foreach ($allAttributes as $attribute) {
@@ -250,7 +232,7 @@ class AttributeConfig extends GeneralConfig
      */
     public function getSiteVariantAttributes(): array
     {
-        if ($this->siteVariantAttributes === null) {
+        if (!isset($this->siteVariantAttributes)) {
             $siteVariantAttributes = [];
             foreach ($this->getAllAttributes() as $attribute) {
                 if ($attribute['append_site_variant']) {
