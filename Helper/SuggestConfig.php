@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Helper;
 
 use Magento\Framework\App\Helper\Context;

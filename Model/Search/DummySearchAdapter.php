@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Search;
 
 use Aligent\FredhopperIndexer\Model\Search\Adapter\DummyResponseFactory;

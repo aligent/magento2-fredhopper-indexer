@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export;
 
 use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;

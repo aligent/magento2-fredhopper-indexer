@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;

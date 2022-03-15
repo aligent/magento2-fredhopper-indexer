@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Cron;
 
 use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;

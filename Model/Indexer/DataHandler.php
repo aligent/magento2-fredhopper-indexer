@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer;
 
 use Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface;

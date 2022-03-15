@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export\Validator;
 
 use Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface;
