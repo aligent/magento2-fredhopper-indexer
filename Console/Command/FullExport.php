@@ -9,6 +9,7 @@ use Aligent\FredhopperIndexer\Model\Export\FullExporter;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Validation\ValidationException;
 use Symfony\Component\Console\Command\Command;
@@ -54,7 +55,11 @@ class FullExport extends Command
     }
 
     /**
-     * @inheritDoc
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     * @throws LocalizedException
+     * @throws FileSystemException
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

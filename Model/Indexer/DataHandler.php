@@ -20,14 +20,16 @@ use Magento\Framework\Serialize\Serializer\Json;
 class DataHandler implements IndexerInterface
 {
     public const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
+
     public const OPERATION_TYPE_ADD = 'a';
     public const OPERATION_TYPE_DELETE = 'd';
     public const OPERATION_TYPE_UPDATE = 'u';
     public const OPERATION_TYPE_REPLACE = 'r';
 
+    public const TYPE_PRODUCT = 'p';
+    public const TYPE_VARIANT = 'v';
+
     private const BATCH_SIZE = 1000;
-    private const TYPE_PRODUCT = 'p';
-    private const TYPE_VARIANT = 'v';
 
     private ResourceConnection $resource;
     private IndexScopeResolver $indexScopeResolver;

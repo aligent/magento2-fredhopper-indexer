@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model\Search\Adapter;
 
-use Magento\Framework\Api\Search\DocumentFactory;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Search\Response\Aggregation;
 use Magento\Framework\Search\Response\QueryResponse;
