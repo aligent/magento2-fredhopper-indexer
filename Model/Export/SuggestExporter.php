@@ -22,7 +22,7 @@ class SuggestExporter implements ExporterInterface
     /**
      * @var FileGeneratorInterface[]
      */
-    protected array $fileGenerators;
+    private array $fileGenerators;
 
     public function __construct(
         ZipFile $zipFile,

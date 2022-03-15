@@ -52,7 +52,7 @@ class AttributeConfig extends AbstractFieldArray
      * @return Select
      * @throws LocalizedException
      */
-    protected function getAttributeRenderer(): Select
+    private function getAttributeRenderer(): Select
     {
         if (!isset($this->attributeRenderer)) {
             $this->attributeRenderer = $this->getLayout()->createBlock(
@@ -73,7 +73,7 @@ class AttributeConfig extends AbstractFieldArray
      * @return Select
      * @throws LocalizedException
      */
-    protected function getFHAttributeTypeRenderer(): Select
+    private function getFHAttributeTypeRenderer(): Select
     {
         if (!isset($this->fhAttributeTypeRenderer)) {
             $this->fhAttributeTypeRenderer = $this->getLayout()->createBlock(
@@ -94,7 +94,7 @@ class AttributeConfig extends AbstractFieldArray
      * @return Select
      * @throws LocalizedException
      */
-    protected function getAppendSiteVariantRenderer(): Select
+    private function getAppendSiteVariantRenderer(): Select
     {
         if (!isset($this->appendSiteVariantRenderer)) {
             $this->appendSiteVariantRenderer = $this->getLayout()->createBlock(

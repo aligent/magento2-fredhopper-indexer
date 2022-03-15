@@ -62,7 +62,7 @@ class ValidateProductExport extends Command
      * @return array[]
      * @throws FileSystemException
      */
-    protected function getDirs(): array
+    private function getDirs(): array
     {
         $files = Glob::glob($this->getBaseDir() . 'fh_export_*', GLOB_NOSORT);
         $incremental = $full = [];

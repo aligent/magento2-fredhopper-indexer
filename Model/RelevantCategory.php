@@ -18,7 +18,7 @@ class RelevantCategory
     private CollectionFactory $categoryCollectionFactory;
     private GeneralConfig $config;
 
-    protected array $ancestorCategories;
+    private array $ancestorCategories;
 
     public function __construct(
         CategoryRepositoryInterface $categoryRepository,

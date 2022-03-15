@@ -26,25 +26,26 @@ abstract class AbstractProductExporter implements ExporterInterface
     private const PRODUCT_FILE_PREFIX = 'products-';
     private const VARIANT_FILE_PREFIX = 'variants-';
 
-    protected Products $products;
-    protected Meta $meta;
-    protected ZipFile $zipFile;
-    protected FasUpload $upload;
-    protected AttributeConfig $config;
-    protected SanityCheckConfig $sanityConfig;
-    protected Email $emailHelper;
-    protected File $filesystem;
-    protected Json $json;
     protected LoggerInterface $logger;
     protected string $directory;
+
+    private Products $products;
+    private Meta $meta;
+    private ZipFile $zipFile;
+    private FasUpload $upload;
+    private AttributeConfig $config;
+    private SanityCheckConfig $sanityConfig;
+    private Email $emailHelper;
+    private File $filesystem;
+    private Json $json;
     /**
      * @var string[]
      */
-    protected array $files = [];
+    private array $files = [];
     /**
      * @var int
      */
-    protected int $productLimit;
+    private int $productLimit;
 
     public function __construct(
         Products $products,
