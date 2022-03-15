@@ -25,8 +25,10 @@ class StructureHandler implements IndexStructureInterface
     }
 
     /**
+     * This is not a filesystem delete function - phpcs false positive
      * @inheritDoc
      */
+    // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.FilesystemFunctions.WarnFilesystem
     public function delete($index, array $dimensions = [])
     {
         $tableName = $this->indexScopeResolver->resolve($index, $dimensions);

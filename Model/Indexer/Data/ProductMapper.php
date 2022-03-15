@@ -236,6 +236,7 @@ class ProductMapper
      */
     private function prepareMultiselectValues(array $values): array
     {
+        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
         return array_map(function (string $value) {
             return explode(',', $value);
         }, $values);
@@ -321,6 +322,7 @@ class ProductMapper
     private function retrieveFieldValue(array $values)
     {
         $values = array_unique($values);
+        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
         $values = array_filter($values, function ($el) {
             return $el !== null;
         });

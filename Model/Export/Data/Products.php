@@ -161,8 +161,13 @@ class Products
                 'parent_id' => 'parent_id',
                 'attribute_data' => 'attribute_data'
             ])
-            ->where($isIncremental ? "operation_type is not null" : "ifnull(operation_type, '') <> 'd'")
-            ->where("product_type = '$productType'");
+            ->where("product_type = ?", $productType);
+        if ($isIncremental) {
+            $select->where('operation_type is not null');
+        } else {
+            $select->where("ifnull(operation_type, '') <> 'd'");
+        }
+
         return $connection->fetchAll($select);
     }
 
@@ -351,6 +356,7 @@ class Products
                 in_array($attributeCode, $this->siteVariantImageAttributes) ||
                 in_array($attributeCode, $this->siteVariantAgeAttributes) ||
                 in_array($attributeCode, $this->siteVariantCustomAttributes) ||
+                // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
                 !empty(array_filter($this->siteVariantPriceAttributes, function ($code) use ($attributeCode) {
                     return strpos($attributeCode, $code) === 0;
                 }))) {

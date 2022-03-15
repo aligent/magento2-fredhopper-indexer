@@ -102,9 +102,12 @@ class AttributeConfig extends GeneralConfig
     public function getBooleanAttributes(): array
     {
         if (!isset($this->booleanAttributes)) {
-            $this->booleanAttributes = array_filter($this->getAllAttributes(), function ($attribute) {
-                return isset($attribute['frontend_input']) && $attribute['frontend_input'] === 'boolean';
-            });
+            $this->booleanAttributes = [];
+            foreach ($this->getAllAttributes() as $attribute) {
+                if (isset($attribute['frontend_input']) && $attribute['frontend_input'] === 'boolean') {
+                    $this->booleanAttributes[] = $attribute;
+                }
+            }
         }
         return $this->booleanAttributes;
     }
