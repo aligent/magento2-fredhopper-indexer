@@ -1,7 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Html\Select;
+
+class FHAttributeTypes extends Select
 {
     public const ATTRIBUTE_TYPE_INT = 'int';
     public const ATTRIBUTE_TYPE_FLOAT = 'float';
@@ -13,7 +19,7 @@ class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
     public const ATTRIBUTE_TYPE_ASSET = 'asset';
     public const ATTRIBUTE_TYPE_HIERARCHICAL = 'hierarchical'; // only for categories
 
-    protected const ATTRIBUTE_TYPES = [
+    private const ATTRIBUTE_TYPES = [
         self::ATTRIBUTE_TYPE_INT,
         self::ATTRIBUTE_TYPE_FLOAT,
         self::ATTRIBUTE_TYPE_LIST,
@@ -27,9 +33,9 @@ class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function setInputName($value)
+    public function setInputName($value): Select
     {
         return $this->setName($value);
     }
@@ -37,7 +43,7 @@ class FHAttributeTypes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @return string
      */
-    public function _toHtml()
+    public function _toHtml(): string
     {
         if (empty($this->getOptions())) {
             foreach (self::ATTRIBUTE_TYPES as $attributeType) {

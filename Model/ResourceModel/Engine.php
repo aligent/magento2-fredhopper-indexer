@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model\ResourceModel;
 
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\CatalogSearch\Model\ResourceModel\EngineInterface;
 
-class Engine implements \Magento\CatalogSearch\Model\ResourceModel\EngineInterface
+class Engine implements EngineInterface
 {
 
-    /**
-     * @var \Magento\Catalog\Model\Product\Visibility
-     */
-    protected $visibility;
+    private Visibility $visibility;
 
     public function __construct(
-        \Magento\Catalog\Model\Product\Visibility $visibility
+        Visibility $visibility
     ) {
         $this->visibility = $visibility;
     }
@@ -21,7 +21,7 @@ class Engine implements \Magento\CatalogSearch\Model\ResourceModel\EngineInterfa
     /**
      * @inheritDoc
      */
-    public function getAllowedVisibility()
+    public function getAllowedVisibility(): array
     {
         return $this->visibility->getVisibleInSiteIds();
     }
@@ -29,7 +29,7 @@ class Engine implements \Magento\CatalogSearch\Model\ResourceModel\EngineInterfa
     /**
      * @inheritDoc
      */
-    public function allowAdvancedIndex()
+    public function allowAdvancedIndex(): bool
     {
         return false;
     }
@@ -45,15 +45,15 @@ class Engine implements \Magento\CatalogSearch\Model\ResourceModel\EngineInterfa
     /**
      * @inheritDoc
      */
-    public function prepareEntityIndex($index, $separator = ' ')
+    public function prepareEntityIndex($index, $separator = ' '): array
     {
         return $index;
     }
 
     /**
-     * @inheritDoc
+     * @return bool
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }

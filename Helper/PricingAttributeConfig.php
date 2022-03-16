@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Helper;
 
 class PricingAttributeConfig extends GeneralConfig
@@ -8,39 +11,48 @@ class PricingAttributeConfig extends GeneralConfig
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
     public const XML_PATH_USE_RANGE = self::XML_PATH_PREFIX . 'use_range';
 
-    /** @var bool */
-    protected $useCustomerGroup;
-    /** @var bool */
-    protected $useSiteVariantPricing;
-    /** @var bool */
-    protected $useRange;
+    private bool $useCustomerGroup;
+    private bool $useSiteVariantPricing;
+    private bool $useRange;
 
-    public function getUseCustomerGroup()
+    /**
+     * @return bool
+     */
+    public function getUseCustomerGroup(): bool
     {
-        if ($this->useCustomerGroup === null) {
+        if (!isset($this->useCustomerGroup)) {
             $this->useCustomerGroup = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_CUSTOMER_GROUP);
         }
         return $this->useCustomerGroup;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
-        if ($this->useSiteVariantPricing === null) {
+        if (!isset($this->useSiteVariantPricing)) {
             $this->useSiteVariantPricing = parent::getUseSiteVariant() &&
                 $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
         }
         return $this->useSiteVariantPricing;
     }
 
-    public function getUseRange()
+    /**
+     * @return bool
+     */
+    public function getUseRange(): bool
     {
-        if ($this->useRange === null) {
+        if (!isset($this->useRange)) {
             $this->useRange = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_RANGE);
         }
         return $this->useRange;
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         return $this->getUseSiteVariant() ? parent::getAllSiteVariantSuffixes() : [''];
     }

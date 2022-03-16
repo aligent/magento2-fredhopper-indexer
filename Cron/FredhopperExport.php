@@ -1,41 +1,38 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Cron;
 
+use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
+use Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface;
+use Aligent\FredhopperIndexer\Helper\Email;
+use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
 use Magento\Framework\Validation\ValidationException;
 
 class FredhopperExport
 {
-    /**
-     * @var \Aligent\FredhopperIndexer\Api\Export\ExporterInterface
-     */
-    protected $fredhopperExporter;
+
+    private ExporterInterface $fredhopperExporter;
+    private SanityCheckConfig $sanityConfig;
+    private Email $emailHelper;
 
     /**
-     * @var \Aligent\FredhopperIndexer\Helper\SanityCheckConfig
+     * @var PreExportValidatorInterface[]
      */
-    protected $sanityConfig;
-
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\Email
-     */
-    protected $emailHelper;
-
-    /**
-     * @var \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[]
-     */
-    protected $preExportValidators;
+    private array $preExportValidators;
 
     /**
      * FredhopperExport constructor.
-     * @param \Aligent\FredhopperIndexer\Api\Export\ExporterInterface $fredhopperExporter
-     * @param \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig
-     * @param \Aligent\FredhopperIndexer\Helper\Email $emailHelper
-     * @param \Aligent\FredhopperIndexer\Api\Export\PreExportValidatorInterface[] $preExportValidators
+     * @param ExporterInterface $fredhopperExporter
+     * @param SanityCheckConfig $sanityConfig
+     * @param Email $emailHelper
+     * @param PreExportValidatorInterface[] $preExportValidators
      */
     public function __construct(
-        \Aligent\FredhopperIndexer\Api\Export\ExporterInterface $fredhopperExporter,
-        \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
-        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
+        ExporterInterface $fredhopperExporter,
+        SanityCheckConfig $sanityConfig,
+        Email $emailHelper,
         array $preExportValidators = []
     ) {
         $this->fredhopperExporter = $fredhopperExporter;
@@ -45,9 +42,9 @@ class FredhopperExport
     }
 
     /**
-     * @throws \Magento\Framework\Validation\ValidationException
+     * @throws ValidationException
      */
-    public function export()
+    public function export(): void
     {
         try {
             foreach ($this->preExportValidators as $preExportValidator) {

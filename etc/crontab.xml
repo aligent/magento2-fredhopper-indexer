@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="index">
-        <!-- Job included in index group so it does not run at same time as fulltext indexer -->
+        <!-- Job included in index group, so it does not run at same time as fulltext indexer -->
         <job name="fredhopper_incremental_export" instance="FredhopperIncrementalProductCron" method="export">
             <config_path>fredhopper_indexer/cron/incremental_schedule</config_path>
         </job>

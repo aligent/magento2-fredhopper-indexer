@@ -1,63 +1,48 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Serialize\Serializer\Json;
 
 class Products
 {
     public const PRODUCT_TYPE_PRODUCT = 'p';
     public const PRODUCT_TYPE_VARIANT = 'v';
 
-    protected const OPERATION_TYPE_ADD = 'add';
-    protected const OPERATION_TYPE_UPDATE = 'update';
-    protected const OPERATION_TYPE_REPLACE = 'replace';
-    protected const OPERATION_TYPE_DELETE = 'delete';
+    private const OPERATION_TYPE_ADD = 'add';
+    private const OPERATION_TYPE_UPDATE = 'update';
+    private const OPERATION_TYPE_REPLACE = 'replace';
+    private const OPERATION_TYPE_DELETE = 'delete';
 
-    protected const OPERATION_TYPE_MAPPING = [
+    private const OPERATION_TYPE_MAPPING = [
         DataHandler::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
         DataHandler::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
         DataHandler::OPERATION_TYPE_REPLACE => self::OPERATION_TYPE_REPLACE,
         DataHandler::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
     ];
 
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
-    /**
-     * @var AgeAttributeConfig
-     */
-    protected $ageAttributeConfig;
-    /**
-     * @var Meta
-     */
-    protected $metaData;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $json;
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    protected $resource;
+    private GeneralConfig $generalConfig;
+    private AttributeConfig $attributeConfig;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private StockAttributeConfig $stockAttributeConfig;
+    private AgeAttributeConfig $ageAttributeConfig;
+    private Meta $metaData;
+    private Json $json;
+    private ResourceConnection $resource;
     /**
      * @var string[]
      */
-    protected $siteVariantPriceAttributes = [
+    private array $siteVariantPriceAttributes = [
         'regular_price',
         'special_price',
         'min_price',
@@ -66,46 +51,44 @@ class Products
     /**
      * @var string[]
      */
-    protected $siteVariantStockAttributes = [
+    private array $siteVariantStockAttributes = [
         'stock_qty',
         'stock_status'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantImageAttributes = [
+    private array $siteVariantImageAttributes = [
         '_imageurl',
         '_thumburl'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantAgeAttributes = [
+    private array $siteVariantAgeAttributes = [
         'is_new',
         'days_online'
     ];
     /**
      * @var string[]
      */
-    protected $siteVariantCustomAttributes = [];
-
+    private array $siteVariantCustomAttributes = [];
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\StockAttributeConfig $stockAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig $ageAttributeConfig,
-        \Aligent\FredhopperIndexer\Model\Export\Data\Meta $metaData,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Magento\Framework\App\ResourceConnection $resource,
+        GeneralConfig $generalConfig,
+        AttributeConfig $attributeConfig,
+        PricingAttributeConfig $pricingAttributeConfig,
+        StockAttributeConfig $stockAttributeConfig,
+        AgeAttributeConfig $ageAttributeConfig,
+        Meta $metaData,
+        Json $json,
+        ResourceConnection $resource,
         $siteVariantPriceAttributes = [],
         $siteVariantStockAttributes = [],
         $siteVariantImageAttributes = [],
         $siteVariantAgeAttributes = [],
         $siteVariantCustomAttributes = []
-    )
-    {
+    ) {
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->pricingAttributeConfig = $pricingAttributeConfig;
@@ -131,7 +114,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    public function getProductData(bool $isIncremental)
+    public function getProductData(bool $isIncremental): array
     {
         return $this->getProcessedProductData($isIncremental);
     }
@@ -140,7 +123,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    public function getVariantData(bool $isIncremental)
+    public function getVariantData(bool $isIncremental): array
     {
         return $this->getProcessedProductData($isIncremental, true);
     }
@@ -150,7 +133,7 @@ class Products
      * @param bool $isVariants
      * @return array
      */
-    protected function getProcessedProductData(bool $isIncremental, bool $isVariants = false)
+    private function getProcessedProductData(bool $isIncremental, bool $isVariants = false): array
     {
         $rawProductData = $this->getRawProductData($isIncremental, $isVariants);
         return $this->processProductData(
@@ -160,7 +143,12 @@ class Products
         );
     }
 
-    protected function getRawProductData(bool $isIncremental, bool $isVariants) : array
+    /**
+     * @param bool $isIncremental
+     * @param bool $isVariants
+     * @return array
+     */
+    private function getRawProductData(bool $isIncremental, bool $isVariants) : array
     {
         $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
         $connection = $this->resource->getConnection();
@@ -173,8 +161,13 @@ class Products
                 'parent_id' => 'parent_id',
                 'attribute_data' => 'attribute_data'
             ])
-            ->where($isIncremental ? "operation_type is not null" : "ifnull(operation_type, '') <> 'd'")
-            ->where("product_type = '{$productType}'");
+            ->where("product_type = ?", $productType);
+        if ($isIncremental) {
+            $select->where('operation_type is not null');
+        } else {
+            $select->where("ifnull(operation_type, '') <> 'd'");
+        }
+
         return $connection->fetchAll($select);
     }
 
@@ -185,7 +178,7 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    protected function processProductData(array $rawProductData, bool $isVariants, bool $isIncremental) : array
+    private function processProductData(array $rawProductData, bool $isVariants, bool $isIncremental) : array
     {
         // collect store records for each product into a single array
         $productStoreData = $this->collateProductData($rawProductData);
@@ -202,7 +195,8 @@ class Products
      * @param array $productData
      * @return array
      */
-    protected function collateProductData(array $productData) {
+    private function collateProductData(array $productData): array
+    {
         $productStoreData = [];
         foreach ($productData as $row) {
             $productStoreData[$row['product_id']] = $productStoreData[$row['product_id']] ?? [];
@@ -214,16 +208,22 @@ class Products
         return $productStoreData;
     }
 
-    protected function convertProductDataToFredhopperFormat(
+    /**
+     * @param array $productStoreData
+     * @param bool $isVariants
+     * @param bool $isIncremental
+     * @return array
+     */
+    private function convertProductDataToFredhopperFormat(
         array $productStoreData,
         bool $isVariants,
         bool $isIncremental
-    ) {
+    ): array {
         $defaultLocale = $this->generalConfig->getDefaultLocale();
         $products = [];
         foreach ($productStoreData as $productId => $productData) {
             $product = [
-                'product_id' => "{$this->generalConfig->getProductPrefix()}{$productId}",
+                'product_id' => "{$this->generalConfig->getProductPrefix()}$productId",
                 'attributes' => $this->convertAttributeDataToFredhopperFormat($productData, $defaultLocale),
                 'locales' => [
                     $defaultLocale
@@ -231,7 +231,7 @@ class Products
             ];
             if ($isVariants) {
                 $product['product_id'] = "{$this->generalConfig->getProductPrefix()}{$productData['parent_id']}";
-                $product['variant_id'] = "{$this->generalConfig->getVariantPrefix()}{$productId}";
+                $product['variant_id'] = "{$this->generalConfig->getVariantPrefix()}$productId";
             }
             if ($isIncremental) {
                 $product['operation'] = self::OPERATION_TYPE_MAPPING[$productData['operation_type']];
@@ -247,7 +247,7 @@ class Products
      * @param $defaultLocale
      * @return array
      */
-    protected function convertAttributeDataToFredhopperFormat($productData, $defaultLocale)
+    private function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
     {
         $attributes = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
@@ -310,7 +310,8 @@ class Products
      * @param string $attributeCode
      * @return bool|string
      */
-    protected function getAttributeFredhopperTypeByCode(string $attributeCode) {
+    private function getAttributeFredhopperTypeByCode(string $attributeCode)
+    {
         // categories attribute is hierarchical
         if ($attributeCode === 'categories') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL;
@@ -344,7 +345,7 @@ class Products
      * @param int $storeId
      * @return bool|string
      */
-    protected function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
+    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
     {
         $defaultStoreId = $this->generalConfig->getDefaultStore();
         $siteVariantAttributes = $this->attributeConfig->getSiteVariantAttributes();
@@ -355,15 +356,26 @@ class Products
                 in_array($attributeCode, $this->siteVariantImageAttributes) ||
                 in_array($attributeCode, $this->siteVariantAgeAttributes) ||
                 in_array($attributeCode, $this->siteVariantCustomAttributes) ||
-                !empty(array_filter($this->siteVariantPriceAttributes, function ($code) use ($attributeCode) {
-                    return strpos($attributeCode, $code) === 0;
-                }))) {
-                return "{$attributeCode}_{$siteVariant}";
+                $this->isSiteVariantPriceAttribute($attributeCode)) {
+                return "{$attributeCode}_$siteVariant";
             }
         }
         // when not using store variants, only retain attributes in the default store
-        return $storeId === (int)$defaultStoreId ? $attributeCode : false;
+        return $storeId === $defaultStoreId ? $attributeCode : false;
     }
 
-
+    /**
+     * Price attributes may have a suffix (e.g. regular_price_min), so use strpos for comparison
+     * @param string $attributeCode
+     * @return bool
+     */
+    private function isSiteVariantPriceAttribute(string $attributeCode): bool
+    {
+        foreach ($this->siteVariantPriceAttributes as $code) {
+            if (strpos($attributeCode, $code) === 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

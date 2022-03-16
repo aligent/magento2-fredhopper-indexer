@@ -1,68 +1,46 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
+use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Model\RelevantCategory;
+use Magento\Catalog\Model\Category;
+use Magento\Customer\Api\GroupRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Exception\LocalizedException;
 
 class Meta
 {
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
-    /**
-     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
-     */
-    protected $relevantCategory;
-    /**
-     * @var \Magento\Catalog\Api\CategoryRepositoryInterface
-     */
-    protected $categoryRepository;
-    /**
-     * @var \Magento\Customer\Api\GroupRepositoryInterface
-     */
-    protected $customerGroupRepository;
-    /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
-     */
-    protected $searchCriteriaBuilder;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig
-     */
-    protected $ageAttributeConfig;
-    /**
-     * @var array
-     */
-    protected $customAttributeData;
+    private RelevantCategory $relevantCategory;
+    private GroupRepositoryInterface $customerGroupRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
+    private AttributeConfig $attributeConfig;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private StockAttributeConfig $stockAttributeConfig;
+    private AgeAttributeConfig $ageAttributeConfig;
+    private array $customAttributeData;
 
-    /**
-     * @var int
-     */
-    protected $rootCategoryId = 1;
+    private int $rootCategoryId = 1;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
-        \Magento\Catalog\Api\CategoryRepositoryInterface $categoryRepository,
-        \Magento\Customer\Api\GroupRepositoryInterface $customerGroupRepository,
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\StockAttributeConfig $stockAttributeConfig,
-        \Aligent\FredhopperIndexer\Helper\AgeAttributeConfig $ageAttributeConfig,
+        RelevantCategory $relevantCategory,
+        GroupRepositoryInterface $customerGroupRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        AttributeConfig $attributeConfig,
+        PricingAttributeConfig $pricingAttributeConfig,
+        StockAttributeConfig $stockAttributeConfig,
+        AgeAttributeConfig $ageAttributeConfig,
         $customAttributeData = []
-    )
-    {
+    ) {
         $this->relevantCategory = $relevantCategory;
-        $this->categoryRepository = $categoryRepository;
         $this->customerGroupRepository = $customerGroupRepository;
         $this->attributeConfig = $attributeConfig;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -72,6 +50,10 @@ class Meta
         $this->customAttributeData = $customAttributeData;
     }
 
+    /**
+     * @return array
+     * @throws LocalizedException
+     */
     public function getMetaData() : array
     {
         $attributesArray = array_merge(
@@ -93,7 +75,10 @@ class Meta
         ];
     }
 
-    protected function getAttributesArray() : array
+    /**
+     * @throws LocalizedException
+     */
+    private function getAttributesArray() : array
     {
         $attributeArray = [];
         $defaultLocale = $this->attributeConfig->getDefaultLocale();
@@ -104,7 +89,7 @@ class Meta
          *
          */
         $allAttributes = $this->attributeConfig->getAllAttributes();
-        foreach($allAttributes as $attributeData) {
+        foreach ($allAttributes as $attributeData) {
             if ($attributeData['append_site_variant']) {
                 $suffixes = $siteVariantSuffixes;
             } else {
@@ -150,7 +135,7 @@ class Meta
             ];
         }
 
-        $attributeArray = array_merge(
+        return array_merge(
             $attributeArray,
             $this->getPriceAttributesArray($defaultLocale),
             $this->getStockAttributesArray($defaultLocale),
@@ -158,10 +143,14 @@ class Meta
             $this->getAgeAttributesArray($defaultLocale),
             $this->getCustomAttributesArray($defaultLocale)
         );
-        return $attributeArray;
     }
 
-    protected function getPriceAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     * @throws LocalizedException
+     */
+    private function getPriceAttributesArray(string $defaultLocale): array
     {
         $priceAttributes = [
             'regular_price' => 'Regular Price',
@@ -185,7 +174,7 @@ class Meta
         if ($this->pricingAttributeConfig->getUseCustomerGroup()) {
             foreach ($customerGroups as $customerGroup) {
                 foreach ($siteVariantSuffixes as $siteVariantSuffix) {
-                    $suffixes[] = "_{$customerGroup->getId()}{$siteVariantSuffix}";
+                    $suffixes[] = '_' . $customerGroup->getId() . $siteVariantSuffix;
                 }
             }
         } else {
@@ -195,7 +184,7 @@ class Meta
         foreach ($suffixes as $suffix) {
             foreach ($priceAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$suffix}",
+                    'attribute_id' => $attributeCode . $suffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_FLOAT,
                     'names' => [
                         [
@@ -210,7 +199,11 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getStockAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    private function getStockAttributesArray(string $defaultLocale): array
     {
         $stockAttributes = [];
         if ($this->stockAttributeConfig->getSendStockCount()) {
@@ -232,7 +225,7 @@ class Meta
         foreach ($siteVariantSuffixes as $siteVariantSuffix) {
             foreach ($stockAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$siteVariantSuffix}",
+                    'attribute_id' => $attributeCode . $siteVariantSuffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
                     'names' => [
                         [
@@ -247,7 +240,11 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getImageAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    private function getImageAttributesArray(string $defaultLocale): array
     {
         $imageAttributes = [
             '_imageurl' => 'Image URL',
@@ -265,7 +262,7 @@ class Meta
         foreach ($suffixes as $suffix) {
             foreach ($imageAttributes as $attributeCode => $label) {
                 $attributeArray[] = [
-                    'attribute_id' => "{$attributeCode}{$suffix}",
+                    'attribute_id' => $attributeCode . $suffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_ASSET,
                     'names' => [
                         [
@@ -279,7 +276,11 @@ class Meta
         return $attributeArray;
     }
 
-    protected function getAgeAttributesArray(string $defaultLocale)
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    private function getAgeAttributesArray(string $defaultLocale): array
     {
         $ageAttributes = [];
         if ($this->ageAttributeConfig->getSendNewIndicator()) {
@@ -294,7 +295,7 @@ class Meta
         foreach ($siteVariantSuffixes as $siteVariantSuffix) {
             foreach ($ageAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
-                    'attribute_id' => "{$attributeCode}{$siteVariantSuffix}",
+                    'attribute_id' => $attributeCode . $siteVariantSuffix,
                     'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
                     'names' => [
                         [
@@ -309,7 +310,12 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getCustomAttributesArray(string $defaultLocale) {
+    /**
+     * @param string $defaultLocale
+     * @return array
+     */
+    private function getCustomAttributesArray(string $defaultLocale): array
+    {
         $attributesArray = [];
         foreach ($this->customAttributeData as $customAttribute) {
             // check if attribute has already been processed as price/stock/image attribute
@@ -330,20 +336,28 @@ class Meta
         return $attributesArray;
     }
 
-    protected function getCategoryArray() : array
+    /**
+     * @return string[]
+     */
+    private function getCategoryArray() : array
     {
         $categoryCollection = $this->relevantCategory->getCollection();
 
         $allCategories = $categoryCollection->getItems();
 
-        /** @var \Magento\Catalog\Model\Category $rootCategory */
+        /** @var Category $rootCategory */
         $this->rootCategoryId = $this->attributeConfig->getRootCategoryId();
         $rootCategory = $allCategories[$this->rootCategoryId] ?? null;
         return $this->getCategoryDataWithChildren($rootCategory, $allCategories);
     }
 
-    protected function getCategoryDataWithChildren(
-        \Magento\Catalog\Model\Category $category,
+    /**
+     * @param Category $category
+     * @param array $allCategories
+     * @return string[]
+     */
+    private function getCategoryDataWithChildren(
+        Category $category,
         array $allCategories
     ) : array {
         $categoryId = $category->getId();
@@ -359,10 +373,12 @@ class Meta
         $categoryData['names'] = $names;
 
         // add child category information
-        $children = array_filter(
-            explode(',', $category->getChildren()), function ($id) {
-                return !empty($id);
-        });
+        $children = [];
+        foreach (explode(',', $category->getChildren()) as $child) {
+            if (!empty($child)) {
+                $children[] = $child;
+            }
+        }
         if (empty($children)) {
             $categoryData['children'] = [];
         } else {

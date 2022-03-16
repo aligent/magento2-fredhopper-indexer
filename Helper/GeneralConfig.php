@@ -1,7 +1,15 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Helper;
 
+use Magento\Catalog\Model\Category;
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Locale\Resolver;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class GeneralConfig extends AbstractHelper
 {
@@ -18,119 +26,130 @@ class GeneralConfig extends AbstractHelper
     public const XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
     public const XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
 
-    /** @var string */
-    protected $username;
-    /** @var string */
-    protected $password;
-    /** @var string */
-    protected $environmentName;
-    /** @var string */
-    protected $endpointName;
-    /** @var string */
-    protected $productPrefix;
-    /** @var string */
-    protected $variantPrefix;
-    /** @var bool */
-    protected $useSiteVariant;
-    /** @var string */
-    protected $defaultStore;
-    /** @var string */
-    protected $defaultLocale;
-    /** @var string[] */
-    protected $siteVariants = [];
-    /** @var string[] */
-    protected $allSiteVariantSuffixes;
-    /** @var int */
-    protected $rootCategoryId;
-    /** @var bool */
-    protected $debugLogging;
+    private Resolver $localeResolver;
+    private StoreManagerInterface $storeManager;
 
-    /**
-     * @var \Magento\Framework\Locale\Resolver
-     */
-    protected $localeResolver;
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    protected $storeManager;
+    private string $username;
+    private string $password;
+    private string $environmentName;
+    private string $endpointName;
+    private string $productPrefix;
+    private string $variantPrefix;
+    private bool $useSiteVariant;
+    private int $defaultStore;
+    private string $defaultLocale;
+    private int $rootCategoryId;
+    private bool $debugLogging;
+
+    /** @var string[] */
+    private array $siteVariants = [];
+    /** @var string[] */
+    private array $allSiteVariantSuffixes;
 
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\Locale\Resolver $localeResolver,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        Context $context,
+        Resolver $localeResolver,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->localeResolver = $localeResolver;
         $this->storeManager = $storeManager;
     }
 
-    public function getUsername()
+    /**
+     * @return string
+     */
+    public function getUsername(): string
     {
-        if (!$this->username) {
-            $this->username = $this->scopeConfig->getValue(self::XML_PATH_USERNAME);
+        if (!isset($this->username)) {
+            $this->username = (string)$this->scopeConfig->getValue(self::XML_PATH_USERNAME);
         }
         return $this->username;
     }
 
-    public function getPassword()
+    /**
+     * @return string
+     */
+    public function getPassword(): string
     {
-        if (!$this->password) {
-            $this->password = $this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
+        if (!isset($this->password)) {
+            $this->password = (string)$this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
         }
         return $this->password;
     }
 
-    public function getEnvironmentName()
+    /**
+     * @return string
+     */
+    public function getEnvironmentName(): string
     {
-        if (!$this->environmentName) {
-            $this->environmentName = $this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
+        if (!isset($this->environmentName)) {
+            $this->environmentName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
         }
         return $this->environmentName;
     }
 
-    public function getEndpointName()
+    /**
+     * @return string
+     */
+    public function getEndpointName(): string
     {
-        if (!$this->endpointName) {
-            $this->endpointName = $this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
+        if (!isset($this->endpointName)) {
+            $this->endpointName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
         }
         return $this->endpointName;
     }
 
-    public function getProductPrefix()
+    /**
+     * @return string
+     */
+    public function getProductPrefix(): string
     {
-        if (!$this->productPrefix) {
-            $this->productPrefix = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
+        if (!isset($this->productPrefix)) {
+            $this->productPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
         }
         return $this->productPrefix;
     }
 
-    public function getVariantPrefix()
+    /**
+     * @return string
+     */
+    public function getVariantPrefix(): string
     {
-        if (!$this->variantPrefix) {
-            $this->variantPrefix = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
+        if (!isset($this->variantPrefix)) {
+            $this->variantPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
         }
         return $this->variantPrefix;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
-        if ($this->useSiteVariant === null) {
+        if (!isset($this->useSiteVariant)) {
             $this->useSiteVariant = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
         }
         return $this->useSiteVariant;
     }
 
-    public function getDefaultStore()
+    /**
+     * @return int
+     */
+    public function getDefaultStore(): int
     {
-        if (!$this->defaultStore) {
-            $this->defaultStore = $this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
+        if (!isset($this->defaultStore)) {
+            $this->defaultStore = (int)$this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
         }
         return $this->defaultStore;
     }
 
-    public function getDefaultLocale()
+    /**
+     * @return string
+     */
+    public function getDefaultLocale(): string
     {
-        if (!$this->defaultLocale) {
+        if (!isset($this->defaultLocale)) {
             $this->localeResolver->emulate($this->getDefaultStore());
             $this->defaultLocale = $this->localeResolver->getDefaultLocale();
             $this->localeResolver->revert();
@@ -138,46 +157,60 @@ class GeneralConfig extends AbstractHelper
         return $this->defaultLocale;
     }
 
-    public function getSiteVariant($storeId = null)
+    /**
+     * @param int|null $storeId
+     * @return string|null
+     */
+    public function getSiteVariant(?int $storeId = null): ?string
     {
-        if (!isset($this->siteVariants[$storeId ?? 'default'])) {
-            $this->siteVariants[$storeId ?? 'default'] = $this->scopeConfig->getValue(
+        $storeKey = $storeId ?? 'default';
+        if (!isset($this->siteVariants[$storeKey])) {
+            $this->siteVariants[$storeKey] = $this->scopeConfig->getValue(
                 self::XML_PATH_SITE_VARIANT,
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                ScopeInterface::SCOPE_STORE,
                 $storeId
             );
         }
-        return $this->siteVariants[$storeId ?? 'default'];
+        return $this->siteVariants[$storeKey];
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
-        if ($this->allSiteVariantSuffixes === null) {
+        if (!isset($this->allSiteVariantSuffixes)) {
             if (!$this->getUseSiteVariant()) {
                 $this->allSiteVariantSuffixes = ['']; // single empty string, rather than empty array
             } else {
                 foreach ($this->storeManager->getStores() as $store) {
-                    $this->allSiteVariantSuffixes[] = '_' . $this->getSiteVariant($store->getId());
+                    $this->allSiteVariantSuffixes[] = '_' . $this->getSiteVariant((int)$store->getId());
                 }
             }
         }
         return $this->allSiteVariantSuffixes;
     }
 
-    public function getRootCategoryId()
+    /**
+     * @return int
+     */
+    public function getRootCategoryId(): int
     {
         if (!isset($this->rootCategoryId)) {
             $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
             if ($this->rootCategoryId <= 0) {
-                $this->rootCategoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+                $this->rootCategoryId = Category::TREE_ROOT_ID;
             }
         }
         return $this->rootCategoryId;
     }
 
-    public function getDebugLogging()
+    /**
+     * @return bool
+     */
+    public function getDebugLogging(): bool
     {
-        if (!$this->debugLogging) {
+        if (!isset($this->debugLogging)) {
             $this->debugLogging = $this->scopeConfig->isSetFlag(self::XML_PATH_DEBUG_LOGGING);
         }
         return $this->debugLogging;

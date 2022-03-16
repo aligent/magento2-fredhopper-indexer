@@ -1,34 +1,32 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Search\Adapter;
+
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Search\Response\Aggregation;
+use Magento\Framework\Search\Response\QueryResponse;
 
 class DummyResponseFactory
 {
-    /**
-     * @var \Magento\Framework\Api\Search\DocumentFactory
-     */
-    protected $documentFactory;
-    /**
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
-    protected $objectManager;
+
+    private ObjectManagerInterface $objectManager;
 
     public function __construct(
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Framework\Api\Search\DocumentFactory $documentFactory
-    )
-    {
-        $this->documentFactory = $documentFactory;
+        ObjectManagerInterface $objectManager
+    ) {
         $this->objectManager = $objectManager;
     }
 
     public function create()
     {
         $aggregation = $this->objectManager->create(
-            \Magento\Framework\Search\Response\Aggregation::class,
+            Aggregation::class,
             ['buckets' => []]
         );
         return $this->objectManager->create(
-            \Magento\Framework\Search\Response\QueryResponse::class,
+            QueryResponse::class,
             [
                 'documents' => [],
                 'aggregations' => $aggregation,

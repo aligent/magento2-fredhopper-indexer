@@ -1,21 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Console\Command;
 
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Console\Cli;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TouchProduct extends \Symfony\Component\Console\Command\Command
+class TouchProduct extends Command
 {
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    private $resourceConnection;
+
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
+        ResourceConnection $resourceConnection,
         string $name = null
     ) {
         $this->resourceConnection = $resourceConnection;
@@ -36,16 +38,16 @@ EOH
         $this->addArgument('sku', InputArgument::REQUIRED | InputArgument::IS_ARRAY, $desc);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @inheritDoc
+     */
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $skus = $input->getArgument('sku');
         if (count($skus) < 1) {
             throw new \InvalidArgumentException('Must provide SKUs');
         }
 
-        /**
-         * @var \Magento\Framework\DB\Adapter\AdapterInterface $conn
-         */
         $conn = $this->resourceConnection->getConnection();
         $productFetch = $conn->select()
             ->from($conn->getTableName('catalog_product_entity'))
@@ -59,15 +61,17 @@ EOH
 
         if (count($insertData) == 0) {
             $output->writeln("No matching products");
-            return;
+            return Cli::RETURN_FAILURE;
         }
 
         $table = $conn->getTableName('catalogsearch_fulltext_cl');
         try {
             $conn->insertMultiple($table, $insertData);
             $output->writeln("Updated " . count($insertData) . " product(s)");
+            return Cli::RETURN_SUCCESS;
         } catch (\Exception $ex) {
             $output->writeln("Failed to update changelog");
+            return Cli::RETURN_FAILURE;
         }
     }
 }

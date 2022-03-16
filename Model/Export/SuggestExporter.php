@@ -1,35 +1,34 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export;
 
-class SuggestExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterInterface
+use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
+use Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface;
+use Aligent\FredhopperIndexer\Model\Export\Upload\SuggestUpload;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\Driver\File;
+use Psr\Log\LoggerInterface;
+
+class SuggestExporter implements ExporterInterface
 {
-    const ZIP_FILE_NAME = 'data.zip';
+    private const ZIP_FILE_NAME = 'data.zip';
+
+    private ZipFile $zipFile;
+    private SuggestUpload $upload;
+    private File $filesystem;
+    private LoggerInterface $logger;
     /**
-     * @var ZipFile
+     * @var FileGeneratorInterface[]
      */
-    protected $zipFile;
-    /**
-     * @var Upload\SuggestUpload
-     */
-    protected $upload;
-    /**
-     * @var \Magento\Framework\Filesystem\Driver\File
-     */
-    protected $filesystem;
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var \Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface[]
-     */
-    protected $fileGenerators;
+    private array $fileGenerators;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Export\ZipFile $zipFile,
-        \Aligent\FredhopperIndexer\Model\Export\Upload\SuggestUpload $upload,
-        \Magento\Framework\Filesystem\Driver\File $filesystem,
-        \Psr\Log\LoggerInterface $logger,
+        ZipFile $zipFile,
+        SuggestUpload $upload,
+        File $filesystem,
+        LoggerInterface $logger,
         array $fileGenerators = []
     ) {
         $this->fileGenerators = $fileGenerators;
@@ -39,6 +38,9 @@ class SuggestExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterI
         $this->logger = $logger;
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public function export() : bool
     {
         $this->logger->info('Performing suggest export');
@@ -47,7 +49,7 @@ class SuggestExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterI
             $this->filesystem->createDirectory($directory);
         } catch (\Exception $e) {
             $this->logger->critical(
-                "Could not create directory {$directory} for export",
+                "Could not create directory $directory for export",
                 ['exception' => $e]
             );
             return false;

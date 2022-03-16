@@ -1,24 +1,26 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
+
+use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Framework\App\ResourceConnection;
 
 /**
  * Adds basic stock information to product index data. Not recommended with frequest stock updates or when using
  * Magento Inventory. Instead, add stock information at the time of FE query.
  */
-class StockFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class StockFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    protected $resourceConnection;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\StockAttributeConfig
-     */
-    protected $stockAttributeConfig;
+
+    private ResourceConnection $resourceConnection;
+    private StockAttributeConfig $stockAttributeConfig;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
-        \Aligent\FredhopperIndexer\Helper\StockAttributeConfig $stockAttributeConfig
+        ResourceConnection $resourceConnection,
+        StockAttributeConfig $stockAttributeConfig
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->stockAttributeConfig = $stockAttributeConfig;
@@ -27,7 +29,7 @@ class StockFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
     /**
      * @inheritDoc
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         $result = [];
         // only add stock information if enabled

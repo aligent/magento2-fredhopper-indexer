@@ -1,85 +1,74 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer;
 
+use Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\App\ScopeResolverInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Indexer\IndexStructureInterface;
+use Magento\Framework\Indexer\SaveHandler\Batch;
+use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
+use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 use Magento\Framework\Search\Request\Dimension;
+use Magento\Framework\Serialize\Serializer\Json;
 
-class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInterface
+class DataHandler implements IndexerInterface
 {
-    const BATCH_SIZE = 1000;
-    const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
-    const TYPE_PRODUCT = 'p';
-    const TYPE_VARIANT = 'v';
-    const OPERATION_TYPE_ADD = 'a';
-    const OPERATION_TYPE_DELETE = 'd';
-    const OPERATION_TYPE_UPDATE = 'u';
-    const OPERATION_TYPE_REPLACE = 'r';
+    public const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
+
+    public const OPERATION_TYPE_ADD = 'a';
+    public const OPERATION_TYPE_DELETE = 'd';
+    public const OPERATION_TYPE_UPDATE = 'u';
+    public const OPERATION_TYPE_REPLACE = 'r';
+
+    public const TYPE_PRODUCT = 'p';
+    public const TYPE_VARIANT = 'v';
+
+    private const BATCH_SIZE = 1000;
+
+    private ResourceConnection $resource;
+    private IndexScopeResolver $indexScopeResolver;
+    private Batch $batch;
+    private ScopeResolverInterface $scopeResolver;
+    private IndexStructureInterface $indexStructure;
+    private FredhopperDataProvider $dataProvider;
+    private Json $json;
+    private AttributeConfig $attributeConfig;
 
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var DocumentProcessorInterface[]
      */
-    protected $resource;
+    private array $documentPreProcessors;
     /**
-     * @var \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver
+     * @var DocumentProcessorInterface[]
      */
-    protected $indexScopeResolver;
-    /**
-     * @var \Magento\Framework\Indexer\SaveHandler\Batch
-     */
-    protected $batch;
-    /**
-     * @var \Magento\Framework\App\ScopeResolverInterface
-     */
-    protected $scopeResolver;
-    /**
-     * @var \Magento\Framework\Indexer\IndexStructureInterface
-     */
-    protected $indexStructure;
-    /**
-     * @var \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider
-     */
-    protected $dataProvider;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $json;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface[]
-     */
-    protected $documentPreProcessors;
-    /**
-     * @var \Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface[]
-     */
-    protected $documentPostProcessors;
+    private array $documentPostProcessors;
     /**
      * @var int
      */
-    protected $batchSize;
+    private int $batchSize;
     /**
      * @var string[]
      */
-    protected $variantPriceAttributes = [
+    private array $variantPriceAttributes = [
         'regular_price',
         'special_price'
     ];
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver $indexScopeResolver,
-        \Magento\Framework\Indexer\SaveHandler\Batch $batch,
-        \Magento\Framework\App\ScopeResolverInterface $scopeResolver,
-        \Magento\Framework\Indexer\IndexStructureInterface $indexStructure,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider $dataProvider,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
+        ResourceConnection $resource,
+        IndexScopeResolver $indexScopeResolver,
+        Batch $batch,
+        ScopeResolverInterface $scopeResolver,
+        IndexStructureInterface $indexStructure,
+        Json $json,
+        FredhopperDataProvider $dataProvider,
+        AttributeConfig $attributeConfig,
         array $documentPreProcessors = [],
         array $documentPostProcessors = [],
         $batchSize = 1000
@@ -91,7 +80,6 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $this->indexStructure = $indexStructure;
         $this->json = $json;
         $this->dataProvider = $dataProvider;
-        $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->documentPreProcessors = $documentPreProcessors;
         $this->documentPostProcessors = $documentPostProcessors;
@@ -108,7 +96,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $variants = [];
         foreach ($this->batch->getItems($documents, self::BATCH_SIZE) as $documents) {
             $this->processDocuments($documents, $scopeId);
-            foreach($documents as $productId => $productData) {
+            foreach ($documents as $productId => $productData) {
                 $products[$productId] = $productData['product'];
                 foreach ($productData['variants'] as $variantId => $variantData) {
                     $variants[$variantId] = $variantData;
@@ -127,7 +115,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
     /**
      * Final processing of attributes to ensure attributes are sent at correct level (product/variant), and that
      * site variants are appended where needed.
-     * Also provide pre/post processors for custom code to hook into
+     * Also provide pre- / post-processors for custom code to hook into
      * @param array $documents
      * @param $scopeId
      */
@@ -139,80 +127,9 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         if (!empty($documents)) {
             // if using variants, need to ensure each product has a variant
             if ($this->attributeConfig->getUseVariantProducts()) {
-                $productAttributeCodes = [];
-                foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
-                    $productAttributeCodes[$code] = true;
-                }
-                foreach ($documents as $productId => &$data) {
-                    // copy product data to variant
-                    if (empty($data['variants'])) {
-                        $data['variants'] =[
-                            $productId => $data['product']
-                        ];
-                    }
-
-                    // remove any variant-level attributes from parent product, ensuring it is set on each variant
-                    foreach ($data['product'] as $attributeCode => $productData) {
-                        if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
-                            foreach ($data['variants'] as $variantId => &$variantData) {
-                                $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
-                            }
-                            if (!isset($productAttributeCodes[$attributeCode])) {
-                                unset($data['product'][$attributeCode]);
-                            }
-                            continue; // continue with the next attribute
-                        }
-                        // check pricing attributes
-                        // need to use strpos as we can have customer group pricing
-                        foreach ($this->variantPriceAttributes as $priceAttributePrefix) {
-                            if (strpos($attributeCode, $priceAttributePrefix) === 0) {
-                                foreach ($data['variants'] as $variantId => &$variantData) {
-                                    $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
-                                }
-                                unset($data['product'][$attributeCode]);
-                                break; // skip the rest of the pricing attribute loop
-                            }
-                        }
-                    }
-
-                    // remove product-level attributes from variants
-                    foreach ($data['variants'] as &$variantData) {
-                        foreach ($variantData as $attributeCode => $attributeValue) {
-                            if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
-                                unset($variantData[$attributeCode]);
-                            }
-                        }
-                    }
-                }
+                $this->processVariants($documents);
             } else {
-                // need to collate variant level attributes at product level
-                // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
-                // of parent data
-                foreach ($documents as $productId => &$data) {
-                    foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
-                        // convert product attribute to an array if it's not already
-                        if (isset($data['product'][$variantAttributeCode]) &&
-                            !is_array($data['product'][$variantAttributeCode])) {
-                            $data['product'][$variantAttributeCode] = [$data['product'][$variantAttributeCode]];
-                        }
-                        $valueArray = [];
-                        foreach ($data['variants'] as $variantId => $variantData) {
-                            if (isset($variantData[$variantAttributeCode])) {
-                                $value = $variantData[$variantAttributeCode];
-                                $value = is_array($value) ? $value : [$value];
-                                $valueArray = array_merge($valueArray, $value);
-                            }
-                        }
-                        // if there are variant values to include, ensure product value is set
-                        if (!empty($valueArray)) {
-                            $data['product'][$variantAttributeCode] = $data['product'][$variantAttributeCode] ?? [];
-                            $data['product'][$variantAttributeCode] = array_merge(
-                                $data['product'][$variantAttributeCode],
-                                $valueArray
-                            );
-                        }
-                    }
-                }
+                $this->processProducts($documents);
             }
         }
         foreach ($this->documentPostProcessors as $postProcessor) {
@@ -220,7 +137,117 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         }
     }
 
-    protected function insertProductData(
+    /**
+     * Handles the processing of variant-level attributes for products
+     * @param array $documents passed by reference
+     * @return void
+     */
+    private function processVariants(array &$documents)
+    {
+        $productAttributeCodes = [];
+        foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
+            $productAttributeCodes[$code] = true;
+        }
+        foreach ($documents as $productId => &$data) {
+            // copy product data to variant
+            if (empty($data['variants'])) {
+                $data['variants'] =[
+                    $productId => $data['product']
+                ];
+            }
+
+            // remove any variant-level attributes from parent product, ensuring it is set on each variant
+            foreach ($data['product'] as $attributeCode => $productData) {
+                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                    foreach ($data['variants'] as &$variantData) {
+                        $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
+                    }
+                    if (!isset($productAttributeCodes[$attributeCode])) {
+                        unset($data['product'][$attributeCode]);
+                    }
+                    continue; // continue with the next attribute
+                }
+                // check pricing attributes
+                // need to use strpos as we can have customer group pricing
+                foreach ($this->variantPriceAttributes as $priceAttributePrefix) {
+                    if (strpos($attributeCode, $priceAttributePrefix) === 0) {
+                        foreach ($data['variants'] as &$variantData) {
+                            $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
+                        }
+                        unset($data['product'][$attributeCode]);
+                        break; // skip the rest of the pricing attribute loop
+                    }
+                }
+            }
+
+            // remove product-level attributes from variants
+            foreach ($data['variants'] as &$variantData) {
+                foreach ($variantData as $attributeCode => $attributeValue) {
+                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                        unset($variantData[$attributeCode]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Collates variant-level attributes into the parent product
+     * @param array $documents passed by reference
+     * @return void
+     */
+    private function processProducts(array &$documents)
+    {
+        // need to collate variant level attributes at product level
+        // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
+        // of parent data
+        foreach ($documents as &$data) {
+            foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
+                $this->processProductVariantAttribute($data, $variantAttributeCode);
+            }
+        }
+    }
+
+    /**
+     * Collates the variant-level values for a single attribute
+     * @param array $data passed by reference
+     * @param $variantAttributeCode
+     * @return void
+     */
+    private function processProductVariantAttribute(array &$data, $variantAttributeCode)
+    {
+        // convert product attribute to an array if it's not already
+        if (isset($data['product'][$variantAttributeCode]) &&
+            !is_array($data['product'][$variantAttributeCode])) {
+            $data['product'][$variantAttributeCode] = [$data['product'][$variantAttributeCode]];
+        }
+        $valueArray = [];
+        foreach ($data['variants'] as $variantData) {
+            if (isset($variantData[$variantAttributeCode])) {
+                $value = $variantData[$variantAttributeCode];
+                $valueArray[] = is_array($value) ? $value : [$value];
+            }
+        }
+        $valueArray = array_merge([], ...$valueArray);
+
+        // if there are variant values to include, ensure product value is set
+        if (!empty($valueArray)) {
+            $data['product'][$variantAttributeCode] = $data['product'][$variantAttributeCode] ?? [];
+            $data['product'][$variantAttributeCode] = array_merge(
+                $data['product'][$variantAttributeCode],
+                $valueArray
+            );
+        }
+    }
+
+    /**
+     * @param $dimensions
+     * @param array $products
+     * @param array $variants
+     * @param array $variantIdParentMapping
+     * @return void
+     */
+    private function insertProductData(
         $dimensions,
         array $products,
         array $variants,
@@ -240,7 +267,8 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
             $variantRows[] = [
                 'product_type' => self::TYPE_VARIANT,
                 'product_id' => $variantId,
-                'parent_id' => $variantIdParentMapping[$variantId] ?? $variantId, // dummy variants have themselves as parents
+                // dummy variants have themselves as parents
+                'parent_id' => $variantIdParentMapping[$variantId] ?? $variantId,
                 'attribute_data' => $this->json->serialize($this->sortArray($attributeData))
             ];
         }
@@ -260,7 +288,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * Ensures correct deltas are sent to Fredhopper
      * @param $dimensions
      */
-    protected function applyProductChanges($dimensions) : void
+    private function applyProductChanges($dimensions) : void
     {
         $connection = $this->resource->getConnection();
         $indexTableName = self::INDEX_TABLE_NAME;
@@ -268,102 +296,94 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $storeId = $this->getScopeId($dimensions);
 
         // insert any new records and mark as "add"
-        /*
-         * INSERT IGNORE INTO fredhopper_product_data_index
-         * SELECT :scopeId as store_id, product_type, product_id, attribute_data, 'a' as operation_type
-         *   FROM fredhopper_product_data_index_store<id>;
-         *
-         */
-        $insertQuery = "INSERT IGNORE INTO {$indexTableName}" .
-            " (store_id, product_type, product_id, parent_id, attribute_data, operation_type)" .
-            " SELECT :store_id, product_type, product_id, parent_id, attribute_data, :operation_type" .
-            " FROM {$scopeTableName}";
-        $connection->query($insertQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_ADD
-        ]);
-
+        $insertSelect = $connection->select();
+        $insertSelect->from(
+            ['scope_table' => $scopeTableName],
+            ['product_type', 'product_id', 'parent_id', 'attribute_data']
+        );
+        $insertSelect->columns(
+            [
+                'operation_type' => new \Zend_Db_Expr($connection->quote(self::OPERATION_TYPE_ADD)),
+                'store_id' => new \Zend_Db_Expr($storeId)
+            ]
+        );
+        $connection->insertFromSelect(
+            $insertSelect,
+            $indexTableName,
+            ['product_type', 'product_id', 'parent_id', 'attribute_data', 'operation_type', 'store_id'],
+            AdapterInterface::INSERT_IGNORE // ignore mode so only records that do not exist will be inserted
+        );
 
         // check for deleted records and mark as "delete"
-        /**
-         * UPDATE fredhopper_product_data_index main
-         *    SET operation_type = 'd'
-         *  WHERE store_id = :scopeId
-         *    AND (product_id IN (:affectedProductIds) or :affectedProductIds = -1)
-         *    AND NOT EXISTS (SELECT 1
-         *                      FROM fredhopper_product_data_index_store<id> store_index
-         *                     WHERE store_index.product_id = main.product_id
-         *                       AND store_index.product_type = main.product_type)
-         */
-        $deleteQuery = "UPDATE {$indexTableName} main_table" .
-            " SET operation_type = :operation_type " .
-            " WHERE store_id = :store_id AND NOT EXISTS (SELECT 1 from {$scopeTableName} scope_table " .
+        $deleteWhereClause = "store_id = $storeId AND NOT EXISTS (SELECT 1 from $scopeTableName scope_table " .
             " WHERE scope_table.product_id = main_table.product_id " .
             " AND scope_table.product_type = main_table.product_type)";
-        $connection->query($deleteQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_DELETE
-        ]);
+        $connection->update(
+            $indexTableName,
+            ['operation_type' => self::OPERATION_TYPE_DELETE],
+            $deleteWhereClause
+        );
 
-        // compare
-        /**
-         * UPDATE fredhopper_product_data_index main,
-         *        fredhopper_product_data_index_store<id> store_index
-         *    SET main.operation_type = 'r',
-         *        main.attribute_data = store_index.attribute_data
-         *  WHERE main.store_id = :scopeId
-         *    AND main.product_type = store_index.product_type
-         *    AND main.product_id = store_index.product_id
-         *    AND main.attribute_data != store_index.attribute_data
-         */
-        $updateQuery = "UPDATE {$indexTableName} main_table, {$scopeTableName} scope_table" .
-            " SET main_table.operation_type = :operation_type, main_table.attribute_data = scope_table.attribute_data" .
-            " WHERE main_table.store_id = :store_id" .
-            " AND main_table.product_id = scope_table.product_id" .
-            " AND main_table.product_type = scope_table.product_type" .
-            " AND main_table.attribute_data <> scope_table.attribute_data";
-        $connection->query($updateQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_UPDATE
-        ]);
+        // find records to be updated - where attribute_data has changed
+        $updateSubSelect = $connection->select();
+        $updateSubSelect->from(
+            false,
+            ['operation_type' => $connection->quote(self::OPERATION_TYPE_UPDATE)] // used for setting value
+        );
+        $updateSubSelect->join(
+            ['scope_table' => $scopeTableName],
+            'main_table.product_id = scope_table.product_id AND main_table.product_type = scope_table.product_type',
+            ['attribute_data']
+        );
+        $updateSubSelect->where('main_table.store_id = ?', $storeId);
+        $updateSubSelect->where('main_table.attribute_data <> scope_table.attribute_data');
 
-        // restore incorrectly deleted  products
-        /**
-         * UPDATE fredhopper_product_data_index main,
-         *        fredhopper_product_data_index_store<id> store_index
-         *    SET main.operation_type = null
-         *  WHERE main.store_id = :scopeId
-         *    AND main.product_type = store_index.product_type
-         *    AND main.product_id = store_index.product_id
-         *    AND main.operation_type = :operation_type
-         */
-        $restoreQuery = "UPDATE {$indexTableName} main_table, {$scopeTableName} scope_table" .
-            " SET main_table.operation_type = NULL" .
-            " WHERE main_table.store_id = :store_id" .
-            " AND main_table.product_id = scope_table.product_id" .
-            " AND main_table.product_type = scope_table.product_type" .
-            " AND main_table.operation_type = :operation_type";
-        $connection->query($restoreQuery, [
-            'store_id' => $storeId,
-            'operation_type' => self::OPERATION_TYPE_DELETE
-        ]);
+        $updateQuery = $connection->updateFromSelect(
+            $updateSubSelect,
+            ['main_table' => $indexTableName]
+        );
+        $connection->query($updateQuery);
+
+        // Restore incorrectly deleted  products by clearing operation_type
+        // Find records that are no longer missing from the scope table but are marked for deletion
+        $restoreSubSelect = $connection->select();
+        $restoreSubSelect->from(
+            false,
+            ['operation_type' => 'NULL'] // used for setting value
+        );
+        $restoreSubSelect->join(
+            ['scope_table' => $scopeTableName],
+            'main_table.product_id = scope_table.product_id AND main_table.product_type = scope_table.product_type',
+            []
+        );
+        $restoreSubSelect->where('main_table.store_id = ?', $storeId);
+        $restoreSubSelect->where('main_table.operation_type = ?', self::OPERATION_TYPE_DELETE);
+
+        $restoreQuery = $connection->updateFromSelect(
+            $restoreSubSelect,
+            ['main_table' => $indexTableName]
+        );
+        $connection->query($restoreQuery);
     }
 
     /**
      * Function used to "reset" main index table after performing an incremental update
+     * @return bool
      */
-    public function resetIndexAfterExport()
+    public function resetIndexAfterExport(): bool
     {
         $connection = $this->resource->getConnection();
         $indexTableName = self::INDEX_TABLE_NAME;
         // first, remove any records marked for deletion
-        $deleteQuery = "DELETE FROM {$indexTableName} WHERE operation_type = :operation_type";
-        $connection->query($deleteQuery, ['operation_type' => self::OPERATION_TYPE_DELETE]);
+        $connection->delete($indexTableName, ['operation_type = ?' => self::OPERATION_TYPE_DELETE]);
 
         // where clause is not technically needed, but operation_type column is indexed, so this should reduce the
         // amount of work and maintain/improve performance
-        $updateQuery = "UPDATE {$indexTableName} SET operation_type = NULL WHERE operation_type IS NOT NULL";
-        $connection->query($updateQuery);
+        $connection->update(
+            $indexTableName,
+            ['operation_type' => new \Zend_Db_Expr('NULL')],
+            'operation_type IS NOT NULL'
+        );
         return true;
     }
 
@@ -392,7 +412,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
     /**
      * @inheritDoc
      */
-    public function isAvailable($dimensions = [])
+    public function isAvailable($dimensions = []): bool
     {
         return $this->resource->getConnection()->isTableExists($this->getTableName($dimensions));
     }
@@ -401,7 +421,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * @param Dimension[] $dimensions
      * @return int
      */
-    public function getScopeId(array $dimensions) : int
+    private function getScopeId(array $dimensions) : int
     {
         $dimension = current($dimensions);
         return $this->scopeResolver->getScope($dimension->getValue())->getId();
@@ -411,7 +431,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * @param Dimension[] $dimensions
      * @return string
      */
-    protected function getTableName(array $dimensions) : string
+    private function getTableName(array $dimensions) : string
     {
         return $this->indexScopeResolver->resolve(self::INDEX_TABLE_NAME, $dimensions);
     }
@@ -421,7 +441,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      * @param array $array
      * @return array
      */
-    protected function sortArray(array $array) : array
+    private function sortArray(array $array) : array
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {

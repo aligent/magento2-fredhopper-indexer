@@ -1,78 +1,63 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export;
 
-abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api\Export\ExporterInterface
+use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\Email;
+use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
+use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
+use Aligent\FredhopperIndexer\Model\Export\Data\Products;
+use Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Log\LoggerInterface;
+
+abstract class AbstractProductExporter implements ExporterInterface
 {
     protected const ZIP_FILE_FULL = 'data.zip';
     protected const ZIP_FILE_INCREMENTAL = 'data-incremental.zip';
-    protected const META_FILE = 'meta.json';
-    protected const PRODUCT_FILE_PREFIX = 'products-';
-    protected const VARIANT_FILE_PREFIX = 'variants-';
 
-    /**
-     * @var Data\Products
-     */
-    protected $products;
-    /**
-     * @var Data\Meta
-     */
-    protected $meta;
-    /**
-     * @var ZipFile
-     */
-    protected $zipFile;
-    /**
-     * @var Upload\FasUpload
-     */
-    protected $upload;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
-     */
-    protected $config;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\SanityCheckConfig
-     */
-    protected $sanityConfig;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\Email
-     */
-    protected $emailHelper;
-    /**
-     * @var \Magento\Framework\Filesystem\Driver\File
-     */
-    protected $filesystem;
-    /**
-     * @var \Magento\Framework\Serialize\Serializer\Json
-     */
-    protected $json;
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var string
-     */
-    protected $directory;
+    private const META_FILE = 'meta.json';
+    private const PRODUCT_FILE_PREFIX = 'products-';
+    private const VARIANT_FILE_PREFIX = 'variants-';
+
+    protected LoggerInterface $logger;
+    protected string $directory;
+
+    private Products $products;
+    private Meta $meta;
+    private ZipFile $zipFile;
+    private FasUpload $upload;
+    private AttributeConfig $config;
+    private SanityCheckConfig $sanityConfig;
+    private Email $emailHelper;
+    private File $filesystem;
+    private Json $json;
     /**
      * @var string[]
      */
-    protected $files = [];
+    private array $files = [];
     /**
      * @var int
      */
-    protected $productLimit;
+    private int $productLimit;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Export\Data\Products $products,
-        \Aligent\FredhopperIndexer\Model\Export\Data\Meta $meta,
-        \Aligent\FredhopperIndexer\Model\Export\ZipFile $zipFile,
-        \Aligent\FredhopperIndexer\Model\Export\Upload\FasUpload $upload,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $config,
-        \Aligent\FredhopperIndexer\Helper\SanityCheckConfig $sanityConfig,
-        \Aligent\FredhopperIndexer\Helper\Email $emailHelper,
-        \Magento\Framework\Filesystem\Driver\File $filesystem,
-        \Magento\Framework\Serialize\Serializer\Json $json,
-        \Psr\Log\LoggerInterface $logger,
+        Products $products,
+        Meta $meta,
+        ZipFile $zipFile,
+        FasUpload $upload,
+        AttributeConfig $config,
+        SanityCheckConfig $sanityConfig,
+        Email $emailHelper,
+        File $filesystem,
+        Json $json,
+        LoggerInterface $logger,
         $productLimit = 1000
     ) {
         $this->products = $products;
@@ -94,11 +79,21 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
 
     abstract protected function getZipFileName() : string;
 
+    /**
+     * @param bool $isDryRun
+     * @return void
+     */
     public function setDryRun(bool $isDryRun): void
     {
         $this->upload->setDryRun($isDryRun);
     }
 
+    /**
+     * @param bool $isIncremental
+     * @return bool
+     * @throws FileSystemException
+     * @throws LocalizedException
+     */
     protected function doExport(bool $isIncremental) : bool
     {
         // create a new temp directory for files to be sent to fredhopper
@@ -107,7 +102,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             $this->filesystem->createDirectory($this->directory);
         } catch (\Exception $e) {
             $this->logger->critical(
-                "Could not create directory {$this->directory} for export",
+                "Could not create directory $this->directory for export",
                 ['exception' => $e]
             );
             return false;
@@ -130,7 +125,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             $minProducts = $this->sanityConfig->getMinTotalProducts();
             $errs = [];
             if ($productCount < $minProducts) {
-                $errs[] = "Full export has {$productCount} products, below minimum threshold of {$minProducts}";
+                $errs[] = "Full export has $productCount products, below minimum threshold of $minProducts";
             }
             $errs = array_merge($errs, $this->validateCategories($metaContent, $productData));
 
@@ -146,7 +141,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                 return false;
             }
 
-            $msg = "Generating JSON for full export of {$productCount} products (meets minimum of {$minProducts})";
+            $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
             $this->logger->info($msg);
         } else {
             $deleteSkus = [];
@@ -173,7 +168,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                     break;
                 }
             }
-            $msg = "Generating JSON for increment export of {$productCount} products: ";
+            $msg = "Generating JSON for increment export of $productCount products: ";
             $msg .= $this->json->serialize($opCount);
             $this->logger->info($msg);
 
@@ -208,9 +203,10 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
     }
 
     /**
-     * @return array|bool
+     * @return array[]|false
+     * @throws LocalizedException
      */
-    protected function generateMetaJson()
+    private function generateMetaJson()
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . self::META_FILE;
         $content = $this->meta->getMetaData();
@@ -219,7 +215,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
         } catch (\Exception $e) {
             // couldn't create a required file, so abort
             $this->logger->critical(
-                "Error saving meta file {$filePath}",
+                "Error saving meta file $filePath",
                 ['exception' => $e]
             );
             return false;
@@ -233,7 +229,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      * @param array $productData Format as per Data\Products::getProductData()
      * @return string[] Errors found in categories, if any
      */
-    protected function validateCategories(array $metaContent, array $productData): array
+    private function validateCategories(array $metaContent, array $productData): array
     {
         $errors = [];
         $categories = [];
@@ -282,7 +278,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
             }
         }
 
-        $tierReqd = [
+        $tierRequired = [
             1 => $this->sanityConfig->getMinProductsCategoryTier1(),
             2 => $this->sanityConfig->getMinProductsCategoryTier2(),
         ];
@@ -296,10 +292,10 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                 $tierMin[$tier] = $cat;
             }
 
-            $required = $tierReqd[$tier];
+            $required = $tierRequired[$tier];
             if ($cat['product_count'] < $required) {
-                $errMsg = "Insufficient products in tier {$tier} category {$cat['name']}";
-                $errMsg .= ": {$cat['product_count']} (expected {$required})";
+                $errMsg = "Insufficient products in tier $tier category {$cat['name']}";
+                $errMsg .= ": {$cat['product_count']} (expected $required)";
                 $errors[] = $errMsg;
                 $sufficientProducts = false;
             }
@@ -307,7 +303,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
 
         if ($sufficientProducts) {
             foreach ($tierMin as $tier => $cat) {
-                $msg = "Category {$cat['name']} has fewest products in tier {$tier}: {$cat['product_count']}";
+                $msg = "Category {$cat['name']} has fewest products in tier $tier: {$cat['product_count']}";
                 $this->logger->info($msg);
             }
         }
@@ -319,7 +315,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      * @param array $productData
      * @return bool
      */
-    protected function generateProductsJson(array $productData)
+    private function generateProductsJson(array $productData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($productData, $this->productLimit) as $products) {
@@ -329,7 +325,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                 $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
             } catch (\Exception $e) {
                 $this->logger->critical(
-                    "Error saving products file {$filePath}",
+                    "Error saving products file $filePath",
                     ['exception' => $e]
                 );
                 return false;
@@ -344,7 +340,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
      * @param array $variantData
      * @return bool
      */
-    protected function generateVariantsJson(array $variantData)
+    private function generateVariantsJson(array $variantData): bool
     {
         $fileIndex = 0;
         foreach (array_chunk($variantData, $this->productLimit) as $products) {
@@ -354,7 +350,7 @@ abstract class AbstractProductExporter implements \Aligent\FredhopperIndexer\Api
                 $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
             } catch (\Exception $e) {
                 $this->logger->critical(
-                    "Error saving variants file {$filePath}",
+                    "Error saving variants file $filePath",
                     ['exception' => $e]
                 );
                 return false;

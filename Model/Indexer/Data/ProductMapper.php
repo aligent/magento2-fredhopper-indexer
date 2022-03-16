@@ -1,7 +1,9 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
-use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute;
@@ -9,37 +11,19 @@ use Magento\Elasticsearch\Model\Adapter\FieldType\Date as DateFieldType;
 
 class ProductMapper
 {
-    /**
-     * @var Visibility
-     */
-    protected $visibility;
 
-    /**
-     * @var DataProvider
-     */
-    protected $dataProvider;
+    private DataProvider $dataProvider;
+    private DateFieldType $dateFieldType;
 
-    /**
-     * @var array
-     */
-    private $attributeOptionsCache;
-
-    /**
-     * @var DateFieldType
-     */
-    protected $dateFieldType;
-
-    /**
-     * @var array
-     */
-    private $excludedAttributes;
+    private array $excludedAttributes;
+    private array $attributeOptionsCache;
 
     /**
      * List of attributes which will be skipped during mapping
      *
      * @var string[]
      */
-    private $defaultExcludedAttributes = [
+    private array $defaultExcludedAttributes = [
         'price',
         'media_gallery',
         'tier_price',
@@ -51,7 +35,7 @@ class ProductMapper
     /**
      * @var string[]
      */
-    private $attributesExcludedFromMerge = [
+    private array $attributesExcludedFromMerge = [
         'status',
         'visibility',
         'tax_class_id'
@@ -59,18 +43,15 @@ class ProductMapper
 
     /**
      * ProductMapper constructor.
-     * @param Visibility $visibility
      * @param DataProvider $dataProvider
      * @param DateFieldType $dateFieldType
      * @param array $excludedAttributes
      */
     public function __construct(
-        Visibility $visibility,
         DataProvider $dataProvider,
         DateFieldType $dateFieldType,
         array $excludedAttributes = []
     ) {
-        $this->visibility = $visibility;
         $this->dataProvider = $dataProvider;
         $this->dateFieldType = $dateFieldType;
         $this->excludedAttributes = array_merge($this->defaultExcludedAttributes, $excludedAttributes);
@@ -103,7 +84,8 @@ class ProductMapper
                 if ($productId === $id) {
                     $productData[$attributeCode] = $value;
                 } elseif ($typeId === Configurable::TYPE_CODE) {
-                    // only want to have variant information for configurable products// map variant id to parent for use later
+                    // only want to have variant information for configurable products
+                    // map variant id to parent for use later
                     $variantData[$id] = $variantData[$id] ?? [];
                     $variantData[$id][$attributeCode] = $value;
                 }
@@ -132,7 +114,7 @@ class ProductMapper
      * @param int $storeId
      * @return array
      */
-    protected function convertToProductData(int $productId, array $indexData, int $storeId): array
+    private function convertToProductData(int $productId, array $indexData, int $storeId): array
     {
         $productAttributes = [];
 
@@ -166,7 +148,7 @@ class ProductMapper
      * @param array $attributeValues
      * @return array
      */
-    protected function convertAttribute(
+    private function convertAttribute(
         Attribute $attribute,
         array $attributeValues
     ): array {
@@ -221,7 +203,7 @@ class ProductMapper
      * @param int $storeId
      * @return array
      */
-    protected function prepareAttributeValues(
+    private function prepareAttributeValues(
         int $productId,
         Attribute $attribute,
         array $attributeValues,
@@ -252,11 +234,13 @@ class ProductMapper
      * @param array $values
      * @return array
      */
-    protected function prepareMultiselectValues(array $values): array
+    private function prepareMultiselectValues(array $values): array
     {
-        return array_map(function (string $value) {
-            return explode(',', $value);
-        }, $values);
+        $multiSelectValues = [];
+        foreach ($values as $value) {
+            $multiSelectValues[] = explode(',', $value);
+        }
+        return $multiSelectValues;
     }
 
     /**
@@ -265,7 +249,7 @@ class ProductMapper
      * @param Attribute $attribute
      * @return bool
      */
-    protected function isAttributeDate(Attribute $attribute): bool
+    private function isAttributeDate(Attribute $attribute): bool
     {
         return $attribute->getFrontendInput() === 'date'
             || in_array($attribute->getBackendType(), ['datetime', 'timestamp'], true);
@@ -279,7 +263,7 @@ class ProductMapper
      * @param bool $isMultiSelect
      * @return array
      */
-    protected function getValuesLabels(
+    private function getValuesLabels(
         Attribute $attribute,
         array $attributeValues,
         bool $isMultiSelect
@@ -295,9 +279,9 @@ class ProductMapper
         if ($isMultiSelect) {
             $values = [];
             foreach ($attributeValues as $valueArray) {
-                $values = array_merge($values, $valueArray);
+                $values[] = $valueArray;
             }
-            $attributeValues = array_unique($values);
+            $attributeValues = array_unique(array_merge([], ...$values));
         }
 
         foreach ($attributeValues as $attributeValue) {
@@ -315,7 +299,7 @@ class ProductMapper
      * @param Attribute $attribute
      * @return array
      */
-    protected function getAttributeOptions(Attribute $attribute): array
+    private function getAttributeOptions(Attribute $attribute): array
     {
         if (!isset($this->attributeOptionsCache[$attribute->getId()])) {
             $options = [];
@@ -329,20 +313,23 @@ class ProductMapper
     }
 
     /**
-     * Retrieve value for field. If field have only one value this method return it.
-     * Otherwise will be returned array of these values.
+     * Retrieve value for field. If the field has only one value this method will return it.
+     * Otherwise, it will return an array of these values.
      * Note: array of values must have index keys, not as associative array.
      *
      * @param array $values
      * @return array|string
      */
-    protected function retrieveFieldValue(array $values)
+    private function retrieveFieldValue(array $values)
     {
         $values = array_unique($values);
-        $values = array_filter($values, function($el) {
-            return $el !== null;
-        });
+        $allValues = [];
+        foreach ($values as $value) {
+            if ($value !== null) {
+                $allValues[] = $value;
+            }
+        }
 
-        return count($values) === 1 ? array_shift($values) : array_values($values);
+        return count($values) === 1 ? array_shift($allValues) : array_values($values);
     }
 }

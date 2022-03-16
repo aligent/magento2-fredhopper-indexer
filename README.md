@@ -71,7 +71,7 @@ There are a number of customisation points in the module, allowing for data to b
 </type>
 ```
 - Custom Suggest Data
-    - The `\Aligent\FredhopperIndexer\Model\Export\SuggestExporter` class provides the `fileGenerators` argument by which custom data feeds can be added to the suggest export.
+    - The `\Aligent\FredhopperIndexer\Model\Export\SuggestExporter` class provides the `fileGenerators` argument by which custom data feeds can be added to the "suggest" export.
         - Each class added to the array must implement `\Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface`
 ```
 <type name="Aligent\FredhopperIndexer\Model\Export\SuggestExporter">

@@ -1,26 +1,28 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Data;
 
-class CreatedAtOptionSource implements \Magento\Framework\Data\OptionSourceInterface
-{
-    /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
-     */
-    protected $dataProvider;
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\Data\OptionSourceInterface;
 
-    protected $options = null;
+class CreatedAtOptionSource implements OptionSourceInterface
+{
+
+    private DataProvider $dataProvider;
+
+    private array $options;
 
     public function __construct(
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider
+        DataProvider $dataProvider
     ) {
         $this->dataProvider = $dataProvider;
     }
 
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
-        if ($this->options === null) {
+        if (!isset($this->options)) {
             $options = [
                 ['value' => 'created_at', 'label' => __('Created at')],
             ];

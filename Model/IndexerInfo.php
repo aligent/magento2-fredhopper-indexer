@@ -1,27 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model;
 
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\DB\Select;
+use Magento\Framework\Indexer\IndexerInterface;
+use Magento\Framework\Indexer\StateInterface;
+use Magento\Framework\Mview\View;
+use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
+use Magento\Indexer\Model\Indexer\DependencyDecorator;
+use Zend_Db_Select;
 
 /**
  * Gets information about Magento indexers, and temp tables used by the Fredhopper indexer
  */
 class IndexerInfo
 {
-    /**
-     * @var ResourceConnection
-     */
-    protected $resourceConnection;
 
-    /**
-     * @var CollectionFactory
-     */
-    protected $indexerCollectionFactory;
+    private ResourceConnection $resourceConnection;
+    private CollectionFactory $indexerCollectionFactory;
 
     public function __construct(
         ResourceConnection $resourceConnection,
@@ -32,28 +32,32 @@ class IndexerInfo
     }
 
     /**
-     * @param \Magento\Framework\Indexer\IndexerInterface $indexer
+     * @param IndexerInterface $indexer
      * @return string
      * @see \Magento\Indexer\Console\Command\IndexerStatusCommand::getStatus
      */
-    public function getIndexerStatus(\Magento\Framework\Indexer\IndexerInterface $indexer): string
+    public function getIndexerStatus(IndexerInterface $indexer): string
     {
         $status = 'unknown';
         switch ($indexer->getStatus()) {
-            case \Magento\Framework\Indexer\StateInterface::STATUS_VALID:
+            case StateInterface::STATUS_VALID:
                 $status = 'Ready';
                 break;
-            case \Magento\Framework\Indexer\StateInterface::STATUS_INVALID:
+            case StateInterface::STATUS_INVALID:
                 $status = 'Reindex required';
                 break;
-            case \Magento\Framework\Indexer\StateInterface::STATUS_WORKING:
+            case StateInterface::STATUS_WORKING:
                 $status = 'Processing';
                 break;
         }
         return $status;
     }
 
-    public function getPendingCount(\Magento\Framework\Mview\ViewInterface $view): int
+    /**
+     * @param ViewInterface $view
+     * @return int
+     */
+    public function getPendingCount(ViewInterface $view): int
     {
         $changelog = $view->getChangelog();
         try {
@@ -66,14 +70,17 @@ class IndexerInfo
         return count($changelog->getList($state->getVersionId(), $currentVersionId));
     }
 
+    /**
+     * @return array
+     */
     public function getIndexState(): array
     {
         $rows = [];
         $indexers = $this->indexerCollectionFactory->create()->getItems();
 
-        /** @var \Magento\Indexer\Model\Indexer\DependencyDecorator $indexer */
+        /** @var DependencyDecorator $indexer */
         foreach ($indexers as $indexer) {
-            /** @var \Magento\Framework\Mview\View $view */
+            /** @var View $view */
             $view = $indexer->getView();
             $pending = $this->getPendingCount($view);
             $rows[] = [
@@ -87,16 +94,14 @@ class IndexerInfo
         }
 
         // Ensure same order as bin/magento indexer:status
-        usort(
-            $rows,
-            function (array $comp1, array $comp2) {
-                return strcmp($comp1['title'], $comp2['title']);
-            }
-        );
+        array_multisort(array_column($rows, 'title'), SORT_ASC, $rows);
 
         return $rows;
     }
 
+    /**
+     * @return array
+     */
     public function getFredhopperIndexState(): array
     {
         $conn = $this->resourceConnection->getConnection();
@@ -110,14 +115,13 @@ class IndexerInfo
         $baseTable = DataHandler::INDEX_TABLE_NAME;
         $result = [];
 
-        /** @var \Magento\Framework\DB\Select $select */
         $select = $conn->select();
         $select->from($baseTable);
-        $select->reset(Select::COLUMNS);
+        $select->reset(Zend_Db_Select::COLUMNS);
         $select->columns(['store' => 'store_id', 'type' => 'product_type']);
         foreach ($ops as $op => $label) {
             // N.B. both values are defined in code; safe SQL-injection
-            $select->columns([$label => "SUM(operation_type = '{$op}')"]);
+            $select->columns([$label => "SUM(operation_type = '$op')"]);
         }
         $select->group(['store_id', 'product_type']);
         try {
@@ -141,7 +145,7 @@ class IndexerInfo
         foreach ($storeIds as $storeId => $ignore) {
             $select = $conn->select();
             $select->from($baseTable . '_scope' . $storeId);
-            $select->reset(Select::COLUMNS);
+            $select->reset(Zend_Db_Select::COLUMNS);
             $select->columns(['product_type', 'total_count' => 'COUNT(*)']);
             $select->group('product_type');
             try {

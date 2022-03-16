@@ -1,22 +1,28 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class Attributes extends \Magento\Framework\View\Element\Html\Select
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Context;
+use Magento\Framework\View\Element\Html\Select;
+
+class Attributes extends Select
 {
-    /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
-     */
-    protected $dataProvider;
+
+    private DataProvider $dataProvider;
 
     /**
      * Attributes constructor.
-     * @param \Magento\Framework\View\Element\Context $context
-     * @param \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider
+     * @param Context $context
+     * @param DataProvider $dataProvider
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\View\Element\Context $context,
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
+        Context $context,
+        DataProvider $dataProvider,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -26,9 +32,9 @@ class Attributes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function setInputName($value)
+    public function setInputName($value): Select
     {
         return $this->setName($value);
     }
@@ -36,7 +42,7 @@ class Attributes extends \Magento\Framework\View\Element\Html\Select
     /**
      * @return string
      */
-    public function _toHtml()
+    public function _toHtml(): string
     {
         if (empty($this->getOptions())) {
             $attributes = $this->dataProvider->getSearchableAttributes();
@@ -51,5 +57,4 @@ class Attributes extends \Magento\Framework\View\Element\Html\Select
 
         return parent::_toHtml();
     }
-
 }

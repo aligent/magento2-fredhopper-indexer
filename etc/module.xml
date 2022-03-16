@@ -4,6 +4,7 @@
     <module name="Aligent_FredhopperIndexer">
         <sequence>
             <module name="Magento_CatalogSearch"/>
+            <module name="Aligent_CategorySelector"/>
         </sequence>
     </module>
 </config>

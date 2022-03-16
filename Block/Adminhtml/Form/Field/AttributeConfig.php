@@ -1,14 +1,23 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class AttributeConfig extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Html\Select;
+
+class AttributeConfig extends AbstractFieldArray
 {
-    protected $attributeRenderer;
-    protected $fhAttributeTypeRenderer;
-    protected $appendSiteVariantRenderer;
+
+    private Select $attributeRenderer;
+    private Select $fhAttributeTypeRenderer;
+    private Select $appendSiteVariantRenderer;
 
     /**
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _prepareToRender()
     {
@@ -40,14 +49,14 @@ class AttributeConfig extends \Magento\Config\Block\System\Config\Form\Field\Fie
     }
 
     /**
-     * @return \Magento\Framework\View\Element\BlockInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Select
+     * @throws LocalizedException
      */
-    protected function getAttributeRenderer()
+    private function getAttributeRenderer(): Select
     {
-        if (!$this->attributeRenderer) {
+        if (!isset($this->attributeRenderer)) {
             $this->attributeRenderer = $this->getLayout()->createBlock(
-                \Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\Attributes::class,
+                Attributes::class,
                 '',
                 [
                     'data' => [
@@ -61,14 +70,14 @@ class AttributeConfig extends \Magento\Config\Block\System\Config\Form\Field\Fie
     }
 
     /**
-     * @return \Magento\Framework\View\Element\BlockInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Select
+     * @throws LocalizedException
      */
-    protected function getFHAttributeTypeRenderer()
+    private function getFHAttributeTypeRenderer(): Select
     {
-        if (!$this->fhAttributeTypeRenderer) {
+        if (!isset($this->fhAttributeTypeRenderer)) {
             $this->fhAttributeTypeRenderer = $this->getLayout()->createBlock(
-                \Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes::class,
+                FHAttributeTypes::class,
                 '',
                 [
                     'data' => [
@@ -82,14 +91,14 @@ class AttributeConfig extends \Magento\Config\Block\System\Config\Form\Field\Fie
     }
 
     /**
-     * @return \Magento\Framework\View\Element\BlockInterface|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Select
+     * @throws LocalizedException
      */
-    protected function getAppendSiteVariantRenderer()
+    private function getAppendSiteVariantRenderer(): Select
     {
-        if (!$this->appendSiteVariantRenderer) {
+        if (!isset($this->appendSiteVariantRenderer)) {
             $this->appendSiteVariantRenderer = $this->getLayout()->createBlock(
-                \Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\YesNo::class,
+                YesNo::class,
                 '',
                 [
                     'data' => [
@@ -103,19 +112,22 @@ class AttributeConfig extends \Magento\Config\Block\System\Config\Form\Field\Fie
     }
 
     /**
-     * @param \Magento\Framework\DataObject $row
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @param DataObject $row
+     * @throws LocalizedException
      */
-    protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
+    protected function _prepareArrayRow(DataObject $row)
     {
-        $options['option_' . $this->getAttributeRenderer()->calcOptionHash($row->getData('attribute'))]
-            = 'selected="selected"';
+        $attributeRendererHash = $this->getAttributeRenderer()->calcOptionHash($row->getData('attribute'));
+        $fhAttributeTypeRendererHash = $this->getFHAttributeTypeRenderer()->calcOptionHash(
+            $row->getData('fredhopper_type')
+        );
+        $appendSiteVariantRendererHash = $this->getAppendSiteVariantRenderer()->calcOptionHash(
+            $row->getData('append_site_variant')
+        );
 
-        $options['option_' . $this->getFHAttributeTypeRenderer()->calcOptionHash($row->getData('fredhopper_type'))]
-            = 'selected="selected"';
-
-        $options['option_' . $this->getAppendSiteVariantRenderer()->calcOptionHash($row->getData('append_site_variant'))]
-            = 'selected="selected"';
+        $options['option_' . $attributeRendererHash] = 'selected="selected"';
+        $options['option_' . $fhAttributeTypeRendererHash]  = 'selected="selected"';
+        $options['option_' . $appendSiteVariantRendererHash] = 'selected="selected"';
 
         $row->setData('option_extra_attrs', $options);
     }

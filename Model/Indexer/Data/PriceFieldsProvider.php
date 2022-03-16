@@ -1,41 +1,33 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
-
+use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Search\Request\IndexScopeResolverInterface;
 use Magento\Store\Model\Indexer\WebsiteDimensionProvider;
+use Magento\Store\Model\StoreManagerInterface;
 
-class PriceFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class PriceFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    protected $resourceConnection;
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    protected $storeManager;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig
-     */
-    protected $pricingAttributeConfig;
-    /**
-     * @var \Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory
-     */
-    protected $dimensionCollectionFactory;
-    /**
-     * @var \Magento\Framework\Search\Request\IndexScopeResolverInterface
-     */
-    protected $tableResolver;
 
+    private ResourceConnection $resourceConnection;
+    private StoreManagerInterface $storeManager;
+    private PricingAttributeConfig $pricingAttributeConfig;
+    private DimensionCollectionFactory $dimensionCollectionFactory;
+    private IndexScopeResolverInterface $tableResolver;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Aligent\FredhopperIndexer\Helper\PricingAttributeConfig $pricingAttributeConfig,
-        \Magento\Catalog\Model\Indexer\Product\Price\DimensionCollectionFactory $dimensionCollectionFactory,
-        \Magento\Framework\Search\Request\IndexScopeResolverInterface $tableResolver
+        ResourceConnection $resourceConnection,
+        StoreManagerInterface $storeManager,
+        PricingAttributeConfig $pricingAttributeConfig,
+        DimensionCollectionFactory $dimensionCollectionFactory,
+        IndexScopeResolverInterface $tableResolver
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->storeManager = $storeManager;
@@ -46,8 +38,10 @@ class PriceFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
 
     /**
      * @inheritDoc
+     * @throws NoSuchEntityException
+     * @throws \Zend_Db_Select_Exception
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         $result = [];
         $useCustomerGroup = $this->pricingAttributeConfig->getUseCustomerGroup();
@@ -69,7 +63,7 @@ class PriceFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
             $result[$productId] = [];
             foreach ($customerGroupPriceData as $customerGroupId => $prices) {
                 foreach ($indexFields as $fieldName) {
-                    $attributeName = $fieldName . ($useCustomerGroup ? "_{$customerGroupId}" : "");
+                    $attributeName = $fieldName . ($useCustomerGroup ? "_$customerGroupId" : "");
                     $result[$productId][$attributeName] = $prices[$fieldName];
                 }
             }
@@ -77,7 +71,15 @@ class PriceFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataM
         return $result;
     }
 
-    protected function getPriceIndexData(array $productIds, $storeId, $indexFields)
+    /**
+     * @param array $productIds
+     * @param $storeId
+     * @param $indexFields
+     * @return array
+     * @throws NoSuchEntityException
+     * @throws \Zend_Db_Select_Exception
+     */
+    private function getPriceIndexData(array $productIds, $storeId, $indexFields): array
     {
         $connection = $this->resourceConnection->getConnection();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();

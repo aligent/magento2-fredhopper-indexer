@@ -1,16 +1,22 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-class YesNo extends \Magento\Framework\View\Element\Html\Select
+use Magento\Config\Model\Config\Source\Yesno as YesNoSource;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\View\Element\Context;
+use Magento\Framework\View\Element\Html\Select;
+
+class YesNo extends Select
 {
-    /**
-     * @var \Magento\Config\Model\Config\Source\Yesno
-     */
-    protected $sourceConfig;
+
+    private YesNoSource $sourceConfig;
 
     public function __construct(
-        \Magento\Framework\View\Element\Context $context,
-        \Magento\Config\Model\Config\Source\Yesno $sourceConfig,
+        Context $context,
+        YesNoSource $sourceConfig,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -20,9 +26,9 @@ class YesNo extends \Magento\Framework\View\Element\Html\Select
     /**
      * @param $value
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function setInputName($value)
+    public function setInputName($value): Select
     {
         return $this->setName($value);
     }
@@ -30,7 +36,7 @@ class YesNo extends \Magento\Framework\View\Element\Html\Select
     /**
      * @return string
      */
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         if (!$this->getOptions()) {
             $this->setOptions($this->sourceConfig->toOptionArray());

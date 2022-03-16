@@ -1,26 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Plugin\Model\Indexer\Fulltext\Action;
+
+use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full;
 
 class FullPlugin
 {
-    /**
-     * @var \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider
-     */
-    protected $fredhopperDataProvider;
+
+    private FredhopperDataProvider $fredhopperDataProvider;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider $fredhopperDataProvider
+        FredhopperDataProvider $fredhopperDataProvider
     ) {
         $this->fredhopperDataProvider = $fredhopperDataProvider;
     }
 
+    /**
+     * @param Full $subject
+     * @param callable $proceed
+     * @param $storeId
+     * @param $productIds
+     * @return \Generator
+     */
     public function aroundRebuildStoreIndex(
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full $subject,
+        Full $subject,
         callable $proceed,
         $storeId,
         $productIds = null
-    ) {
+    ): \Generator {
         return $this->fredhopperDataProvider->rebuildStoreIndex($storeId, $productIds);
     }
 }

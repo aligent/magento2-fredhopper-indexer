@@ -1,31 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model;
 
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
+use Magento\Catalog\Model\ResourceModel\Category\Collection;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Magento\Store\Model\Store;
 
 class RelevantCategory
 {
-    /**
-     * @var CategoryRepositoryInterface
-     */
-    protected $categoryRepository;
 
-    /**
-     * @var CollectionFactory
-     */
-    protected $categoryCollectionFactory;
+    private CategoryRepositoryInterface $categoryRepository;
+    private CollectionFactory $categoryCollectionFactory;
+    private GeneralConfig $config;
 
-    /**
-     * @var GeneralConfig
-     */
-    protected $config;
-
-    protected $ancestorCategories = null;
+    private array $ancestorCategories;
 
     public function __construct(
         CategoryRepositoryInterface $categoryRepository,
@@ -42,7 +35,7 @@ class RelevantCategory
      */
     public function getAncestorCategoryIds(): array
     {
-        if ($this->ancestorCategories !== null) {
+        if (isset($this->ancestorCategories)) {
             return $this->ancestorCategories;
         }
 
@@ -62,12 +55,15 @@ class RelevantCategory
         return $this->ancestorCategories;
     }
 
-    public function getCollection(): \Magento\Catalog\Model\ResourceModel\Category\Collection
+    /**
+     * @return Collection
+     */
+    public function getCollection(): Collection
     {
         $ancestorIds = $this->getAncestorCategoryIds();
 
         $categories = $this->categoryCollectionFactory->create();
-        $categories->setStoreId(\Magento\Store\Model\Store::DEFAULT_STORE_ID);
+        $categories->setStoreId(Store::DEFAULT_STORE_ID);
         $categories->addAttributeToFilter(CategoryInterface::KEY_IS_ACTIVE, 1);
         if (count($ancestorIds) > 0) {
             $categories->addAttributeToFilter('entity_id', ['nin' => $ancestorIds]);

@@ -1,23 +1,26 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
-abstract class AbstractSearchTermsFileGenerator implements \Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface
+use Aligent\FredhopperIndexer\Api\Export\FileGeneratorInterface;
+use Aligent\FredhopperIndexer\Helper\SuggestConfig;
+use Magento\Framework\Filesystem\Driver\File;
+
+abstract class AbstractSearchTermsFileGenerator implements FileGeneratorInterface
 {
     protected const FILENAME = '';
-    protected const HEADER_ROW = ['searchterm', 'locale'];
-    protected const DELIMITER = "\t\t";
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\SuggestConfig
-     */
-    protected $suggestConfig;
-    /**
-     * @var \Magento\Framework\Filesystem\Driver\File
-     */
-    protected $fileSystem;
+    private const HEADER_ROW = ['searchterm', 'locale'];
+    private const DELIMITER = "\t\t";
+
+    protected SuggestConfig $suggestConfig;
+
+    private File $fileSystem;
 
     public function __construct(
-        \Aligent\FredhopperIndexer\Helper\SuggestConfig $suggestConfig,
-        \Magento\Framework\Filesystem\Driver\File $fileSystem
+        SuggestConfig $suggestConfig,
+        File $fileSystem
     ) {
         $this->suggestConfig = $suggestConfig;
         $this->fileSystem = $fileSystem;
@@ -51,15 +54,19 @@ abstract class AbstractSearchTermsFileGenerator implements \Aligent\FredhopperIn
         }
     }
 
-    protected function addRow(array $data) {
+    /**
+     * @param array $data
+     * @return string
+     */
+    private function addRow(array $data): string
+    {
         $rowContent = '';
         foreach ($data as $column) {
             $rowContent .= $column . self::DELIMITER;
         }
         // remove trailing delimiter
         return rtrim($rowContent, self::DELIMITER);
-
     }
 
-    protected abstract function getSearchTerms() : array;
+    abstract protected function getSearchTerms() : array;
 }

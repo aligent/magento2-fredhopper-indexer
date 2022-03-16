@@ -1,40 +1,31 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
+use Aligent\FredhopperIndexer\Model\RelevantCategory;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\AdvancedSearch\Model\ResourceModel\Index;
 
-class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
+class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
 {
-    /**
-     * @var \Magento\AdvancedSearch\Model\ResourceModel\Index
-     */
-    protected $index;
 
-    /**
-     * @var \Aligent\FredhopperIndexer\Model\RelevantCategory
-     */
-    protected $relevantCategory;
-
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
-     */
-    protected $config;
-
-    /**
-     * @var int
-     */
-    protected $rootCategoryId;
-
+    private Index $index;
+    private RelevantCategory $relevantCategory;
+    private GeneralConfig $config;
+    private int $rootCategoryId;
     /**
      * Array has form [int:category id => bool:allowed?]
-     * @var array|null
      */
-    protected $allowCategories = null;
+    private array $allowCategories;
 
     public function __construct(
-        \Magento\AdvancedSearch\Model\ResourceModel\Index $index,
-        \Aligent\FredhopperIndexer\Model\RelevantCategory $relevantCategory,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $config
+        Index $index,
+        RelevantCategory $relevantCategory,
+        GeneralConfig $config
     ) {
         $this->index = $index;
         $this->relevantCategory = $relevantCategory;
@@ -44,10 +35,10 @@ class CategoryFieldsProvider implements \Magento\AdvancedSearch\Model\Adapter\Da
     /**
      * @inheritDoc
      */
-    public function getFields(array $productIds, $storeId)
+    public function getFields(array $productIds, $storeId): array
     {
         if (!isset($this->allowCategories)) {
-            $this->rootCategoryId = (int)$this->config->getRootCategoryId();
+            $this->rootCategoryId = $this->config->getRootCategoryId();
             $collection = $this->relevantCategory->getCollection();
             $allowCategories = [];
             foreach ($collection as $category) {

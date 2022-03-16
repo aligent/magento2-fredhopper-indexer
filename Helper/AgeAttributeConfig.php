@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Helper;
 
 class AgeAttributeConfig extends GeneralConfig
@@ -9,49 +12,60 @@ class AgeAttributeConfig extends GeneralConfig
     public const XML_PATH_CREATED_AT_FIELD = self::XML_PATH_PREFIX . 'created_at_field';
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
 
-    /** @var bool */
-    protected $sendNewIndicator;
-    /** @var bool */
-    protected $sendDaysOnline;
-    /** @var string */
-    protected $createdAtFieldName;
-    /** @var bool */
-    protected $useSiteVariantAge;
+    private bool $sendNewIndicator;
+    private bool $sendDaysOnline;
+    private string $createdAtFieldName;
+    private bool $useSiteVariantAge;
 
-    public function getSendNewIndicator()
+    /**
+     * @return bool
+     */
+    public function getSendNewIndicator(): bool
     {
-        if ($this->sendNewIndicator === null) {
+        if (!isset($this->sendNewIndicator)) {
             $this->sendNewIndicator = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_NEW_INDICATOR);
         }
         return $this->sendNewIndicator;
     }
 
-    public function getSendDaysOnline()
+    /**
+     * @return bool
+     */
+    public function getSendDaysOnline(): bool
     {
-        if ($this->sendDaysOnline === null) {
+        if (!isset($this->sendDaysOnline)) {
             $this->sendDaysOnline = $this->scopeConfig->isSetFlag(self::XML_PATH_SEND_DAYS_ONLINE);
         }
         return $this->sendDaysOnline;
     }
 
-    public function getCreatedAtFieldName()
+    /**
+     * @return string
+     */
+    public function getCreatedAtFieldName(): string
     {
-        if ($this->createdAtFieldName === null) {
-            $this->createdAtFieldName = $this->scopeConfig->getValue(self::XML_PATH_CREATED_AT_FIELD);
+        if (!isset($this->createdAtFieldName)) {
+            $this->createdAtFieldName = (string)$this->scopeConfig->getValue(self::XML_PATH_CREATED_AT_FIELD);
         }
         return $this->createdAtFieldName;
     }
 
-    public function getUseSiteVariant()
+    /**
+     * @return bool
+     */
+    public function getUseSiteVariant(): bool
     {
-        if ($this->useSiteVariantAge === null) {
+        if (!isset($this->useSiteVariantAge)) {
             $this->useSiteVariantAge = parent::getUseSiteVariant() &&
                 $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
         }
         return $this->useSiteVariantAge;
     }
 
-    public function getAllSiteVariantSuffixes()
+    /**
+     * @return string[]
+     */
+    public function getAllSiteVariantSuffixes(): array
     {
         return $this->getUseSiteVariant() ? parent::getAllSiteVariantSuffixes() : [''];
     }

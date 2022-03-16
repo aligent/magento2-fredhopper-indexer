@@ -1,32 +1,34 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer;
 
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
-use Magento\Framework\Search\Request\Dimension;
+use Magento\Framework\Indexer\IndexStructureInterface;
+use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 
-class StructureHandler implements \Magento\Framework\Indexer\IndexStructureInterface
+class StructureHandler implements IndexStructureInterface
 {
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    protected $resource;
-    /**
-     * @var \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver
-     */
-    protected $indexScopeResolver;
+
+    private ResourceConnection $resource;
+    private IndexScopeResolver $indexScopeResolver;
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver $indexScopeResolver
+        ResourceConnection $resource,
+        IndexScopeResolver $indexScopeResolver
     ) {
         $this->resource = $resource;
         $this->indexScopeResolver = $indexScopeResolver;
     }
 
     /**
+     * This is not a filesystem delete function - phpcs false positive
      * @inheritDoc
      */
+    // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.FilesystemFunctions.WarnFilesystem
     public function delete($index, array $dimensions = [])
     {
         $tableName = $this->indexScopeResolver->resolve($index, $dimensions);
@@ -37,6 +39,7 @@ class StructureHandler implements \Magento\Framework\Indexer\IndexStructureInter
 
     /**
      * @inheritDoc
+     * @throws \Zend_Db_Exception
      */
     public function create($index, array $fields, array $dimensions = [])
     {
@@ -47,7 +50,7 @@ class StructureHandler implements \Magento\Framework\Indexer\IndexStructureInter
      * @param $tableName
      * @throws \Zend_Db_Exception
      */
-    protected function createWorkingIndexTable($tableName)
+    private function createWorkingIndexTable($tableName)
     {
         $table = $this->resource->getConnection()->newTable($tableName)
             ->addColumn(

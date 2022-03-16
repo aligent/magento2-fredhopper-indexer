@@ -1,5 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Export\Upload;
+
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DriverInterface as FilesystemDriverInterface;
+use Magento\Framework\Filesystem\Io\File;
+use Psr\Log\LoggerInterface;
+use Laminas\Http\Client;
+use Laminas\Http\Request;
 
 abstract class AbstractUpload
 {
@@ -8,45 +19,53 @@ abstract class AbstractUpload
     protected const FAS_TRIGGER_ENDPOINT = 'load-data';
     protected const SUGGEST_TRIGGER_ENDPOINT = 'generate';
 
-    /**
-     * @var \Zend\Http\Client
-     */
-    protected $httpClient;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
-     */
-    protected $generalConfig;
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    private Client $httpClient;
+    private GeneralConfig $generalConfig;
+    private FilesystemDriverInterface $filesystemDriver;
+    private File $file;
+    private LoggerInterface $logger;
 
-    protected $dryRun = false;
+    private bool $dryRun = false;
 
     public function __construct(
-        \Zend\Http\Client $httpClient,
-        \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
-        \Psr\Log\LoggerInterface $logger
+        Client $httpClient,
+        GeneralConfig $generalConfig,
+        File $file,
+        FilesystemDriverInterface $filesystemDriver,
+        LoggerInterface $logger
     ) {
         $this->httpClient = $httpClient;
         $this->generalConfig = $generalConfig;
+        $this->file = $file;
+        $this->filesystemDriver = $filesystemDriver;
         $this->logger = $logger;
     }
 
+    /**
+     * @param bool $isDryRun
+     * @return void
+     */
     public function setDryRun(bool $isDryRun): void
     {
         $this->dryRun = $isDryRun;
     }
 
-    public function uploadZipFile($zipFilePath)
+    /**
+     * @param string $zipFilePath
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function uploadZipFile(string $zipFilePath): bool
     {
         if ($this->generalConfig->getDebugLogging()) {
-            $this->logger->debug("Uploading zip file: {$zipFilePath}");
+            $this->logger->debug("Uploading zip file: $zipFilePath");
         }
-        $zipContent = file_get_contents($zipFilePath);
+        $zipContent = $this->filesystemDriver->fileGetContents($zipFilePath);
+        // md5 used for checksum, not for hashing password or secret information
+        // phpcs:ignore Magento2.Security.InsecureFunction.FoundWithAlternative
         $checksum = md5($zipContent);
         if ($this->generalConfig->getDebugLogging()) {
-            $this->logger->debug("Checksum of file: {$checksum}");
+            $this->logger->debug("Checksum of file: $checksum");
         }
         $url = $this->getUploadUrl($zipFilePath);
         $parameters = [
@@ -74,10 +93,14 @@ abstract class AbstractUpload
         return false;
     }
 
-    protected function triggerDataLoad($dataIdString)
+    /**
+     * @param $dataIdString
+     * @return bool
+     */
+    private function triggerDataLoad($dataIdString): bool
     {
         if ($this->generalConfig->getDebugLogging()) {
-            $this->logger->debug("Triggering load of data: {$dataIdString}");
+            $this->logger->debug("Triggering load of data: $dataIdString");
         }
         $parameters = [
             'headers' => [
@@ -91,10 +114,15 @@ abstract class AbstractUpload
         return (isset($response['status_code']) && $response['status_code'] == 201);
     }
 
-    protected function generateRequest($url, $parameters, $method = \Zend\Http\Request::METHOD_PUT)
+    /**
+     * @param string $url
+     * @param array $parameters
+     * @return Request
+     */
+    private function generateRequest(string $url, array $parameters): Request
     {
         $request = $this->httpClient->getRequest();
-        $request->setMethod($method);
+        $request->setMethod(Request::METHOD_PUT);
         $request->setUri($url);
         if (isset($parameters['headers'])) {
             $headers = $request->getHeaders();
@@ -114,18 +142,19 @@ abstract class AbstractUpload
         return $request;
     }
 
-    protected function getUploadUrl($filePath)
+    private function getUploadUrl($filePath): string
     {
-        $fileName = basename($filePath);
+        $fileInfo = $this->file->getPathInfo($filePath);
+        $fileName = $fileInfo['basename'];
         return $this->getBaseUrl() . '/data/input/' .$fileName;
     }
 
-    protected function getTriggerUrl()
+    private function getTriggerUrl(): string
     {
         return $this->getBaseUrl() . '/trigger/' . $this->getFredhopperTriggerEndpoint();
     }
 
-    protected function getBaseUrl()
+    private function getBaseUrl(): string
     {
         return 'https://my.' . $this->generalConfig->getEndpointName() . '.fredhopperservices.com/' .
             $this->getFredhopperUploadEndpoint() .':' . $this->generalConfig->getEnvironmentName();
@@ -134,14 +163,18 @@ abstract class AbstractUpload
     /**
      * @return string
      */
-    protected abstract function getFredhopperUploadEndpoint() : string;
+    abstract protected function getFredhopperUploadEndpoint() : string;
 
     /**
      * @return string
      */
-    protected abstract function getFredhopperTriggerEndpoint() : string;
+    abstract protected function getFredhopperTriggerEndpoint() : string;
 
-    protected function sendRequest($request)
+    /**
+     * @param $request
+     * @return array|false
+     */
+    private function sendRequest($request)
     {
         if ($this->dryRun) {
             $this->logger->info("Dry run; not exporting");
@@ -152,7 +185,7 @@ abstract class AbstractUpload
 
         $response = $this->httpClient->send($request);
         if ($this->generalConfig->getDebugLogging()) {
-            $this->logger->debug("Request response:\n {$response}");
+            $this->logger->debug("Request response:\n $response");
         }
         // clear client for next request
         $this->httpClient->reset();
@@ -162,7 +195,10 @@ abstract class AbstractUpload
         ];
     }
 
-    protected function getAuth()
+    /**
+     * @return array
+     */
+    private function getAuth(): array
     {
         return [
             'username' => $this->generalConfig->getUsername(),

@@ -1,48 +1,35 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
+
+use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Magento\Framework\App\ResourceConnection;
 
 class FredhopperDataProvider
 {
-    /**
-     * @var \Magento\Framework\App\ResourceConnection
-     */
-    protected $resource;
-    /**
-     * @var \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider
-     */
-    protected $searchDataProvider;
-    /**
-     * @var \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface
-     */
-    protected $additionalFieldsProvider;
-    /**
-     * @var \Magento\Catalog\Model\Product\Attribute\Source\Status
-     */
-    protected $catalogProductStatus;
-    /**
-     * @var \Aligent\FredhopperIndexer\Helper\AttributeConfig
-     */
-    protected $attributeConfig;
-    /**
-     * @var  \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper
-     */
-    protected $productMapper;
-    /**
-     * @var int
-     */
-    protected $batchSize;
-    /**
-     * @var array
-     */
-    protected $variantIdParentMapping = [];
+
+    private ResourceConnection $resource;
+    private DataProvider $searchDataProvider;
+    private AdditionalFieldsProviderInterface $additionalFieldsProvider;
+    private Status $catalogProductStatus;
+    private AttributeConfig $attributeConfig;
+    private ProductMapper $productMapper;
+
+    private int $batchSize;
+    private array $variantIdParentMapping = [];
 
     public function __construct(
-        \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider $dataProvider,
-        \Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface $additionalFieldsProvider,
-        \Magento\Catalog\Model\Product\Attribute\Source\Status $catalogProductStatus,
-        \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
-        \Aligent\FredhopperIndexer\Model\Indexer\Data\ProductMapper $productMapper,
+        ResourceConnection $resource,
+        DataProvider $dataProvider,
+        AdditionalFieldsProviderInterface $additionalFieldsProvider,
+        Status $catalogProductStatus,
+        AttributeConfig $attributeConfig,
+        ProductMapper $productMapper,
         $batchSize = 500
     ) {
         $this->resource = $resource;
@@ -54,6 +41,11 @@ class FredhopperDataProvider
         $this->batchSize = $batchSize;
     }
 
+    /**
+     * @param $storeId
+     * @param $productIds
+     * @return \Generator
+     */
     public function rebuildStoreIndex($storeId, $productIds) : \Generator
     {
         if ($productIds !== null) {
@@ -73,9 +65,11 @@ class FredhopperDataProvider
         while (count($products) > 0) {
             $allProductIds = array_column($products, 'entity_id');
             $relatedProducts = $this->getRelatedProducts($products);
-            foreach ($relatedProducts as $productId => $relatedArray) {
-                $allProductIds = array_unique(array_merge($allProductIds, $relatedArray));
+            $relatedProductIds = [];
+            foreach ($relatedProducts as $relatedArray) {
+                $relatedProductIds[] = $relatedArray;
             }
+            $allProductIds = array_merge($allProductIds, ...$relatedProductIds);
 
             // ensure that status attribute is always included
             $eavAttributesByType = $this->attributeConfig->getEavAttributesByType();
@@ -121,7 +115,13 @@ class FredhopperDataProvider
         }
     }
 
-    protected function getChildProductsIndex(
+    /**
+     * @param int $parentId
+     * @param array $relatedProducts
+     * @param array $productsAttributes
+     * @return array
+     */
+    private function getChildProductsIndex(
         int $parentId,
         array $relatedProducts,
         array $productsAttributes
@@ -136,7 +136,11 @@ class FredhopperDataProvider
         return $productIndex;
     }
 
-    protected function getRelatedProducts($products)
+    /**
+     * @param $products
+     * @return array
+     */
+    private function getRelatedProducts($products): array
     {
         $relatedProducts = [];
         foreach ($products as $productData) {
@@ -148,7 +152,12 @@ class FredhopperDataProvider
         return array_filter($relatedProducts);
     }
 
-    protected function isProductEnabled($productId, array $productsAttributes)
+    /**
+     * @param $productId
+     * @param array $productsAttributes
+     * @return bool
+     */
+    private function isProductEnabled($productId, array $productsAttributes): bool
     {
         $status = $this->searchDataProvider->getSearchableAttribute('status');
         $allowedStatuses = $this->catalogProductStatus->getVisibleStatusIds();
@@ -156,7 +165,11 @@ class FredhopperDataProvider
             in_array($productsAttributes[$productId][$status->getId()], $allowedStatuses);
     }
 
-    protected function addStaticAttributes(array &$productsAttributes, array $staticAttributes)
+    /**
+     * @param array $productsAttributes
+     * @param array $staticAttributes
+     */
+    private function addStaticAttributes(array &$productsAttributes, array $staticAttributes): void
     {
         if (count($productsAttributes) == 0 || count($staticAttributes) == 0) {
             return;
@@ -177,12 +190,19 @@ class FredhopperDataProvider
         }
     }
 
-    protected function prepareProductIndex(
+    /**
+     * @param array $productIndex
+     * @param array $productData
+     * @param int $storeId
+     * @param array $additionalFields
+     * @return array
+     */
+    private function prepareProductIndex(
         array $productIndex,
         array $productData,
         int $storeId,
         array $additionalFields
-    ) {
+    ): array {
         $productId = $productData['entity_id'];
         $typeId = $productData['type_id'];
 
@@ -207,7 +227,11 @@ class FredhopperDataProvider
         return $indexData;
     }
 
-    protected function populateBooleanAttributes(array &$indexData)
+    /**
+     * @param array $indexData
+     * @return void
+     */
+    private function populateBooleanAttributes(array &$indexData): void
     {
         // all boolean attributes are of type "int"
         $booleanAttributes = $this->attributeConfig->getBooleanAttributes();
@@ -215,7 +239,7 @@ class FredhopperDataProvider
             if (!isset($indexData['product'][$attribute['attribute']])) {
                 $indexData['product'][$attribute['attribute']] = '0';
             }
-            foreach ($indexData['variants'] as $variantId => &$variantData) {
+            foreach ($indexData['variants'] as &$variantData) {
                 if (!isset($variantData[$attribute['attribute']])) {
                     $variantData[$attribute['attribute']] = '0';
                 }
@@ -223,6 +247,9 @@ class FredhopperDataProvider
         }
     }
 
+    /**
+     * @return array
+     */
     public function getVariantIdParentMapping() : array
     {
         return $this->variantIdParentMapping;

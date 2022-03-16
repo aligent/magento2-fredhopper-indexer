@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Helper;
@@ -13,30 +14,50 @@ class SanityCheckConfig extends GeneralConfig
     public const XML_PATH_MIN_CATEGORY_TIER2 = self::XML_PATH_PREFIX . 'cat_tier2';
     public const XML_PATH_REPORT_EMAIL = self::XML_PATH_PREFIX . 'report_email';
 
+    /**
+     * @return int
+     */
     public function getMinTotalProducts(): int
     {
         return (int)$this->scopeConfig->getValue(self::XML_PATH_MIN_TOTAL);
     }
 
+    /**
+     * @return int
+     */
     public function getMaxDeleteProducts(): int
     {
         return (int)$this->scopeConfig->getValue(self::XML_PATH_MAX_DELETE);
     }
 
+    /**
+     * @return int
+     */
     public function getMinProductsCategoryTier1(): int
     {
         return (int)$this->scopeConfig->getValue(self::XML_PATH_MIN_CATEGORY_TIER1);
     }
 
+    /**
+     * @return int
+     */
     public function getMinProductsCategoryTier2(): int
     {
         return (int)$this->scopeConfig->getValue(self::XML_PATH_MIN_CATEGORY_TIER2);
     }
 
+    /**
+     * @return array
+     */
     public function getErrorEmailRecipients(): array
     {
         $rawConfig = $this->scopeConfig->getValue(self::XML_PATH_REPORT_EMAIL);
-        $emails = array_filter(preg_split('/,\s*/', $rawConfig));
-        return $emails;
+        $emailRecipients = [];
+        foreach (preg_split('/,\s*/', $rawConfig) as $recipient) {
+            if (!empty($recipient)) {
+                $emailRecipients[] = $recipient;
+            }
+        }
+        return $emailRecipients;
     }
 }
