@@ -94,13 +94,7 @@ class IndexerInfo
         }
 
         // Ensure same order as bin/magento indexer:status
-        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-        usort(
-            $rows,
-            function (array $comp1, array $comp2) {
-                return strcmp($comp1['title'], $comp2['title']);
-            }
-        );
+        array_multisort(array_column($rows, 'title'), SORT_ASC, $rows);
 
         return $rows;
     }

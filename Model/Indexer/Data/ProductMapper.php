@@ -236,10 +236,11 @@ class ProductMapper
      */
     private function prepareMultiselectValues(array $values): array
     {
-        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-        return array_map(function (string $value) {
-            return explode(',', $value);
-        }, $values);
+        $multiSelectValues = [];
+        foreach ($values as $value) {
+            $multiSelectValues[] = explode(',', $value);
+        }
+        return $multiSelectValues;
     }
 
     /**

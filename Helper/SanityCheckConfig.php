@@ -52,7 +52,12 @@ class SanityCheckConfig extends GeneralConfig
     public function getErrorEmailRecipients(): array
     {
         $rawConfig = $this->scopeConfig->getValue(self::XML_PATH_REPORT_EMAIL);
-        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-        return array_filter(preg_split('/,\s*/', $rawConfig));
+        $emailRecipients = [];
+        foreach (preg_split('/,\s*/', $rawConfig) as $recipient) {
+            if (!empty($recipient)) {
+                $emailRecipients[] = $recipient;
+            }
+        }
+        return $emailRecipients;
     }
 }

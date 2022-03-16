@@ -356,14 +356,26 @@ class Products
                 in_array($attributeCode, $this->siteVariantImageAttributes) ||
                 in_array($attributeCode, $this->siteVariantAgeAttributes) ||
                 in_array($attributeCode, $this->siteVariantCustomAttributes) ||
-                // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-                !empty(array_filter($this->siteVariantPriceAttributes, function ($code) use ($attributeCode) {
-                    return strpos($attributeCode, $code) === 0;
-                }))) {
+                $this->isSiteVariantPriceAttribute($attributeCode)) {
                 return "{$attributeCode}_$siteVariant";
             }
         }
         // when not using store variants, only retain attributes in the default store
         return $storeId === $defaultStoreId ? $attributeCode : false;
+    }
+
+    /**
+     * Price attributes may have a suffix (e.g. regular_price_min), so use strpos for comparison
+     * @param string $attributeCode
+     * @return bool
+     */
+    private function isSiteVariantPriceAttribute(string $attributeCode): bool
+    {
+        foreach ($this->siteVariantPriceAttributes as $code) {
+            if (strpos($attributeCode, $code) === 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

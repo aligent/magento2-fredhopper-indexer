@@ -373,13 +373,12 @@ class Meta
         $categoryData['names'] = $names;
 
         // add child category information
-        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-        $children = array_filter(
-            explode(',', $category->getChildren()),
-            function ($id) {
-                return !empty($id);
+        $children = [];
+        foreach (explode(',', $category->getChildren()) as $child) {
+            if (!empty($child)) {
+                $children[] = $child;
             }
-        );
+        }
         if (empty($children)) {
             $categoryData['children'] = [];
         } else {
