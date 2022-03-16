@@ -312,8 +312,8 @@ class ProductMapper
     }
 
     /**
-     * Retrieve value for field. If field have only one value this method return it.
-     * Otherwise, will be returned array of these values.
+     * Retrieve value for field. If the field has only one value this method will return it.
+     * Otherwise, it will return an array of these values.
      * Note: array of values must have index keys, not as associative array.
      *
      * @param array $values
@@ -322,11 +322,13 @@ class ProductMapper
     private function retrieveFieldValue(array $values)
     {
         $values = array_unique($values);
-        // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.CallbackFunctions.WarnCallbackFunctions
-        $values = array_filter($values, function ($el) {
-            return $el !== null;
-        });
+        $allValues = [];
+        foreach ($values as $value) {
+            if ($value !== null) {
+                $allValues[] = $value;
+            }
+        }
 
-        return count($values) === 1 ? array_shift($values) : array_values($values);
+        return count($values) === 1 ? array_shift($allValues) : array_values($values);
     }
 }
