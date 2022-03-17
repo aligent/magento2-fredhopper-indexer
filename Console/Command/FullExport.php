@@ -9,6 +9,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FullExport extends \Symfony\Component\Console\Command\Command
 {
+    const OPTION_DRY_RUN = 'dry-run';
+    const OPTION_FORCE = 'force';
+
     /**
      * @var \Magento\Framework\App\State
      */
@@ -48,7 +51,10 @@ class FullExport extends \Symfony\Component\Console\Command\Command
             ->setDescription('Export full set of products to Fredhopper');
 
         $desc = 'If true, zip file will be generated, but no upload to FH will be performed';
-        $this->addOption('dry-run', null, null, $desc);
+        $this->addOption(self::OPTION_DRY_RUN, null, null, $desc);
+
+        $desc = 'Force export, ignoring sanity checks such as deletion threshold and minimum products per category';
+        $this->addOption(self::OPTION_FORCE, null, null, $desc);
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -59,11 +65,15 @@ class FullExport extends \Symfony\Component\Console\Command\Command
             $this->appState->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
         }
 
-        $this->exporter->setDryRun($input->getOption('dry-run'));
+        $this->exporter->setDryRun($input->getOption(self::OPTION_DRY_RUN));
 
-        foreach ($this->preExportValidators as $preExportValidator) {
-            $preExportValidator->validateState();
+        $force = $input->getOption(self::OPTION_FORCE);
+        if (!$force) {
+            foreach ($this->preExportValidators as $preExportValidator) {
+                $preExportValidator->validateState();
+            }
         }
+
         $this->exporter->export();
     }
 }
