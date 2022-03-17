@@ -68,6 +68,7 @@ class FullExport extends \Symfony\Component\Console\Command\Command
         $this->exporter->setDryRun($input->getOption(self::OPTION_DRY_RUN));
 
         $force = $input->getOption(self::OPTION_FORCE);
+        $this->exporter->setForce($force);
         if (!$force) {
             foreach ($this->preExportValidators as $preExportValidator) {
                 $preExportValidator->validateState();
