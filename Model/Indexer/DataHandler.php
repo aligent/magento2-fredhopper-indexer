@@ -43,6 +43,10 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
      */
     protected $json;
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+    /**
      * @var \Aligent\FredhopperIndexer\Helper\GeneralConfig
      */
     protected $generalConfig;
@@ -77,6 +81,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         \Magento\Framework\App\ScopeResolverInterface $scopeResolver,
         \Magento\Framework\Indexer\IndexStructureInterface $indexStructure,
         \Magento\Framework\Serialize\Serializer\Json $json,
+        \Psr\Log\LoggerInterface $logger,
         \Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider $dataProvider,
         \Aligent\FredhopperIndexer\Helper\GeneralConfig $generalConfig,
         \Aligent\FredhopperIndexer\Helper\AttributeConfig $attributeConfig,
@@ -90,6 +95,7 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $this->scopeResolver = $scopeResolver;
         $this->indexStructure = $indexStructure;
         $this->json = $json;
+        $this->logger = $logger;
         $this->dataProvider = $dataProvider;
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
@@ -106,8 +112,17 @@ class DataHandler implements \Magento\Framework\Indexer\SaveHandler\IndexerInter
         $scopeId = $this->getScopeId($dimensions);
         $products = [];
         $variants = [];
+        $batchNum = 0;
         foreach ($this->batch->getItems($documents, self::BATCH_SIZE) as $documents) {
-            $this->processDocuments($documents, $scopeId);
+            ++$batchNum;
+            try {
+                $this->processDocuments($documents, $scopeId);
+            } catch (\Exception $ex) {
+                $err = "DataHandler failure processing batch $batchNum in scope $scopeId: ";
+                $err .= get_class($ex) . ' -- ' . $ex->getMessage();
+                $this->logger->error($err);
+                throw $ex;
+            }
             foreach($documents as $productId => $productData) {
                 $products[$productId] = $productData['product'];
                 foreach ($productData['variants'] as $variantId => $variantData) {

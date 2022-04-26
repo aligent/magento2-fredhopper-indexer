@@ -182,6 +182,25 @@
         </arguments>
     </type>
 
+    <virtualType name="FredhopperIndexerLoggerHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/fredhopper_indexer.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="FredhopperIndexerLogger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">FredhopperIndexer</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="fredhopper" xsi:type="object">FredhopperIndexerLoggerHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Aligent\FredhopperIndexer\Model\Indexer\DataHandler">
+        <arguments>
+            <argument name="logger" xsi:type="object">FredhopperIndexerLogger</argument>
+        </arguments>
+    </type>
+
     <!-- Cron configuration -->
     <virtualType name="FredhopperIncrementalProductCron" type="Aligent\FredhopperIndexer\Cron\FredhopperExport">
         <arguments>
