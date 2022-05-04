@@ -11,6 +11,7 @@
             </general>
             <sanity_check>
                 <delete_products>10</delete_products>
+                <report_products>50</report_products>
             </sanity_check>
             <age_config>
                 <created_at_field>created_at</created_at_field>
