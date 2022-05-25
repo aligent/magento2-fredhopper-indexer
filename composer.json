@@ -1,9 +1,9 @@
 {
-    "name": "aligent/fredhopperindexer",
+    "name": "aligent/magento2-fredhopper-indexer",
     "description": "Index and push data from Magento to Fredhopper",
     "require": {
         "php": ">=7.4",
-        "aligent/category-selector": "*",
+        "aligent/magento2-category-selector": "*",
         "magento/module-catalog-search": "*",
         "magento/magento-composer-installer": "*"
     },
@@ -12,7 +12,7 @@
     },
     "type": "magento2-module",
     "license": [
-        "proprietary"
+        "GPL-3.0-only"
     ],
     "autoload": {
         "files": [
