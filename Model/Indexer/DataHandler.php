@@ -6,6 +6,7 @@ namespace Aligent\FredhopperIndexer\Model\Indexer;
 
 use Aligent\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\ScopeResolverInterface;
@@ -16,6 +17,7 @@ use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
 use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 use Magento\Framework\Search\Request\Dimension;
 use Magento\Framework\Serialize\Serializer\Json;
+use Psr\Log\LoggerInterface;
 
 class DataHandler implements IndexerInterface
 {
@@ -38,7 +40,9 @@ class DataHandler implements IndexerInterface
     private IndexStructureInterface $indexStructure;
     private FredhopperDataProvider $dataProvider;
     private Json $json;
+    private LoggerInterface $logger;
     private AttributeConfig $attributeConfig;
+    private GeneralConfig $generalConfig;
 
     /**
      * @var DocumentProcessorInterface[]
@@ -67,8 +71,10 @@ class DataHandler implements IndexerInterface
         ScopeResolverInterface $scopeResolver,
         IndexStructureInterface $indexStructure,
         Json $json,
+        LoggerInterface $logger,
         FredhopperDataProvider $dataProvider,
         AttributeConfig $attributeConfig,
+        GeneralConfig $generalConfig,
         array $documentPreProcessors = [],
         array $documentPostProcessors = [],
         $batchSize = 1000
@@ -79,8 +85,10 @@ class DataHandler implements IndexerInterface
         $this->scopeResolver = $scopeResolver;
         $this->indexStructure = $indexStructure;
         $this->json = $json;
+        $this->logger = $logger;
         $this->dataProvider = $dataProvider;
         $this->attributeConfig = $attributeConfig;
+        $this->generalConfig = $generalConfig;
         $this->documentPreProcessors = $documentPreProcessors;
         $this->documentPostProcessors = $documentPostProcessors;
         $this->batchSize = $batchSize;
@@ -94,8 +102,17 @@ class DataHandler implements IndexerInterface
         $scopeId = $this->getScopeId($dimensions);
         $products = [];
         $variants = [];
+        $batchNum = 0;
         foreach ($this->batch->getItems($documents, self::BATCH_SIZE) as $documents) {
-            $this->processDocuments($documents, $scopeId);
+            ++$batchNum;
+            try {
+                $this->processDocuments($documents, $scopeId);
+            } catch (\Exception $ex) {
+                $err = "DataHandler failure processing batch $batchNum in scope $scopeId: ";
+                $err .= get_class($ex) . ' -- ' . $ex->getMessage();
+                $this->logger->error($err);
+                throw $ex;
+            }
             foreach ($documents as $productId => $productData) {
                 $products[$productId] = $productData['product'];
                 foreach ($productData['variants'] as $variantId => $variantData) {

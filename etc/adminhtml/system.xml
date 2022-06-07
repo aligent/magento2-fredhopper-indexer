@@ -69,6 +69,10 @@
                     <label>Email failures to</label>
                     <comment>Comma-separated list</comment>
                 </field>
+                <field id="report_products" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Maximum number of products to report in email</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
             </group>
             <group id="product_config" translate="label" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
                 <label>Product Configuration</label>

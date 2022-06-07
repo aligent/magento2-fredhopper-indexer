@@ -104,6 +104,29 @@ class Email extends AbstractHelper
         return $html;
     }
 
+    public function getDeleteProductTables(): string
+    {
+        $data = $this->indexerInfo->getProductDeletes();
+
+        if (empty($data)) {
+            return '';
+        }
+
+        $num = count($data);
+        $html = "<p>For reference, here is a random selection of $num products marked for deletion:</p>\n";
+
+        $html .= "<table border=\"1\">\n";
+        foreach ($data as $product) {
+            $html .= '<tr>';
+            $html .= '<td>' . $this->escaper->escapeHtml($product['sku']) . '</td>';
+            $html .= '<td>' . $this->escaper->escapeHtml($product['name']) . '</td>';
+            $html .= "<tr>\n";
+        }
+        $html .= "</table>\n";
+
+        return $html;
+    }
+
     /**
      * @param array $to
      * @param array $errors
@@ -116,6 +139,7 @@ class Email extends AbstractHelper
             $templateVars = [
                 'errors' => $this->getErrorHtml($errors),
                 'indexer_info' => $this->getIndexInfoTables(),
+                'delete_info' => $this->getDeleteProductTables(),
             ];
 
             $transport = $this->transportBuilder

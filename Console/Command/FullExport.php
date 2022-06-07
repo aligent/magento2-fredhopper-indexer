@@ -18,6 +18,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FullExport extends Command
 {
+    const OPTION_DRY_RUN = 'dry-run';
+    const OPTION_FORCE = 'force';
 
     private State $appState;
     private FullExporter $exporter;
@@ -51,7 +53,10 @@ class FullExport extends Command
             ->setDescription('Export full set of products to Fredhopper');
 
         $desc = 'If true, zip file will be generated, but no upload to FH will be performed';
-        $this->addOption('dry-run', null, null, $desc);
+        $this->addOption(self::OPTION_DRY_RUN, null, null, $desc);
+
+        $desc = 'Force export, ignoring sanity checks such as deletion threshold and minimum products per category';
+        $this->addOption(self::OPTION_FORCE, null, null, $desc);
     }
 
     /**
@@ -75,23 +80,28 @@ class FullExport extends Command
             }
         }
 
-        $this->exporter->setDryRun($input->getOption('dry-run'));
+        $this->exporter->setDryRun($input->getOption(self::OPTION_DRY_RUN));
 
-        $validationErrors = [];
-        foreach ($this->preExportValidators as $preExportValidator) {
-            try {
-                $preExportValidator->validateState();
-            } catch (ValidationException $e) {
-                $validationErrors[] = $e->getMessage();
+        $force = $input->getOption(self::OPTION_FORCE);
+        $this->exporter->setForce($force);
+        if (!$force) {
+            $validationErrors = [];
+            foreach ($this->preExportValidators as $preExportValidator) {
+                try {
+                    $preExportValidator->validateState();
+                } catch (ValidationException $e) {
+                    $validationErrors[] = $e->getMessage();
+                }
+            }
+            if (!empty($validationErrors)) {
+                $output->writeln('Export failed validation checks:');
+                foreach ($validationErrors as $errorMessage) {
+                    $output->writeln($errorMessage);
+                }
+                return Cli::RETURN_FAILURE;
             }
         }
-        if (!empty($validationErrors)) {
-            $output->writeln('Export failed validation checks:');
-            foreach ($validationErrors as $errorMessage) {
-                $output->writeln($errorMessage);
-            }
-            return Cli::RETURN_FAILURE;
-        }
+
         $this->exporter->export();
         return Cli::RETURN_SUCCESS;
     }

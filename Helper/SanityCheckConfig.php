@@ -13,6 +13,7 @@ class SanityCheckConfig extends GeneralConfig
     public const XML_PATH_MIN_CATEGORY_TIER1 = self::XML_PATH_PREFIX . 'cat_tier1';
     public const XML_PATH_MIN_CATEGORY_TIER2 = self::XML_PATH_PREFIX . 'cat_tier2';
     public const XML_PATH_REPORT_EMAIL = self::XML_PATH_PREFIX . 'report_email';
+    public const XML_PATH_REPORT_PRODUCTS = self::XML_PATH_PREFIX . 'report_products';
 
     /**
      * @return int
@@ -59,5 +60,10 @@ class SanityCheckConfig extends GeneralConfig
             }
         }
         return $emailRecipients;
+    }
+
+    public function getReportProducts(): int
+    {
+        return (int)$this->scopeConfig->getValue(self::XML_PATH_REPORT_PRODUCTS);
     }
 }

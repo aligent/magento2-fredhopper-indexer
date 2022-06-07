@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model;
 
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
+use Aligent\FredhopperIndexer\Helper\SanityCheckConfig;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\Indexer\StateInterface;
 use Magento\Framework\Mview\View;
@@ -19,15 +22,20 @@ use Zend_Db_Select;
  */
 class IndexerInfo
 {
-
     private ResourceConnection $resourceConnection;
+    private SanityCheckConfig $sanityCheckConfig;
+    private ProductCollectionFactory $productCollectionFactory;
     private CollectionFactory $indexerCollectionFactory;
 
     public function __construct(
         ResourceConnection $resourceConnection,
+        SanityCheckConfig $sanityCheckConfig,
+        ProductCollectionFactory $productCollectionFactory,
         CollectionFactory $indexerCollectionFactory
     ) {
         $this->resourceConnection = $resourceConnection;
+        $this->sanityCheckConfig = $sanityCheckConfig;
+        $this->productCollectionFactory = $productCollectionFactory;
         $this->indexerCollectionFactory = $indexerCollectionFactory;
     }
 
@@ -161,5 +169,77 @@ class IndexerInfo
 
         // No longer need store_id - product_type key
         return array_values($result);
+    }
+
+    public function getProductDeletes()
+    {
+        $maxProducts = $this->sanityCheckConfig->getReportProducts();
+        if ($maxProducts <= 0) {
+            return [];
+        }
+
+        $conn = $this->resourceConnection->getConnection();
+
+        $baseTable = DataHandler::INDEX_TABLE_NAME;
+
+        // Get store with greatest number of deleted products
+        $select = $conn->select();
+        $select->from($baseTable);
+        $select->reset(Select::COLUMNS);
+        $select->columns(['store_id', 'product_count' => 'COUNT(*)']);
+        $select->where('product_type = ?', DataHandler::TYPE_PRODUCT);
+        $select->where('operation_type = ?', DataHandler::OPERATION_TYPE_DELETE);
+        $select->group(['store_id']);
+        $select->order(['product_count DESC']);
+        $select->limit(1);
+
+        try {
+            $storeId = $conn->fetchOne($select);
+        } catch (\Throwable $ex) {
+            return [];
+        }
+        if (empty($storeId)) {
+            return [];
+        }
+
+        // Get list of deleted products associated with that store
+        $select = $conn->select();
+        $select->from($baseTable);
+        $select->reset(Select::COLUMNS);
+        $select->columns(['product_id']);
+        $select->where('product_type = ?', DataHandler::TYPE_PRODUCT);
+        $select->where('operation_type = ?', DataHandler::OPERATION_TYPE_DELETE);
+        $select->where('store_id = ?', $storeId);
+
+        $productIds = [];
+        try {
+            $productIds = $conn->fetchCol($select);
+        } catch (\Throwable $ex) {
+            return [];
+        }
+        if (empty($productIds)) {
+            return [];
+        }
+
+        // get SKU, name of deleted products for inclusion in email
+        /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
+        $productCollection = $this->productCollectionFactory->create();
+        $productCollection->addAttributeToSelect(['sku', 'name']);
+        $productCollection->addIdFilter($productIds);
+        $productCollection->setStore(\Magento\Store\Model\Store::DEFAULT_STORE_ID);
+        $select = $productCollection->getSelect();
+        $select->order('RAND()');
+        $select->limit($maxProducts);
+
+        $allProducts = [];
+        foreach ($productCollection as $product) {
+            $productId = $product->getId();
+            $allProducts[$productId] = [
+                'sku' => $product->getSku(),
+                'name' => $product->getName(),
+            ];
+        }
+
+        return $allProducts;
     }
 }

@@ -47,6 +47,11 @@ abstract class AbstractProductExporter implements ExporterInterface
      */
     private int $productLimit;
 
+    /**
+     * @var bool
+     */
+    private bool $forceExport = false;
+
     public function __construct(
         Products $products,
         Meta $meta,
@@ -86,6 +91,11 @@ abstract class AbstractProductExporter implements ExporterInterface
     public function setDryRun(bool $isDryRun): void
     {
         $this->upload->setDryRun($isDryRun);
+    }
+
+    public function setForce(bool $force): void
+    {
+        $this->forceExport = $force;
     }
 
     /**
@@ -133,16 +143,22 @@ abstract class AbstractProductExporter implements ExporterInterface
                 foreach ($errs as $err) {
                     $this->logger->error($err);
                 }
-                $this->logger->critical("Cancelling export due to errors");
-                $recipients = $this->sanityConfig->getErrorEmailRecipients();
-                if (count($recipients) > 0) {
-                    $this->emailHelper->sendErrorEmail($recipients, $errs);
+                if ($this->forceExport) {
+                    $msg = "Forcing full export despite errors; ";
+                    $msg .= "generating JSON for $productCount products (vs. minimum of $minProducts)";
+                    $this->logger->info($msg);
+                } else {
+                    $this->logger->critical("Cancelling export due to errors");
+                    $recipients = $this->sanityConfig->getErrorEmailRecipients();
+                    if (count($recipients) > 0) {
+                        $this->emailHelper->sendErrorEmail($recipients, $errs);
+                    }
+                    return false;
                 }
-                return false;
+            } else {
+                $msg = "Generating JSON for full export of {$productCount} products (meets minimum of {$minProducts})";
+                $this->logger->info($msg);
             }
-
-            $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
-            $this->logger->info($msg);
         } else {
             $deleteSkus = [];
             $opCount = [];
