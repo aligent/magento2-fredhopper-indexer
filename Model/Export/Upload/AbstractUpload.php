@@ -6,7 +6,7 @@ namespace Aligent\FredhopperIndexer\Model\Export\Upload;
 
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Filesystem\DriverInterface as FilesystemDriverInterface;
+use Magento\Framework\Filesystem\Driver\File as FilesystemDriver;
 use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
 use Laminas\Http\Client;
@@ -31,7 +31,7 @@ abstract class AbstractUpload
         Client $httpClient,
         GeneralConfig $generalConfig,
         File $file,
-        FilesystemDriverInterface $filesystemDriver,
+        FilesystemDriver $filesystemDriver,
         LoggerInterface $logger
     ) {
         $this->httpClient = $httpClient;
