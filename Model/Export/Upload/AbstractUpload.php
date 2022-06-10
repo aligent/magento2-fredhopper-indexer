@@ -21,7 +21,7 @@ abstract class AbstractUpload
 
     private Client $httpClient;
     private GeneralConfig $generalConfig;
-    private FilesystemDriverInterface $filesystemDriver;
+    private FilesystemDriver $filesystemDriver;
     private File $file;
     private LoggerInterface $logger;
 

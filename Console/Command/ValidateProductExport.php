@@ -20,7 +20,7 @@ class ValidateProductExport extends Command
     private int $maxLength = 200;
 
     private Json $jsonSerializer;
-    private FilesystemDriverInterface $filesystemDriver;
+    private FilesystemDriver $filesystemDriver;
 
     public function __construct(
         Json $jsonSerializer,
