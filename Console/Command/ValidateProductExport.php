@@ -6,7 +6,7 @@ namespace Aligent\FredhopperIndexer\Console\Command;
 
 use Magento\Framework\Console\Cli;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Filesystem\DriverInterface as FilesystemDriverInterface;
+use Magento\Framework\Filesystem\Driver\File as FilesystemDriver;
 use Magento\Framework\Filesystem\Glob;
 use Magento\Framework\Serialize\Serializer\Json;
 use Symfony\Component\Console\Command\Command;
@@ -24,7 +24,7 @@ class ValidateProductExport extends Command
 
     public function __construct(
         Json $jsonSerializer,
-        FilesystemDriverInterface $filesystemDriver,
+        FilesystemDriver $filesystemDriver,
         string $name = null
     ) {
         $this->jsonSerializer = $jsonSerializer;
