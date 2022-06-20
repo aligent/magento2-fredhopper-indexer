@@ -178,7 +178,14 @@
     </type>
     <type name="Aligent\FredhopperIndexer\Model\Export\Upload\AbstractUpload">
         <arguments>
+            <argument name="filesystemDriver" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
             <argument name="logger" xsi:type="object">FredhopperExportLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Aligent\FredhopperIndexer\Console\Command\ValidateProductExport">
+        <arguments>
+            <argument name="filesystemDriver" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
     </type>
 
