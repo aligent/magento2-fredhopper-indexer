@@ -48,6 +48,8 @@ class FredhopperDataProvider
      */
     public function rebuildStoreIndex($storeId, $productIds) : \Generator
     {
+        // ensure store id is an integer
+        $storeId = (int)$storeId;
         if ($productIds !== null) {
             $productIds = array_unique($productIds);
         }
@@ -87,7 +89,7 @@ class FredhopperDataProvider
             $additionalFields = $this->additionalFieldsProvider->getFields($allProductIds, $storeId);
 
             foreach ($products as $productData) {
-                $lastProductId = $productData['entity_id'];
+                $lastProductId = (int)$productData['entity_id'];
                 if (!isset($productsAttributes[$lastProductId])) {
                     continue;
                 }
@@ -144,8 +146,9 @@ class FredhopperDataProvider
     {
         $relatedProducts = [];
         foreach ($products as $productData) {
-            $relatedProducts[$productData['entity_id']] = $this->searchDataProvider->getProductChildIds(
-                $productData['entity_id'],
+            $entityId = (int)$productData['entity_id'];
+            $relatedProducts[$entityId] = $this->searchDataProvider->getProductChildIds(
+                $entityId,
                 $productData['type_id']
             );
         }
@@ -203,7 +206,8 @@ class FredhopperDataProvider
         int $storeId,
         array $additionalFields
     ): array {
-        $productId = $productData['entity_id'];
+        // ensure product id is an integer
+        $productId = (int)$productData['entity_id'];
         $typeId = $productData['type_id'];
 
         // first convert index to be based on attributes at top level, also converting values where necessary
