@@ -105,7 +105,7 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
         foreach ($connection->fetchAll($unionSelect) as $row) {
             $prices = [];
             foreach ($indexFields as $columnName => $fieldName) {
-                $prices[$fieldName] = round($row[$columnName], 2);
+                $prices[$fieldName] = round((float)$row[$columnName], 2);
             }
             $result[$row['website_id']][$row['entity_id']][$row['customer_group_id']] = $prices;
         }

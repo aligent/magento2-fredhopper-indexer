@@ -316,8 +316,8 @@ class DataHandler implements IndexerInterface
 
         // check for deleted records and mark as "delete"
         $deleteWhereClause = "store_id = $storeId AND NOT EXISTS (SELECT 1 from $scopeTableName scope_table " .
-            " WHERE scope_table.product_id = main_table.product_id " .
-            " AND scope_table.product_type = main_table.product_type)";
+            " WHERE scope_table.product_id = ". $indexTableName . ".product_id " .
+            " AND scope_table.product_type = ". $indexTableName . ".product_type)";
         $connection->update(
             $indexTableName,
             ['operation_type' => self::OPERATION_TYPE_DELETE],
