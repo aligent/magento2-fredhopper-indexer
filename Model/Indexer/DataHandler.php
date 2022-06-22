@@ -319,7 +319,7 @@ class DataHandler implements IndexerInterface
             " WHERE scope_table.product_id = ". $indexTableName . ".product_id " .
             " AND scope_table.product_type = ". $indexTableName . ".product_type)";
         $connection->update(
-            ['main_table' => $indexTableName],
+            $indexTableName,
             ['operation_type' => self::OPERATION_TYPE_DELETE],
             $deleteWhereClause
         );
