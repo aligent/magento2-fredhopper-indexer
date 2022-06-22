@@ -424,7 +424,7 @@ class DataHandler implements IndexerInterface
     private function getScopeId(array $dimensions) : int
     {
         $dimension = current($dimensions);
-        return $this->scopeResolver->getScope($dimension->getValue())->getId();
+        return (int)$this->scopeResolver->getScope($dimension->getValue())->getId();
     }
 
     /**
