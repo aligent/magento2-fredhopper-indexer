@@ -14,6 +14,21 @@ This module is intended to replace the core Magento 2 CatalogSearch indexer (`ca
     - `fredhopper_incremental_export` - Exports product/variants that have changed since the last run.
         - This job is added to the `index` cron group, so that it will not be affected by ongoing indexing processes.
     - `fredhopper_suggest_export` - Exports data to be used in 'instant search' functionality.
+
+## Installation
+
+1. Install the package via composer:
+```
+composer require aligent/magento2-fredhopper-indexer
+```
+2. Enable the module and the dependent Category selector module:
+```
+bin/magento module:enable Aligent_FredhopperIndexer
+bin/magento module:enable Aligent_CategorySelector
+```
+3. Set Fredhopper as the catalog search engine
+   1. This can be done via `config.php`, `env.php` or Admin configuration
+   2. If done via `config.php` or `env.php`, `fredhopper` should be used.
     
 ## Configuration
 This module provides a number of configurable settings for controlling which data is sent to Fredhopper and in what format:
