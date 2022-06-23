@@ -45,6 +45,11 @@ class DeletedProductsValidator implements PreExportValidatorInterface
         $result = $connection->query($select);
         $row = $result->fetch();
 
+        // if no rows exist in the table, will be handled by min total products config during export
+        if (!$row) {
+            return;
+        }
+
         $maxDeletes = $this->sanityCheckConfig->getMaxDeleteProducts();
         if ($row['product_count'] > $maxDeletes) {
             throw new ValidationException(
