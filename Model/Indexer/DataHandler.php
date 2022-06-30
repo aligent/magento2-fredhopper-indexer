@@ -145,7 +145,7 @@ class DataHandler implements IndexerInterface
     private function processVariants(array &$documents)
     {
         $productAttributeCodes = [];
-        foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
+        foreach ($this->attributeConfig->getProductAttributeCodes(true) as $code) {
             $productAttributeCodes[$code] = true;
         }
         foreach ($documents as $productId => &$data) {
@@ -158,7 +158,7 @@ class DataHandler implements IndexerInterface
 
             // remove any variant-level attributes from parent product, ensuring it is set on each variant
             foreach ($data['product'] as $attributeCode => $productData) {
-                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                     foreach ($data['variants'] as &$variantData) {
                         $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
                     }
@@ -183,7 +183,7 @@ class DataHandler implements IndexerInterface
             // remove product-level attributes from variants
             foreach ($data['variants'] as &$variantData) {
                 foreach ($variantData as $attributeCode => $attributeValue) {
-                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                         unset($variantData[$attributeCode]);
                     }
                 }
@@ -202,7 +202,7 @@ class DataHandler implements IndexerInterface
         // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
         // of parent data
         foreach ($documents as &$data) {
-            foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
+            foreach ($this->attributeConfig->getVariantAttributeCodes(true) as $variantAttributeCode) {
                 $this->processProductVariantAttribute($data, $variantAttributeCode);
             }
         }
