@@ -307,12 +307,13 @@ class DataHandler implements IndexerInterface
                 'store_id' => new \Zend_Db_Expr($storeId)
             ]
         );
-        $connection->insertFromSelect(
+        $insertQuery = $connection->insertFromSelect(
             $insertSelect,
             $indexTableName,
             ['product_type', 'product_id', 'parent_id', 'attribute_data', 'operation_type', 'store_id'],
             AdapterInterface::INSERT_IGNORE // ignore mode so only records that do not exist will be inserted
         );
+        $connection->query($insertQuery);
 
         // check for deleted records and mark as "delete"
         $deleteWhereClause = "store_id = $storeId AND NOT EXISTS (SELECT 1 from $scopeTableName scope_table " .
