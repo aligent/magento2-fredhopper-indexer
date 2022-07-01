@@ -10,6 +10,7 @@ use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Model\AttributeTranslator;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -39,6 +40,7 @@ class Products
     private Meta $metaData;
     private Json $json;
     private ResourceConnection $resource;
+    private AttributeTranslator $attributeTranslator;
     /**
      * @var string[]
      */
@@ -83,6 +85,7 @@ class Products
         Meta $metaData,
         Json $json,
         ResourceConnection $resource,
+        AttributeTranslator $attributeTranslator,
         $siteVariantPriceAttributes = [],
         $siteVariantStockAttributes = [],
         $siteVariantImageAttributes = [],
@@ -97,6 +100,7 @@ class Products
         $this->metaData = $metaData;
         $this->json = $json;
         $this->resource = $resource;
+        $this->attributeTranslator = $attributeTranslator;
 
         $this->siteVariantPriceAttributes = $this->pricingAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantPriceAttributes, $siteVariantPriceAttributes) : [];
@@ -294,6 +298,8 @@ class Products
                 // return false if non-site-variant attribute in non-default store
                 $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId);
                 if ($attributeId) {
+                    // translate the attribute id if necessary
+                    $attributeId = $this->attributeTranslator->getTranslatedAttributeCode($attributeId);
                     $attributes[] = [
                         'attribute_id' => $attributeId,
                         'values' => $values

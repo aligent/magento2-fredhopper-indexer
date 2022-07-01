@@ -9,6 +9,7 @@ use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Model\AttributeTranslator;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
 use Magento\Catalog\Model\Category;
 use Magento\Customer\Api\GroupRepositoryInterface;
@@ -26,6 +27,8 @@ class Meta
     private PricingAttributeConfig $pricingAttributeConfig;
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
+    private AttributeTranslator $attributeTranslator;
+
     private array $customAttributeData;
 
     private int $rootCategoryId = 1;
@@ -38,6 +41,7 @@ class Meta
         PricingAttributeConfig $pricingAttributeConfig,
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
+        AttributeTranslator $attributeTranslator,
         $customAttributeData = []
     ) {
         $this->relevantCategory = $relevantCategory;
@@ -47,6 +51,7 @@ class Meta
         $this->pricingAttributeConfig = $pricingAttributeConfig;
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
+        $this->attributeTranslator = $attributeTranslator;
         $this->customAttributeData = $customAttributeData;
     }
 
@@ -56,8 +61,18 @@ class Meta
      */
     public function getMetaData() : array
     {
+        $attributesData = [];
+        $attributesArray = $this->getAttributesArray();
+        // translate attribute codes and labels as necessary
+        foreach ($attributesArray as $attribute) {
+            $code = $attribute['attribute_id'];
+            $label = $attribute['names']['name'];
+            $attribute['attribute_id'] = $this->attributeTranslator->getTranslatedAttributeCode($code);
+            $attribute['names']['name'] = $this->attributeTranslator->getTranslatedAttributLabelForCode($code, $label);
+            $attributesData[] = $attribute;
+        }
         $attributesArray = array_merge(
-            $this->getAttributesArray(),
+            $attributesData,
             [
                 [
                     'attribute_id' => 'categories',
