@@ -316,6 +316,12 @@ class Products
         if ($attributeCode === 'categories') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL;
         }
+        // check metadata configuration for custom attributes
+        foreach ($this->metaData->getCustomAttributeData() as $attributeData) {
+            if ($attributeData['attribute_code'] === $attributeCode) {
+                return $attributeData['fredhopper_type'];
+            }
+        }
         // all price attributes are floats
         if (strpos($attributeCode, 'price') !== false) {
             return FHAttributeTypes::ATTRIBUTE_TYPE_FLOAT;
@@ -328,12 +334,6 @@ class Products
         // all url attributes are assets
         if (strpos($attributeCode, 'url') !== false) {
             return FHAttributeTypes::ATTRIBUTE_TYPE_ASSET;
-        }
-        // check metadata configuration for custom attributes
-        foreach ($this->metaData->getCustomAttributeData() as $attributeData) {
-            if ($attributeData['attribute_code'] === $attributeCode) {
-                return $attributeData['fredhopper_type'];
-            }
         }
         return $this->attributeConfig->getAttributesWithFredhopperType()[$attributeCode] ?? false;
     }
