@@ -162,6 +162,17 @@
                     </depends>
                 </field>
             </group>
+            <group id="image_config" translate="label" sortOrder="55" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Image Attributes</label>
+                <field id="use_site_variant" translate="label comment" sortOrder="30" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Site Variant Images?</label>
+                    <comment>Send separate image attributes per site variant</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="fredhopper_indexer/general/use_site_variant">1</field>
+                    </depends>
+                </field>
+            </group>
             <group id="suggest" translate="label" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Suggest Export</label>
                 <field id="blacklist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">

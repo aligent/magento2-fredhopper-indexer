@@ -7,6 +7,7 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
@@ -26,6 +27,7 @@ class Meta
     private PricingAttributeConfig $pricingAttributeConfig;
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
+    private ImageAttributeConfig $imageAttributeConfig;
     private array $customAttributeData;
 
     private int $rootCategoryId = 1;
@@ -38,6 +40,7 @@ class Meta
         PricingAttributeConfig $pricingAttributeConfig,
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
+        ImageAttributeConfig $imageAttributeConfig,
         $customAttributeData = []
     ) {
         $this->relevantCategory = $relevantCategory;
@@ -48,6 +51,7 @@ class Meta
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
         $this->customAttributeData = $customAttributeData;
+        $this->imageAttributeConfig = $imageAttributeConfig;
     }
 
     /**
@@ -258,7 +262,7 @@ class Meta
         }
 
         $attributeArray = [];
-        $suffixes = $this->attributeConfig->getAllSiteVariantSuffixes();
+        $suffixes = $this->imageAttributeConfig->getAllSiteVariantSuffixes();
         foreach ($suffixes as $suffix) {
             foreach ($imageAttributes as $attributeCode => $label) {
                 $attributeArray[] = [
