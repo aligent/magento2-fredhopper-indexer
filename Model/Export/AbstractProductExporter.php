@@ -47,6 +47,10 @@ abstract class AbstractProductExporter implements ExporterInterface
      */
     private int $productLimit;
 
+    private array $categoriesForValidation = [];
+    private array $opCount = [];
+    private array $deleteSkus = [];
+
     public function __construct(
         Products $products,
         Meta $meta,
@@ -114,21 +118,66 @@ abstract class AbstractProductExporter implements ExporterInterface
                 return false;
             }
         }
-        $productData = $this->products->getProductData($isIncremental);
-        if (empty($productData)) {
+
+        $productIds = $this->products->getAllProductIds($isIncremental);
+        if (empty($productIds)) {
             $this->logger->info('Product export has no products to process - exiting.');
             return true;
         }
 
-        $productCount = count($productData);
+        $errs = [];
+        $productCount = count($productIds);
         if (!$isIncremental) {
             $minProducts = $this->sanityConfig->getMinTotalProducts();
-            $errs = [];
             if ($productCount < $minProducts) {
                 $errs[] = "Full export has $productCount products, below minimum threshold of $minProducts";
+            } else {
+                $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
+                $this->logger->info($msg);
             }
-            $errs = array_merge($errs, $this->validateCategories($metaContent, $productData));
+            $this->generateCategoryValidationArray($metaContent);
+        }
 
+        // generate JSON for export
+        $fileIndex = 0;
+        foreach (array_chunk($productIds, $this->productLimit) as $ids) {
+            $productData = $this->products->getProductData($ids, $isIncremental);
+            if (!$isIncremental) {
+                // add product category information for minimum count validation
+                $this->addProductsToCategoryCount($productData);
+            } else {
+                foreach ($productData as $product) {
+                    $op = $product['operation'] ?? null;
+                    if (!$op) {
+                        continue;
+                    }
+                    $this->opCount[$op] = ($this->opCount[$op] ?? 0) + 1;
+
+                    // Collate SKUs to delete for inclusion in logging
+                    if ($op != 'delete') {
+                        continue;
+                    }
+                    foreach ($product['attributes'] as $attr) {
+                        if ($attr['attribute_id'] != 'sku') {
+                            continue;
+                        }
+                        $value = reset($attr['values']);
+                        if (isset($value['value'])) {
+                            $this->deleteSkus[] = $value['value'];
+                        }
+                        break;
+                    }
+                }
+            }
+            if (!$this->generateProductsJson($productData, $fileIndex)) {
+                return false;
+            }
+            $fileIndex++;
+        }
+
+        // ensure minimum category counts are met for full export
+        if (!$isIncremental) {
+            $errs = array_merge($errs, $this->validateCategories());
             if (count($errs) > 0) {
                 foreach ($errs as $err) {
                     $this->logger->error($err);
@@ -140,56 +189,32 @@ abstract class AbstractProductExporter implements ExporterInterface
                 }
                 return false;
             }
-
-            $msg = "Generating JSON for full export of $productCount products (meets minimum of $minProducts)";
-            $this->logger->info($msg);
         } else {
-            $deleteSkus = [];
-            $opCount = [];
-            foreach ($productData as $product) {
-                $op = $product['operation'] ?? null;
-                if (!$op) {
-                    continue;
-                }
-                $opCount[$op] = ($opCount[$op] ?? 0) + 1;
-
-                // Collate SKUs to delete for inclusion in logging
-                if ($op != 'delete') {
-                    continue;
-                }
-                foreach ($product['attributes'] as $attr) {
-                    if ($attr['attribute_id'] != 'sku') {
-                        continue;
-                    }
-                    $value = reset($attr['values']);
-                    if (isset($value['value'])) {
-                        $deleteSkus[] = $value['value'];
-                    }
-                    break;
-                }
-            }
-            $msg = "Generating JSON for increment export of $productCount products: ";
-            $msg .= $this->json->serialize($opCount);
+            $msg = "Generating JSON for incremental export of $productCount products: ";
+            $msg .= $this->json->serialize($this->opCount);
             $this->logger->info($msg);
 
-            if (!empty($deleteSkus)) {
-                $msg = "Deleted SKUs: " . implode(', ', array_slice($deleteSkus, 0, 10));
-                if (count($deleteSkus) > 10) {
+            if (!empty($this->deleteSkus)) {
+                $msg = "Deleted SKUs: " . implode(', ', array_slice($this->deleteSkus, 0, 10));
+                if (count($this->deleteSkus) > 10) {
                     $msg .= ', ...';
                 }
                 $this->logger->info($msg);
             }
         }
-        if (!$this->generateProductsJson($productData)) {
-            return false;
-        }
+
         if ($this->config->getUseVariantProducts()) {
-            $variantData = $this->products->getVariantData($isIncremental);
+            $variantIds = $this->products->getAllVariantIds($isIncremental);
             if ($this->config->getDebugLogging()) {
-                $this->logger->debug('Generating JSON for ' . count($variantData) . ' variants');
+                $this->logger->debug('Generating JSON for ' . count($variantIds) . ' variants');
             }
-            if (!$this->generateVariantsJson($variantData)) {
-                return false;
+            $fileIndex = 0;
+            foreach (array_chunk($variantIds, $this->productLimit) as $ids) {
+                $variantData = $this->products->getVariantData($ids, $isIncremental);
+                if (!$this-$this->generateVariantsJson($variantData, $fileIndex)) {
+                    return false;
+                }
+                $fileIndex++;
             }
         }
 
@@ -225,13 +250,51 @@ abstract class AbstractProductExporter implements ExporterInterface
     }
 
     /**
-     * @param array $metaContent Format as per Data\Meta::getMetaData()
-     * @param array $productData Format as per Data\Products::getProductData()
      * @return string[] Errors found in categories, if any
      */
-    private function validateCategories(array $metaContent, array $productData): array
+    private function validateCategories(): array
     {
         $errors = [];
+
+        $tierRequired = [
+            1 => $this->sanityConfig->getMinProductsCategoryTier1(),
+            2 => $this->sanityConfig->getMinProductsCategoryTier2(),
+        ];
+
+        // Ensure that tier 1 & 2 categories all have sufficient products to meet the tier's threshold
+        $tierMin = [];
+        $sufficientProducts = true;
+        foreach ($this->categoriesForValidation as $cat) {
+            $tier = $cat['tier'];
+            if (!isset($tierMin[$tier]) || $cat['product_count'] < $tierMin[$tier]['product_count']) {
+                $tierMin[$tier] = $cat;
+            }
+
+            $required = $tierRequired[$tier];
+            if ($cat['product_count'] < $required) {
+                $errMsg = "Insufficient products in tier $tier category {$cat['name']}";
+                $errMsg .= ": {$cat['product_count']} (expected $required)";
+                $errors[] = $errMsg;
+                $sufficientProducts = false;
+            }
+        }
+
+        if ($sufficientProducts) {
+            foreach ($tierMin as $tier => $cat) {
+                $msg = "Category {$cat['name']} has fewest products in tier $tier: {$cat['product_count']}";
+                $this->logger->info($msg);
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param array $metaContent Format as per Data\Meta::getMetaData()
+     * @return void
+     */
+    private function generateCategoryValidationArray(array $metaContent): void
+    {
         $categories = [];
         // Collate tier 1 and 2 categories from FH meta-data structure into flat array
         foreach ($metaContent['meta']['attributes'] as $attr) {
@@ -261,7 +324,15 @@ abstract class AbstractProductExporter implements ExporterInterface
                 break;
             }
         }
+        $this->categoriesForValidation = $categories;
+    }
 
+    /**
+     * @param array $productData Format as per Data\Products::getProductData()
+     * @return void
+     */
+    private function addProductsToCategoryCount(array $productData): void
+    {
         // Count products in each tier 1/2 category
         foreach ($productData as $product) {
             foreach ($product['attributes'] as $attr) {
@@ -270,94 +341,56 @@ abstract class AbstractProductExporter implements ExporterInterface
                 }
                 foreach ($attr['values'] as $productCategory) {
                     $catId = (int)$productCategory['value'];
-                    if (!isset($categories[$catId])) {
+                    if (!isset($this->categoriesForValidation[$catId])) {
                         continue;
                     }
-                    $categories[$catId]['product_count'] += 1;
+                    $this->categoriesForValidation[$catId]['product_count'] += 1;
                 }
             }
         }
-
-        $tierRequired = [
-            1 => $this->sanityConfig->getMinProductsCategoryTier1(),
-            2 => $this->sanityConfig->getMinProductsCategoryTier2(),
-        ];
-
-        // Ensure that tier 1 & 2 categories all have sufficient products to meet the tier's threshold
-        $tierMin = [];
-        $sufficientProducts = true;
-        foreach ($categories as $cat) {
-            $tier = $cat['tier'];
-            if (!isset($tierMin[$tier]) || $cat['product_count'] < $tierMin[$tier]['product_count']) {
-                $tierMin[$tier] = $cat;
-            }
-
-            $required = $tierRequired[$tier];
-            if ($cat['product_count'] < $required) {
-                $errMsg = "Insufficient products in tier $tier category {$cat['name']}";
-                $errMsg .= ": {$cat['product_count']} (expected $required)";
-                $errors[] = $errMsg;
-                $sufficientProducts = false;
-            }
-        }
-
-        if ($sufficientProducts) {
-            foreach ($tierMin as $tier => $cat) {
-                $msg = "Category {$cat['name']} has fewest products in tier $tier: {$cat['product_count']}";
-                $this->logger->info($msg);
-            }
-        }
-
-        return $errors;
     }
 
     /**
      * @param array $productData
+     * @param int $fileIndex
      * @return bool
      */
-    private function generateProductsJson(array $productData): bool
+    private function generateProductsJson(array $productData, int $fileIndex): bool
     {
-        $fileIndex = 0;
-        foreach (array_chunk($productData, $this->productLimit) as $products) {
-            $filePath = $this->directory . DIRECTORY_SEPARATOR . self::PRODUCT_FILE_PREFIX . $fileIndex . '.json';
-            $content = ['products' => $products];
-            try {
-                $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
-            } catch (\Exception $e) {
-                $this->logger->critical(
-                    "Error saving products file $filePath",
-                    ['exception' => $e]
-                );
-                return false;
-            }
-            $this->files[] = $filePath;
-            $fileIndex++;
+        $filePath = $this->directory . DIRECTORY_SEPARATOR . self::PRODUCT_FILE_PREFIX . $fileIndex . '.json';
+        $content = ['products' => $productData];
+        try {
+            $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
+        } catch (\Exception $e) {
+            $this->logger->critical(
+                "Error saving products file $filePath",
+                ['exception' => $e]
+            );
+            return false;
         }
+        $this->files[] = $filePath;
         return true;
     }
 
     /**
      * @param array $variantData
+     * @param int $fileIndex
      * @return bool
      */
-    private function generateVariantsJson(array $variantData): bool
+    private function generateVariantsJson(array $variantData, int $fileIndex): bool
     {
-        $fileIndex = 0;
-        foreach (array_chunk($variantData, $this->productLimit) as $products) {
-            $filePath = $this->directory . DIRECTORY_SEPARATOR . self::VARIANT_FILE_PREFIX . $fileIndex . '.json';
-            $content = ['variants' => $products];
-            try {
-                $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
-            } catch (\Exception $e) {
-                $this->logger->critical(
-                    "Error saving variants file $filePath",
-                    ['exception' => $e]
-                );
-                return false;
-            }
-            $this->files[] = $filePath;
-            $fileIndex++;
+        $filePath = $this->directory . DIRECTORY_SEPARATOR . self::VARIANT_FILE_PREFIX . $fileIndex . '.json';
+        $content = ['variants' => $variantData];
+        try {
+            $this->filesystem->filePutContents($filePath, $this->json->serialize($content));
+        } catch (\Exception $e) {
+            $this->logger->critical(
+                "Error saving variants file $filePath",
+                ['exception' => $e]
+            );
+            return false;
         }
+        $this->files[] = $filePath;
         return true;
     }
 }
