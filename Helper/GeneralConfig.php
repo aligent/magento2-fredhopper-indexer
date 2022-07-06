@@ -146,6 +146,9 @@ class GeneralConfig extends AbstractHelper
         return $this->defaultStore;
     }
 
+    /**
+     * @return array
+     */
     public function getExcludedStores(): array
     {
         if (!isset($this->excludedStores)) {
