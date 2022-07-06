@@ -151,7 +151,7 @@ class GeneralConfig extends AbstractHelper
     {
         if (!isset($this->defaultLocale)) {
             $this->localeResolver->emulate($this->getDefaultStore());
-            $this->defaultLocale = $this->localeResolver->getDefaultLocale();
+            $this->defaultLocale = $this->localeResolver->getLocale();
             $this->localeResolver->revert();
         }
         return $this->defaultLocale;
