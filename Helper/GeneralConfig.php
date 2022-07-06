@@ -22,6 +22,7 @@ class GeneralConfig extends AbstractHelper
     public const XML_PATH_VARIANT_PREFIX = self::XML_PATH_PREFIX . 'variant_prefix';
     public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
     public const XML_PATH_DEFAULT_STORE = self::XML_PATH_PREFIX . 'default_store';
+    public const XML_PATH_EXCLUDED_STORES = self::XML_PATH_PREFIX . 'excluded_stores';
     public const XML_PATH_SITE_VARIANT = self::XML_PATH_PREFIX . 'site_variant';
     public const XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
     public const XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
@@ -37,6 +38,7 @@ class GeneralConfig extends AbstractHelper
     private string $variantPrefix;
     private bool $useSiteVariant;
     private int $defaultStore;
+    private array $excludedStores;
     private string $defaultLocale;
     private int $rootCategoryId;
     private bool $debugLogging;
@@ -145,6 +147,18 @@ class GeneralConfig extends AbstractHelper
     }
 
     /**
+     * @return array
+     */
+    public function getExcludedStores(): array
+    {
+        if (!isset($this->excludedStores)) {
+            $configValue = (string)$this->scopeConfig->getValue((self::XML_PATH_EXCLUDED_STORES));
+            $this->excludedStores = explode(',', $configValue);
+        }
+        return $this->excludedStores;
+    }
+
+    /**
      * @return string
      */
     public function getDefaultLocale(): string
@@ -184,6 +198,9 @@ class GeneralConfig extends AbstractHelper
                 $this->allSiteVariantSuffixes = ['']; // single empty string, rather than empty array
             } else {
                 foreach ($this->storeManager->getStores() as $store) {
+                    if (in_array($store->getId(), $this->getExcludedStores())) {
+                        continue;
+                    }
                     $this->allSiteVariantSuffixes[] = '_' . $this->getSiteVariant((int)$store->getId());
                 }
             }

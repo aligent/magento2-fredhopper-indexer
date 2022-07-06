@@ -50,6 +50,10 @@ class FredhopperDataProvider
     {
         // ensure store id is an integer
         $storeId = (int)$storeId;
+        // check if store is excluded from indexing
+        if (in_array($storeId, $this->attributeConfig->getExcludedStores())) {
+            return;
+        }
         if ($productIds !== null) {
             $productIds = array_unique($productIds);
         }

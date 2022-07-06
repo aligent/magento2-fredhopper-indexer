@@ -39,6 +39,11 @@
                     <comment>Store to be used for attributes that are not site-specific</comment>
                     <source_model>Magento\Config\Model\Config\Source\Store</source_model>
                 </field>
+                <field id="excluded_stores" translate="label comment" type="multiselect" sortOrder="105" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Excluded Stores</label>
+                    <comment>Stores to be excluded when generating export data</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Store</source_model>
+                </field>
                 <field id="root_category" translate="label comment" type="select" sortOrder="110" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Root category</label>
                     <comment>Subcategories are sent to Fredhopper</comment>
