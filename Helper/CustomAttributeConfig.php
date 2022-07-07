@@ -40,7 +40,7 @@ class CustomAttributeConfig extends GeneralConfig
         if (!isset($this->siteVariantCustomAttributes)) {
             $this->siteVariantCustomAttributes = [];
             foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-                if ($attributeData['is_site_variant']) {
+                if ($attributeData['is_site_variant'] ?? false) {
                     $this->siteVariantCustomAttributes[] = $attributeCode;
                 }
             }

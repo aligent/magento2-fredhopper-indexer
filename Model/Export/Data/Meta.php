@@ -329,7 +329,7 @@ class Meta
                 continue;
             }
 
-            if ($customAttribute['is_site_variant']) {
+            if ($customAttribute['is_site_variant'] ?? false) {
                 foreach ($siteVariantSuffixes as $siteVariantSuffix) {
                     $attributesArray[] = [
                         'attribute_id' => $customAttribute['attribute_code'] . $siteVariantSuffix,
