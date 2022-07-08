@@ -10,11 +10,15 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class CustomAttributeConfig extends GeneralConfig
 {
+    private const ATTRIBUTE_LEVEL_PRODUCT = 'product';
+    private const ATTRIBUTE_LEVEL_VARIANT = 'variant';
 
     /** @var array */
     private array $customAttributeData;
     /** string[] */
     private array $siteVariantCustomAttributes;
+    private array $productLevelCustomAttributeCodes;
+    private array $variantLevelCustomAttributeCodes;
 
     public function __construct(
         Context $context,
@@ -46,5 +50,39 @@ class CustomAttributeConfig extends GeneralConfig
             }
         }
         return $this->siteVariantCustomAttributes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductLevelCustomAttributes(): array
+    {
+        if (!isset($this->productLevelCustomAttributeCodes)) {
+            $this->productLevelCustomAttributeCodes = [];
+            foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+                $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
+                if ($attributeLevel === self::ATTRIBUTE_LEVEL_PRODUCT) {
+                    $this->productLevelCustomAttributeCodes[] = $attributeCode;
+                }
+            }
+        }
+        return $this->productLevelCustomAttributeCodes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getVariantLevelCustomAttributes(): array
+    {
+        if (!isset($this->variantLevelCustomAttributeCodes)) {
+            $this->variantLevelCustomAttributeCodes = [];
+            foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+                $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
+                if ($attributeLevel === self::ATTRIBUTE_LEVEL_VARIANT) {
+                    $this->variantLevelCustomAttributeCodes[] = $attributeCode;
+                }
+            }
+        }
+        return $this->variantLevelCustomAttributeCodes;
     }
 }
