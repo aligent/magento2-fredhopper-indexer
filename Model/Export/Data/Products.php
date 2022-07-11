@@ -7,6 +7,7 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
@@ -36,6 +37,7 @@ class Products
     private PricingAttributeConfig $pricingAttributeConfig;
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
+    private CustomAttributeConfig $customAttributeConfig;
     private Meta $metaData;
     private Json $json;
     private ResourceConnection $resource;
@@ -69,10 +71,6 @@ class Products
         'is_new',
         'days_online'
     ];
-    /**
-     * @var string[]
-     */
-    private array $siteVariantCustomAttributes = [];
 
     public function __construct(
         GeneralConfig $generalConfig,
@@ -80,20 +78,21 @@ class Products
         PricingAttributeConfig $pricingAttributeConfig,
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
+        CustomAttributeConfig $customAttributeConfig,
         Meta $metaData,
         Json $json,
         ResourceConnection $resource,
         $siteVariantPriceAttributes = [],
         $siteVariantStockAttributes = [],
         $siteVariantImageAttributes = [],
-        $siteVariantAgeAttributes = [],
-        $siteVariantCustomAttributes = []
+        $siteVariantAgeAttributes = []
     ) {
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->pricingAttributeConfig = $pricingAttributeConfig;
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
+        $this->customAttributeConfig = $customAttributeConfig;
         $this->metaData = $metaData;
         $this->json = $json;
         $this->resource = $resource;
@@ -106,8 +105,6 @@ class Products
             array_merge($this->siteVariantImageAttributes, $siteVariantImageAttributes) : [];
         $this->siteVariantAgeAttributes = $this->ageAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantAgeAttributes, $siteVariantAgeAttributes) : [];
-        $this->siteVariantCustomAttributes = $this->generalConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantCustomAttributes, $siteVariantCustomAttributes) : [];
     }
 
     /**
@@ -316,8 +313,8 @@ class Products
         if ($attributeCode === 'categories') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL;
         }
-        // check metadata configuration for custom attributes
-        foreach ($this->metaData->getCustomAttributeData() as $attributeData) {
+        // check custom attribute configuration
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeData) {
             if ($attributeData['attribute_code'] === $attributeCode) {
                 return $attributeData['fredhopper_type'];
             }
@@ -355,7 +352,7 @@ class Products
                 in_array($attributeCode, $this->siteVariantStockAttributes) ||
                 in_array($attributeCode, $this->siteVariantImageAttributes) ||
                 in_array($attributeCode, $this->siteVariantAgeAttributes) ||
-                in_array($attributeCode, $this->siteVariantCustomAttributes) ||
+                in_array($attributeCode, $this->customAttributeConfig->getSiteVariantCustomAttributes()) ||
                 $this->isSiteVariantPriceAttribute($attributeCode)) {
                 return "{$attributeCode}_$siteVariant";
             }

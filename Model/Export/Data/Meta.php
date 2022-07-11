@@ -7,6 +7,7 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
@@ -28,7 +29,7 @@ class Meta
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
     private ImageAttributeConfig $imageAttributeConfig;
-    private array $customAttributeData;
+    private CustomAttributeConfig $customAttributeConfig;
 
     private int $rootCategoryId = 1;
 
@@ -41,7 +42,7 @@ class Meta
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
         ImageAttributeConfig $imageAttributeConfig,
-        $customAttributeData = []
+        CustomAttributeConfig $customAttributeConfig
     ) {
         $this->relevantCategory = $relevantCategory;
         $this->customerGroupRepository = $customerGroupRepository;
@@ -50,8 +51,8 @@ class Meta
         $this->pricingAttributeConfig = $pricingAttributeConfig;
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
-        $this->customAttributeData = $customAttributeData;
         $this->imageAttributeConfig = $imageAttributeConfig;
+        $this->customAttributeConfig = $customAttributeConfig;
     }
 
     /**
@@ -165,8 +166,8 @@ class Meta
             $priceAttributes['max_price'] = 'Maximum Price';
         }
         // check for any custom attributes that are prices
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-            if (($attributeData['fredhopper_type'] ?? null) === 'price') {
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
+            if (($attributeData['type'] ?? null) === 'price') {
                 $priceAttributes[$attributeCode] = $attributeData['label'];
             }
         }
@@ -217,7 +218,7 @@ class Meta
             $stockAttributes['stock_status'] = 'Stock Status';
         }
         // check for any custom stock attributes
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
             if (($attributeData['type'] ?? null) === 'stock') {
                 $stockAttributes[$attributeCode] = $attributeData['label'];
             }
@@ -255,7 +256,7 @@ class Meta
             '_thumburl' => 'Thumbnail URL'
         ];
         // check for custom image attributes
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
             if (($attributeData['type'] ?? null) === 'image') {
                 $imageAttributes[$attributeCode] = $attributeData['label'];
             }
@@ -321,21 +322,38 @@ class Meta
     private function getCustomAttributesArray(string $defaultLocale): array
     {
         $attributesArray = [];
-        foreach ($this->customAttributeData as $customAttribute) {
+        $siteVariantSuffixes = $this->attributeConfig->getAllSiteVariantSuffixes();
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $customAttribute) {
             // check if attribute has already been processed as price/stock/image attribute
             if (!empty($customAttribute['type'])) {
                 continue;
             }
-            $attributesArray[] = [
-                'attribute_id' => $customAttribute['attribute_code'],
-                'type' => $customAttribute['fredhopper_type'],
-                'names' => [
-                    [
-                        'locale' => $defaultLocale,
-                        'name' => __($customAttribute['label'])
+
+            if ($customAttribute['is_site_variant'] ?? false) {
+                foreach ($siteVariantSuffixes as $siteVariantSuffix) {
+                    $attributesArray[] = [
+                        'attribute_id' => $customAttribute['attribute_code'] . $siteVariantSuffix,
+                        'type' => $customAttribute['fredhopper_type'],
+                        'names' => [
+                            [
+                                'locale' => $defaultLocale,
+                                'name' => __($customAttribute['label'])
+                            ]
+                        ]
+                    ];
+                }
+            } else {
+                $attributesArray[] = [
+                    'attribute_id' => $customAttribute['attribute_code'],
+                    'type' => $customAttribute['fredhopper_type'],
+                    'names' => [
+                        [
+                            'locale' => $defaultLocale,
+                            'name' => __($customAttribute['label'])
+                        ]
                     ]
-                ]
-            ];
+                ];
+            }
         }
         return $attributesArray;
     }
@@ -397,13 +415,5 @@ class Meta
             $categoryData['children'] = $childArray;
         }
         return $categoryData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCustomAttributeData(): array
-    {
-        return $this->customAttributeData;
     }
 }

@@ -19,6 +19,7 @@ class AttributeConfig extends GeneralConfig
 
     private Json $json;
     private DataProvider $dataProvider;
+    private CustomAttributeConfig $customAttributeConfig;
 
     private bool $useVariantProducts;
     private array $productAttributes;
@@ -33,23 +34,18 @@ class AttributeConfig extends GeneralConfig
     private array $eavAttributesByType;
     private array $siteVariantAttributes;
 
-    private array $productLevelCustomAttributeCodes;
-    private array $variantLevelCustomAttributeCodes;
-
     public function __construct(
         Context $context,
         Resolver $localeResolver,
         StoreManagerInterface $storeManager,
         Json $json,
         DataProvider $dataProvider,
-        array $productLevelCustomAttributeCodes = [],
-        array $variantLevelCustomAttributeCodes = []
+        CustomAttributeConfig $customAttributeConfig
     ) {
         parent::__construct($context, $localeResolver, $storeManager);
         $this->json = $json;
         $this->dataProvider = $dataProvider;
-        $this->productLevelCustomAttributeCodes = $productLevelCustomAttributeCodes;
-        $this->variantLevelCustomAttributeCodes = $variantLevelCustomAttributeCodes;
+        $this->customAttributeConfig = $customAttributeConfig;
     }
 
     /**
@@ -133,7 +129,10 @@ class AttributeConfig extends GeneralConfig
             $this->productAttributeCodes = $attributeCodes;
         }
         if ($includeCustom) {
-            return array_merge($this->productAttributeCodes, $this->productLevelCustomAttributeCodes);
+            return array_merge(
+                $this->productAttributeCodes,
+                $this->customAttributeConfig->getProductLevelCustomAttributes()
+            );
         }
         return $this->productAttributeCodes;
     }
@@ -152,7 +151,10 @@ class AttributeConfig extends GeneralConfig
             $this->variantAttributeCodes = $attributeCodes;
         }
         if ($includeCustom) {
-            return array_merge($this->variantAttributeCodes, $this->variantLevelCustomAttributeCodes);
+            return array_merge(
+                $this->variantAttributeCodes,
+                $this->customAttributeConfig->getVariantLevelCustomAttributes()
+            );
         }
         return $this->variantAttributeCodes;
     }
