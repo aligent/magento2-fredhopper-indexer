@@ -9,6 +9,7 @@ use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
@@ -37,8 +38,8 @@ class Products
     private PricingAttributeConfig $pricingAttributeConfig;
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
+    private ImageAttributeConfig $imageAttributeConfig;
     private CustomAttributeConfig $customAttributeConfig;
-    private Meta $metaData;
     private Json $json;
     private ResourceConnection $resource;
     /**
@@ -78,8 +79,8 @@ class Products
         PricingAttributeConfig $pricingAttributeConfig,
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
+        ImageAttributeConfig $imageAttributeConfig,
         CustomAttributeConfig $customAttributeConfig,
-        Meta $metaData,
         Json $json,
         ResourceConnection $resource,
         $siteVariantPriceAttributes = [],
@@ -92,8 +93,8 @@ class Products
         $this->pricingAttributeConfig = $pricingAttributeConfig;
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
+        $this->imageAttributeConfig = $imageAttributeConfig;
         $this->customAttributeConfig = $customAttributeConfig;
-        $this->metaData = $metaData;
         $this->json = $json;
         $this->resource = $resource;
 
@@ -101,7 +102,7 @@ class Products
             array_merge($this->siteVariantPriceAttributes, $siteVariantPriceAttributes) : [];
         $this->siteVariantStockAttributes = $this->stockAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantStockAttributes, $siteVariantStockAttributes) : [];
-        $this->siteVariantImageAttributes = $this->generalConfig->getUseSiteVariant() ?
+        $this->siteVariantImageAttributes = $this->imageAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantImageAttributes, $siteVariantImageAttributes) : [];
         $this->siteVariantAgeAttributes = $this->ageAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantAgeAttributes, $siteVariantAgeAttributes) : [];
