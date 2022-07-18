@@ -280,7 +280,7 @@ class Products
                 $values = [];
                 foreach ($attributeValues as $value) {
                     $valueEntry = [
-                        'value' => $value
+                        'value' => (string)$value // ensure all values are strings
                     ];
                     if ($addLocale) {
                         $valueEntry['locale'] = $defaultLocale;
