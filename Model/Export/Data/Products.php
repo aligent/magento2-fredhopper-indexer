@@ -262,9 +262,15 @@ class Products
         string $defaultLocale
     ): array {
         $attributes = [];
+        $categories = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
             // convert to correct format for fredhopper export
             foreach ($storeData as $attributeCode => $attributeValues) {
+                // handle categories separately
+                if ($attributeCode === 'categories') {
+                    $categories[] = $attributeValues;
+                    continue;
+                }
                 if (!is_array($attributeValues)) {
                     $attributeValues = [$attributeValues];
                 }
@@ -277,7 +283,6 @@ class Products
                     case FHAttributeTypes::ATTRIBUTE_TYPE_SET:
                     case FHAttributeTypes::ATTRIBUTE_TYPE_SET64:
                     case FHAttributeTypes::ATTRIBUTE_TYPE_ASSET:
-                    case FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL:
                         // add locale to attribute data
                         $addLocale = true;
                         break;
@@ -313,6 +318,19 @@ class Products
                 }
             }
         }
+        // collate categories from all stores
+        $categories = array_unique(array_merge(...$categories));
+        $categoryValues = [];
+        foreach ($categories as $category) {
+            $categoryValues[] = [
+                'value' => (string)$category,
+                'locale' => $defaultLocale
+            ];
+        }
+        $attributes[] = [
+            'attribute_id' => 'categories',
+            'values' => $categoryValues
+        ];
         return $attributes;
     }
 
