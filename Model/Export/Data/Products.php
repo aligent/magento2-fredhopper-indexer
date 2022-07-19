@@ -195,6 +195,7 @@ class Products
      */
     private function collateProductData(array $productData): array
     {
+        $defaultStore = $this->generalConfig->getDefaultStore();
         $productStoreData = [];
         foreach ($productData as $row) {
             $productStoreData[$row['product_id']] = $productStoreData[$row['product_id']] ?? [];
@@ -202,6 +203,10 @@ class Products
                 $this->json->unserialize($row['attribute_data']);
             $productStoreData[$row['product_id']]['parent_id'] = $row['parent_id'];
             $productStoreData[$row['product_id']]['operation_type'] = $row['operation_type'];
+            // handle the case where a product does not belong to the default store
+            if (!isset($productStoreData[$row['product_id']]['default_store']) || $row['store_id'] === $defaultStore) {
+                $productStoreData[$row['product_id']]['default_store'] = (int)$row['store_id'];
+            }
         }
         return $productStoreData;
     }
@@ -220,9 +225,14 @@ class Products
         $defaultLocale = $this->generalConfig->getDefaultLocale();
         $products = [];
         foreach ($productStoreData as $productId => $productData) {
+            $defaultStore = $productData['default_store'];
             $product = [
                 'product_id' => "{$this->generalConfig->getProductPrefix()}$productId",
-                'attributes' => $this->convertAttributeDataToFredhopperFormat($productData, $defaultLocale),
+                'attributes' => $this->convertAttributeDataToFredhopperFormat(
+                    $productData,
+                    $defaultStore,
+                    $defaultLocale
+                ),
                 'locales' => [
                     $defaultLocale
                 ]
@@ -241,12 +251,16 @@ class Products
 
     /**
      * Converts product attribute data from multiple stores into a single array in the correct format for fredhopper
-     * @param $productData
-     * @param $defaultLocale
+     * @param array $productData
+     * @param int $defaultStore
+     * @param string $defaultLocale
      * @return array
      */
-    private function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
-    {
+    private function convertAttributeDataToFredhopperFormat(
+        array $productData,
+        int $defaultStore,
+        string $defaultLocale
+    ): array {
         $attributes = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
             // convert to correct format for fredhopper export
@@ -290,7 +304,7 @@ class Products
 
                 // will return attribute code with site variant if required
                 // return false if non-site-variant attribute in non-default store
-                $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId);
+                $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId, $defaultStore);
                 if ($attributeId) {
                     $attributes[] = [
                         'attribute_id' => $attributeId,
@@ -341,11 +355,11 @@ class Products
      * Otherwise, returns unchanged code for default store, false for any other store
      * @param string $attributeCode
      * @param int $storeId
+     * @param int $defaultStoreId
      * @return bool|string
      */
-    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
+    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId, int $defaultStoreId)
     {
-        $defaultStoreId = $this->generalConfig->getDefaultStore();
         $siteVariantAttributes = $this->attributeConfig->getSiteVariantAttributes();
         if ($this->generalConfig->getUseSiteVariant()) {
             $siteVariant = $this->generalConfig->getSiteVariant($storeId);
