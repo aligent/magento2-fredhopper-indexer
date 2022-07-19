@@ -19,6 +19,7 @@ class AttributeConfig extends GeneralConfig
 
     private Json $json;
     private DataProvider $dataProvider;
+    private CustomAttributeConfig $customAttributeConfig;
 
     private bool $useVariantProducts;
     private array $productAttributes;
@@ -38,11 +39,13 @@ class AttributeConfig extends GeneralConfig
         Resolver $localeResolver,
         StoreManagerInterface $storeManager,
         Json $json,
-        DataProvider $dataProvider
+        DataProvider $dataProvider,
+        CustomAttributeConfig $customAttributeConfig
     ) {
         parent::__construct($context, $localeResolver, $storeManager);
         $this->json = $json;
         $this->dataProvider = $dataProvider;
+        $this->customAttributeConfig = $customAttributeConfig;
     }
 
     /**
@@ -113,9 +116,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
      */
-    public function getProductAttributeCodes(): array
+    public function getProductAttributeCodes(bool $includeCustom = false): array
     {
         if (!isset($this->productAttributeCodes)) {
             $attributeCodes = [];
@@ -124,13 +128,20 @@ class AttributeConfig extends GeneralConfig
             }
             $this->productAttributeCodes = $attributeCodes;
         }
+        if ($includeCustom) {
+            return array_merge(
+                $this->productAttributeCodes,
+                $this->customAttributeConfig->getProductLevelCustomAttributes()
+            );
+        }
         return $this->productAttributeCodes;
     }
 
     /**
+     * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
      */
-    public function getVariantAttributeCodes(): array
+    public function getVariantAttributeCodes(bool $includeCustom = false): array
     {
         if (!isset($this->variantAttributeCodes)) {
             $attributeCodes = [];
@@ -138,6 +149,12 @@ class AttributeConfig extends GeneralConfig
                 $attributeCodes[] = $attributeConfig['attribute'];
             }
             $this->variantAttributeCodes = $attributeCodes;
+        }
+        if ($includeCustom) {
+            return array_merge(
+                $this->variantAttributeCodes,
+                $this->customAttributeConfig->getVariantLevelCustomAttributes()
+            );
         }
         return $this->variantAttributeCodes;
     }

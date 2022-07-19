@@ -70,7 +70,7 @@ class IncrementalExporter extends AbstractProductExporter
      */
     protected function getDirectory(): string
     {
-        if (!$this->directory) {
+        if (!isset($this->directory)) {
             $this->directory = '/tmp/fh_export_incremental_' . time();
         }
         return $this->directory;

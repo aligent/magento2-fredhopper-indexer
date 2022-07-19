@@ -237,8 +237,8 @@ class ProductMapper
     private function prepareMultiselectValues(array $values): array
     {
         $multiSelectValues = [];
-        foreach ($values as $value) {
-            $multiSelectValues[] = explode(',', $value);
+        foreach ($values as $key => $value) {
+            $multiSelectValues[$key] = explode(',', $value);
         }
         return $multiSelectValues;
     }

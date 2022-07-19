@@ -162,7 +162,7 @@ class DataHandler implements IndexerInterface
     private function processVariants(array &$documents)
     {
         $productAttributeCodes = [];
-        foreach ($this->attributeConfig->getProductAttributeCodes() as $code) {
+        foreach ($this->attributeConfig->getProductAttributeCodes(true) as $code) {
             $productAttributeCodes[$code] = true;
         }
         foreach ($documents as $productId => &$data) {
@@ -175,7 +175,7 @@ class DataHandler implements IndexerInterface
 
             // remove any variant-level attributes from parent product, ensuring it is set on each variant
             foreach ($data['product'] as $attributeCode => $productData) {
-                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                     foreach ($data['variants'] as &$variantData) {
                         $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
                     }
@@ -200,7 +200,7 @@ class DataHandler implements IndexerInterface
             // remove product-level attributes from variants
             foreach ($data['variants'] as &$variantData) {
                 foreach ($variantData as $attributeCode => $attributeValue) {
-                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                    if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                         unset($variantData[$attributeCode]);
                     }
                 }
@@ -219,7 +219,7 @@ class DataHandler implements IndexerInterface
         // keep them at variant level also - variant data won't be sent, but can be used to trigger resending
         // of parent data
         foreach ($documents as &$data) {
-            foreach ($this->attributeConfig->getVariantAttributeCodes() as $variantAttributeCode) {
+            foreach ($this->attributeConfig->getVariantAttributeCodes(true) as $variantAttributeCode) {
                 $this->processProductVariantAttribute($data, $variantAttributeCode);
             }
         }
@@ -324,17 +324,18 @@ class DataHandler implements IndexerInterface
                 'store_id' => new \Zend_Db_Expr($storeId)
             ]
         );
-        $connection->insertFromSelect(
+        $insertQuery = $connection->insertFromSelect(
             $insertSelect,
             $indexTableName,
             ['product_type', 'product_id', 'parent_id', 'attribute_data', 'operation_type', 'store_id'],
             AdapterInterface::INSERT_IGNORE // ignore mode so only records that do not exist will be inserted
         );
+        $connection->query($insertQuery);
 
         // check for deleted records and mark as "delete"
         $deleteWhereClause = "store_id = $storeId AND NOT EXISTS (SELECT 1 from $scopeTableName scope_table " .
-            " WHERE scope_table.product_id = main_table.product_id " .
-            " AND scope_table.product_type = main_table.product_type)";
+            " WHERE scope_table.product_id = ". $indexTableName . ".product_id " .
+            " AND scope_table.product_type = ". $indexTableName . ".product_type)";
         $connection->update(
             $indexTableName,
             ['operation_type' => self::OPERATION_TYPE_DELETE],
@@ -441,7 +442,7 @@ class DataHandler implements IndexerInterface
     private function getScopeId(array $dimensions) : int
     {
         $dimension = current($dimensions);
-        return $this->scopeResolver->getScope($dimension->getValue())->getId();
+        return (int)$this->scopeResolver->getScope($dimension->getValue())->getId();
     }
 
     /**

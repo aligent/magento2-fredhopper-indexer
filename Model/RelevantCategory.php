@@ -68,6 +68,11 @@ class RelevantCategory
         if (count($ancestorIds) > 0) {
             $categories->addAttributeToFilter('entity_id', ['nin' => $ancestorIds]);
         }
+
+        // ensure the root category is in the collection
+        $categoryIds = array_merge($categories->getAllIds(),[$this->config->getRootCategoryId()]);
+        $categories = $this->categoryCollectionFactory->create();
+        $categories->addIdFilter($categoryIds);
         $categories->addNameToResult();
         return $categories;
     }
