@@ -56,9 +56,9 @@ There are a number of customisation points in the module, allowing for data to b
     - `\Aligent\FredhopperIndexer\Model\Indexer\DataHandler` class has 2 arguments, `documentPreProcessors` and `documentPostProcessors`, which handle an array of classes implementing `\Aligent\\FredhopperIndexer\Api\Indexer\Data\DocumentProcessorInterface`
         - These will be run before and after "processing" of documents as a whole (i.e. after all attribute information has been added). As such, this is a good place to handle any custom aggregation or functionality relating to the product as a whole (as opposed to individual attributes).
 - Meta
-    - Custom attributes added via code will need to be added to the meta information that is sent to Fredhopper. This is done by adding to the `customAttributeData` argument of the `\Aligent\FredhopperIndexer\Model\Export\Data\Meta` class:
+    - Custom attributes added via code will need to be added to the meta information that is sent to Fredhopper. This is done by adding to the `customAttributeData` argument of the `\Aligent\FredhopperIndexer\Helper\CustomAttributeConfig` class:
 ```
-<type name="Aligent\FredhopperIndexer\Model\Export\Data\Meta">
+<type name="Aligent\FredhopperIndexer\Helper\CustomAttributeConfig">
     <arguments>
         <argument name="customAttributeData" xsi:type="array">
             <item name="reviews_count" xsi:type="array">
