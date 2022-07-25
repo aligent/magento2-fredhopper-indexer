@@ -201,7 +201,8 @@ class GeneralConfig extends AbstractHelper
                     if (in_array($store->getId(), $this->getExcludedStores())) {
                         continue;
                     }
-                    $this->allSiteVariantSuffixes[] = '_' . $this->getSiteVariant((int)$store->getId());
+                    $siteVariant = $this->getSiteVariant((int)$store->getId());
+                    $this->allSiteVariantSuffixes[$siteVariant] = '_' . $siteVariant;
                 }
             }
         }

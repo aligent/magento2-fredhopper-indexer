@@ -100,14 +100,14 @@ class Meta
             } else {
                 $suffixes = [''];
             }
-            foreach ($suffixes as $suffix) {
+            foreach ($suffixes as $siteVariant => $suffix) {
                 $attributeArray[] = [
                     'attribute_id' => $attributeData['attribute'] . $suffix,
                     'type' => $attributeData['fredhopper_type'],
                     'names' => [
                         [
                             'locale' => $defaultLocale,
-                            'name' => $attributeData['label']
+                            'name' => $attributeData['label'] . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
                         ]
                     ]
                 ];
@@ -178,15 +178,16 @@ class Meta
         $customerGroups = $this->customerGroupRepository->getList($this->searchCriteriaBuilder->create())->getItems();
         if ($this->pricingAttributeConfig->getUseCustomerGroup()) {
             foreach ($customerGroups as $customerGroup) {
-                foreach ($siteVariantSuffixes as $siteVariantSuffix) {
-                    $suffixes[] = '_' . $customerGroup->getId() . $siteVariantSuffix;
+                foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
+                    $key = $siteVariant . '_' . $customerGroup->getId();
+                    $suffixes[$key] = '_' . $customerGroup->getId() . $siteVariantSuffix;
                 }
             }
         } else {
             $suffixes = $siteVariantSuffixes;
         }
 
-        foreach ($suffixes as $suffix) {
+        foreach ($suffixes as $key => $suffix) {
             foreach ($priceAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
                     'attribute_id' => $attributeCode . $suffix,
@@ -194,7 +195,7 @@ class Meta
                     'names' => [
                         [
                             'locale' => $defaultLocale,
-                            'name' => __($label)
+                            'name' => __($label) . (is_numeric($key)  ? '' : (' ' . $key))
                         ]
                     ]
                 ];
@@ -227,7 +228,7 @@ class Meta
         $attributesArray = [];
         $siteVariantSuffixes = $this->stockAttributeConfig->getAllSiteVariantSuffixes();
 
-        foreach ($siteVariantSuffixes as $siteVariantSuffix) {
+        foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
             foreach ($stockAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
                     'attribute_id' => $attributeCode . $siteVariantSuffix,
@@ -235,7 +236,7 @@ class Meta
                     'names' => [
                         [
                             'locale' => $defaultLocale,
-                            'name' => __($label)
+                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
                         ]
                     ]
                 ];
@@ -264,7 +265,7 @@ class Meta
 
         $attributeArray = [];
         $suffixes = $this->imageAttributeConfig->getAllSiteVariantSuffixes();
-        foreach ($suffixes as $suffix) {
+        foreach ($suffixes as $siteVariant => $suffix) {
             foreach ($imageAttributes as $attributeCode => $label) {
                 $attributeArray[] = [
                     'attribute_id' => $attributeCode . $suffix,
@@ -272,7 +273,7 @@ class Meta
                     'names' => [
                         [
                             'locale' => $defaultLocale,
-                            'name' => __($label)
+                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
                         ]
                     ]
                 ];
@@ -297,7 +298,7 @@ class Meta
 
         $attributesArray = [];
         $siteVariantSuffixes = $this->ageAttributeConfig->getAllSiteVariantSuffixes();
-        foreach ($siteVariantSuffixes as $siteVariantSuffix) {
+        foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
             foreach ($ageAttributes as $attributeCode => $label) {
                 $attributesArray[] = [
                     'attribute_id' => $attributeCode . $siteVariantSuffix,
@@ -305,7 +306,7 @@ class Meta
                     'names' => [
                         [
                             'locale' => $defaultLocale,
-                            'name' => __($label)
+                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
                         ]
                     ]
                 ];
@@ -330,14 +331,15 @@ class Meta
             }
 
             if ($customAttribute['is_site_variant'] ?? false) {
-                foreach ($siteVariantSuffixes as $siteVariantSuffix) {
+                foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
                     $attributesArray[] = [
                         'attribute_id' => $customAttribute['attribute_code'] . $siteVariantSuffix,
                         'type' => $customAttribute['fredhopper_type'],
                         'names' => [
                             [
                                 'locale' => $defaultLocale,
-                                'name' => __($customAttribute['label'])
+                                'name' => __($customAttribute['label']) .
+                                    (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
                             ]
                         ]
                     ];
