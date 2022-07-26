@@ -49,7 +49,12 @@ class AgeFieldsProvider implements AdditionalFieldsProviderInterface
                 $results[$productId]['is_new'] = (int)((bool)$product->getData('news_from_date')); // boolean as 1/0
             }
             if ($this->ageAttributeConfig->getSendDaysOnline()) {
-                $createdTime = strtotime($product->getData($createdAtFieldName));
+                $createdTimestamp = $product->getData($createdAtFieldName);
+                if ($createdTimestamp === null) {
+                    $results[$productId]['days_online'] = 0;
+                    continue;
+                }
+                $createdTime = strtotime($createdTimestamp);
                 // convert seconds to days (rounded down)
                 $daysOnline = (int)(($this->currentTime - $createdTime) / (60 * 60 * 24));
                 $results[$productId]['days_online'] = $daysOnline;
