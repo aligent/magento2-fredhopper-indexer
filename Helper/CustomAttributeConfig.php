@@ -24,7 +24,7 @@ class CustomAttributeConfig extends GeneralConfig
         Context $context,
         Resolver $localeResolver,
         StoreManagerInterface $storeManager,
-        array $customAttributeData
+        array $customAttributeData = []
     ) {
         parent::__construct($context, $localeResolver, $storeManager);
 
