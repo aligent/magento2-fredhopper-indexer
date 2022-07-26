@@ -11,6 +11,7 @@ use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Magento\Catalog\Model\ResourceModel\Product;
 use Magento\Store\Model\StoreDimensionProvider;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full;
 use Magento\CatalogSearch\Model\ResourceModel\EngineProvider;
@@ -49,9 +50,9 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
     protected $dataHandlerFactory;
 
     /**
-     * @var CollectionFactory
+     * @var Product
      */
-    protected $productCollectionFactory;
+    protected $productResource;
 
     /**
      * @var ResourceConnection
@@ -59,12 +60,10 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
     private ResourceConnection $resource;
 
     /**
-     * Construct
-     *
      * @param StoreDimensionProvider $dimensionProvider
      * @param Full $indexerAction
      * @param EngineProvider $engineProvider
-     * @param CollectionFactory $productCollectionFactory
+     * @param Product $productResource
      * @param DataHandlerFactory $dataHandlerFactory
      * @param GeneralConfig $generalConfig
      * @param AttributeConfig $attributeConfig
@@ -84,7 +83,7 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
         StoreDimensionProvider $dimensionProvider,
         Full $indexerAction,
         EngineProvider $engineProvider,
-        CollectionFactory $productCollectionFactory,
+        Product $productResource,
         DataHandlerFactory $dataHandlerFactory,
         GeneralConfig $generalConfig,
         AttributeConfig $attributeConfig,
@@ -104,7 +103,7 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
         $this->indexerAction = $indexerAction;
         $this->engineProvider = $engineProvider;
         $this->dataHandlerFactory = $dataHandlerFactory;
-        $this->productCollectionFactory = $productCollectionFactory;
+        $this->productResource = $productResource;
 
         parent::__construct(
             $generalConfig,
@@ -148,13 +147,7 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
             throw new \RuntimeException("Fredhopper is not configured as the search engine in Catalog Search");
         }
 
-        /** @var \Magento\Framework\DB\Adapter\AdapterInterface $connection */
-        $connection = $this->resource->getConnection();
-        $select = $connection->select()
-            ->from('catalog_product_entity')
-            ->columns(['entity_id'])
-            ->where("sku IN (?)", $this->skus);
-        $productIds = $connection->fetchCol($select);
+        $productIds = $this->productResource->getProductsIdsBySkus($this->skus);
 
         /** @var \Aligent\FredhopperIndexer\Model\Indexer\DataHandler $dataHandler */
         $dataHandler = $this->dataHandlerFactory->create();
