@@ -6,6 +6,7 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandlerFactory;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
@@ -22,7 +23,7 @@ use Magento\Framework\Serialize\Serializer\Json;
 /**
  * Collates data for an immediate export without relying on the FH index tables
  */
-class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Products
+class ImmediateProducts extends Products
 {
     /**
      * @var array
@@ -149,7 +150,7 @@ class ImmediateProducts extends \Aligent\FredhopperIndexer\Model\Export\Data\Pro
 
         $productIds = $this->productResource->getProductsIdsBySkus($this->skus);
 
-        /** @var \Aligent\FredhopperIndexer\Model\Indexer\DataHandler $dataHandler */
+        /** @var DataHandler $dataHandler */
         $dataHandler = $this->dataHandlerFactory->create();
 
         $products = [];
