@@ -5,8 +5,8 @@ namespace Aligent\FredhopperIndexer\Console\Command;
 
 use Aligent\FredhopperIndexer\Api\Export\ExporterInterface;
 use Aligent\FredhopperIndexer\Model\Export\Data\ImmediateProducts;
-use Magento\CloudDocker\Cli;
 use Magento\Framework\App\State;
+use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Command\Command;
@@ -88,6 +88,7 @@ EOH
             ;
         }
         $this->exporter->export();
-        return Cli::SUCCESS;
+
+        return Cli::RETURN_SUCCESS;
     }
 }
