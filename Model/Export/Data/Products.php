@@ -231,7 +231,8 @@ class Products
                 'attributes' => $this->convertAttributeDataToFredhopperFormat(
                     $productData,
                     $defaultStore,
-                    $defaultLocale
+                    $defaultLocale,
+                    $isVariants
                 ),
                 'locales' => [
                     $defaultLocale
@@ -254,12 +255,14 @@ class Products
      * @param array $productData
      * @param int $defaultStore
      * @param string $defaultLocale
+     * @param bool $isVariants
      * @return array
      */
     private function convertAttributeDataToFredhopperFormat(
         array $productData,
         int $defaultStore,
-        string $defaultLocale
+        string $defaultLocale,
+        bool $isVariants
     ): array {
         $attributes = [];
         $categories = [];
@@ -318,19 +321,21 @@ class Products
                 }
             }
         }
-        // collate categories from all stores
-        $categories = array_unique(array_merge(...$categories));
-        $categoryValues = [];
-        foreach ($categories as $category) {
-            $categoryValues[] = [
-                'value' => (string)$category,
-                'locale' => $defaultLocale
+        // collate categories from all stores - only for products
+        if (!$isVariants) {
+            $categories = array_unique(array_merge(...$categories));
+            $categoryValues = [];
+            foreach ($categories as $category) {
+                $categoryValues[] = [
+                    'value' => (string)$category,
+                    'locale' => $defaultLocale
+                ];
+            }
+            $attributes[] = [
+                'attribute_id' => 'categories',
+                'values' => $categoryValues
             ];
         }
-        $attributes[] = [
-            'attribute_id' => 'categories',
-            'values' => $categoryValues
-        ];
         return $attributes;
     }
 
