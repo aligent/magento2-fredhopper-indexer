@@ -42,7 +42,7 @@ class SpecificProductExport extends Command
         State $state,
         ExporterInterface $exporter,
         ImmediateProducts $immediateProducts,
-        string $name = null
+        ?string $name = null
     ) {
         $this->state = $state;
         $this->exporter = $exporter;
