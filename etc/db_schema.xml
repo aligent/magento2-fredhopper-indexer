@@ -10,7 +10,7 @@
                 comment="Product ID"/>
         <column xsi:type="int" name="parent_id" padding="10" unsigned="true" nullable="true" identity="false"
                 comment="Parent Product ID"/>
-        <column xsi:type="text" name="attribute_data" nullable="false"
+        <column xsi:type="mediumtext" name="attribute_data" nullable="false"
                 comment="JSON-encoded attribute data to be sent to Fredhopper"/>
         <column xsi:type="varchar" name="operation_type" length="1" nullable="true"
                 comment="Operation Type (a=Add,u=Update,r=Replace,d=Delete)"/>
