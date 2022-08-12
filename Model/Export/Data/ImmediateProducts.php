@@ -12,6 +12,7 @@ use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Model\ResourceModel\Engine as FredhopperEngine;
 use Magento\Catalog\Model\ResourceModel\Product;
 use Magento\Store\Model\StoreDimensionProvider;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\Full;
@@ -28,37 +29,42 @@ class ImmediateProducts extends Products
     /**
      * @var array
      */
-    protected $skus = [];
+    protected array $skus = [];
 
     /**
      * @var StoreDimensionProvider
      */
-    protected $dimensionProvider;
+    protected StoreDimensionProvider $dimensionProvider;
 
     /**
      * @var Full
      */
-    protected $indexerAction;
+    protected Full $indexerAction;
 
     /**
      * @var EngineProvider
      */
-    protected $engineProvider;
+    protected EngineProvider $engineProvider;
 
     /**
      * @var DataHandlerFactory
      */
-    protected $dataHandlerFactory;
+    protected DataHandlerFactory $dataHandlerFactory;
 
     /**
      * @var Product
      */
-    protected $productResource;
+    protected Product $productResource;
 
     /**
      * @var ResourceConnection
      */
     private ResourceConnection $resource;
+
+    /**
+     * @var Json
+     */
+    private Json $json;
 
     /**
      * @param StoreDimensionProvider $dimensionProvider
@@ -122,6 +128,7 @@ class ImmediateProducts extends Products
             $siteVariantAgeAttributes
         );
         $this->resource = $resource;
+        $this->json = $json;
     }
 
     /**
@@ -144,7 +151,7 @@ class ImmediateProducts extends Products
     protected function getRawProductData(bool $isIncremental, bool $isVariants) : array
     {
         $engine = $this->engineProvider->get();
-        if (!($engine instanceof \Aligent\FredhopperIndexer\Model\ResourceModel\Engine)) {
+        if (!($engine instanceof FredhopperEngine)) {
             throw new \RuntimeException("Fredhopper is not configured as the search engine in Catalog Search");
         }
 
@@ -170,7 +177,7 @@ class ImmediateProducts extends Products
                         'product_type' => 'p',
                         'product_id' => $docKey,
                         'parent_id' => null,
-                        'attribute_data' => json_encode($doc['product']),
+                        'attribute_data' => $this->json->serialize($doc['product']),
                         'operation_type' => 'a',
                     ];
                     $products[] = $product;
@@ -184,7 +191,7 @@ class ImmediateProducts extends Products
                             'product_type' => 'v',
                             'product_id' => $variantKey,
                             'parent_id' => $docKey,
-                            'attribute_data' => json_encode($variant),
+                            'attribute_data' => $this->json->serialize($variant),
                             'operation_type' => 'a',
                         ];
                         $products[] = $product;

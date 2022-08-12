@@ -30,6 +30,7 @@
     <virtualType name="FredhopperImmediateExporter" type="Aligent\FredhopperIndexer\Model\Export\IncrementalExporter">
         <arguments>
             <argument name="products" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Data\ImmediateProducts</argument>
+            <argument name="resetIndexTable" xsi:type="boolean">false</argument>
         </arguments>
     </virtualType>
 
