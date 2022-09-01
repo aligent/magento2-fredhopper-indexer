@@ -18,6 +18,7 @@ class IncrementalExporter extends AbstractProductExporter
 {
 
     private DataHandler $dataHandler;
+    private bool $resetIndexTable;
 
     public function __construct(
         Data\Products $products,
@@ -31,7 +32,8 @@ class IncrementalExporter extends AbstractProductExporter
         Json $json,
         LoggerInterface $logger,
         DataHandler $dataHandler,
-        $productLimit = 1000
+        int $productLimit = 1000,
+        bool $resetIndexTable = true
     ) {
         parent::__construct(
             $products,
@@ -47,6 +49,7 @@ class IncrementalExporter extends AbstractProductExporter
             $productLimit
         );
         $this->dataHandler = $dataHandler;
+        $this->resetIndexTable = $resetIndexTable;
     }
 
     /**
@@ -58,7 +61,7 @@ class IncrementalExporter extends AbstractProductExporter
     {
         $this->logger->info('Performing incremental data export');
         $success = $this->doExport(true);
-        if ($success) {
+        if ($success && $this->resetIndexTable) {
             $success = $this->dataHandler->resetIndexAfterExport();
         }
         $this->logger->info('Incremental product export ' . ($success ? 'completed successfully' : 'failed'));
@@ -70,7 +73,7 @@ class IncrementalExporter extends AbstractProductExporter
      */
     protected function getDirectory(): string
     {
-        if (!$this->directory) {
+        if (!isset($this->directory)) {
             $this->directory = '/tmp/fh_export_incremental_' . time();
         }
         return $this->directory;

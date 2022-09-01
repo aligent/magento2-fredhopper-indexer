@@ -8,6 +8,7 @@
                 <item name="fh_indexer_validate_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\ValidateProductExport</item>
                 <item name="fh_indexer_touch_product" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\TouchProduct</item>
                 <item name="fh_indexer_full_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\FullExport</item>
+                <item name="fh_indexer_specific_export" xsi:type="object">Aligent\FredhopperIndexer\Console\Command\SpecificProductExport</item>
             </argument>
         </arguments>
     </type>
@@ -19,6 +20,19 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- Use immediate data source for specific export -->
+    <type name="Aligent\FredhopperIndexer\Console\Command\SpecificProductExport">
+        <arguments>
+            <argument name="exporter" xsi:type="object">FredhopperImmediateExporter</argument>
+        </arguments>
+    </type>
+    <virtualType name="FredhopperImmediateExporter" type="Aligent\FredhopperIndexer\Model\Export\IncrementalExporter">
+        <arguments>
+            <argument name="products" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Data\ImmediateProducts</argument>
+            <argument name="resetIndexTable" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
 
     <type name="Magento\CatalogSearch\Model\Indexer\IndexerHandlerFactory">
         <arguments>

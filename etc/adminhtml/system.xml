@@ -39,6 +39,11 @@
                     <comment>Store to be used for attributes that are not site-specific</comment>
                     <source_model>Magento\Config\Model\Config\Source\Store</source_model>
                 </field>
+                <field id="excluded_stores" translate="label comment" type="multiselect" sortOrder="105" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Excluded Stores</label>
+                    <comment>Stores to be excluded when generating export data</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Store</source_model>
+                </field>
                 <field id="root_category" translate="label comment" type="select" sortOrder="110" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Root category</label>
                     <comment>Subcategories are sent to Fredhopper</comment>
@@ -151,6 +156,17 @@
                 <field id="use_site_variant" translate="label comment" sortOrder="30" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Site Variant Attributes?</label>
                     <comment>Send separate attributes per site variant</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="fredhopper_indexer/general/use_site_variant">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="image_config" translate="label" sortOrder="55" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Image Attributes</label>
+                <field id="use_site_variant" translate="label comment" sortOrder="30" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Site Variant Images?</label>
+                    <comment>Send separate image attributes per site variant</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <depends>
                         <field id="fredhopper_indexer/general/use_site_variant">1</field>

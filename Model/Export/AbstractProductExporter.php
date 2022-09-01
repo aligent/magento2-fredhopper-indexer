@@ -62,7 +62,7 @@ abstract class AbstractProductExporter implements ExporterInterface
         File $filesystem,
         Json $json,
         LoggerInterface $logger,
-        $productLimit = 1000
+        int $productLimit = 1000
     ) {
         $this->products = $products;
         $this->meta = $meta;

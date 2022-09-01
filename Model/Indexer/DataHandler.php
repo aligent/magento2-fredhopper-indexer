@@ -279,7 +279,7 @@ class DataHandler implements IndexerInterface
 
         foreach (array_chunk($variantRows, $this->batchSize) as $batchRows) {
             $this->resource->getConnection()
-                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['attribute_data']);
+                ->insertOnDuplicate($this->getTableName($dimensions), $batchRows, ['parent_id', 'attribute_data']);
         }
     }
 
@@ -325,7 +325,7 @@ class DataHandler implements IndexerInterface
             $deleteWhereClause
         );
 
-        // find records to be updated - where attribute_data has changed
+        // find records to be updated - where attribute_data or parent_id has changed
         $updateSubSelect = $connection->select();
         $updateSubSelect->from(
             false,
@@ -334,10 +334,11 @@ class DataHandler implements IndexerInterface
         $updateSubSelect->join(
             ['scope_table' => $scopeTableName],
             'main_table.product_id = scope_table.product_id AND main_table.product_type = scope_table.product_type',
-            ['attribute_data']
+            ['attribute_data', 'parent_id']
         );
         $updateSubSelect->where('main_table.store_id = ?', $storeId);
-        $updateSubSelect->where('main_table.attribute_data <> scope_table.attribute_data');
+        $updateSubSelect->where('(main_table.attribute_data <> scope_table.attribute_data
+            OR NOT main_table.parent_id <=> scope_table.parent_id)');
 
         $updateQuery = $connection->updateFromSelect(
             $updateSubSelect,

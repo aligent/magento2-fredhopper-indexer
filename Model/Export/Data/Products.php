@@ -7,7 +7,9 @@ namespace Aligent\FredhopperIndexer\Model\Export\Data;
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
@@ -36,7 +38,8 @@ class Products
     private PricingAttributeConfig $pricingAttributeConfig;
     private StockAttributeConfig $stockAttributeConfig;
     private AgeAttributeConfig $ageAttributeConfig;
-    private Meta $metaData;
+    private ImageAttributeConfig $imageAttributeConfig;
+    private CustomAttributeConfig $customAttributeConfig;
     private Json $json;
     private ResourceConnection $resource;
     /**
@@ -69,10 +72,6 @@ class Products
         'is_new',
         'days_online'
     ];
-    /**
-     * @var string[]
-     */
-    private array $siteVariantCustomAttributes = [];
 
     public function __construct(
         GeneralConfig $generalConfig,
@@ -80,21 +79,22 @@ class Products
         PricingAttributeConfig $pricingAttributeConfig,
         StockAttributeConfig $stockAttributeConfig,
         AgeAttributeConfig $ageAttributeConfig,
-        Meta $metaData,
+        ImageAttributeConfig $imageAttributeConfig,
+        CustomAttributeConfig $customAttributeConfig,
         Json $json,
         ResourceConnection $resource,
         $siteVariantPriceAttributes = [],
         $siteVariantStockAttributes = [],
         $siteVariantImageAttributes = [],
-        $siteVariantAgeAttributes = [],
-        $siteVariantCustomAttributes = []
+        $siteVariantAgeAttributes = []
     ) {
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
         $this->pricingAttributeConfig = $pricingAttributeConfig;
         $this->stockAttributeConfig = $stockAttributeConfig;
         $this->ageAttributeConfig = $ageAttributeConfig;
-        $this->metaData = $metaData;
+        $this->imageAttributeConfig = $imageAttributeConfig;
+        $this->customAttributeConfig = $customAttributeConfig;
         $this->json = $json;
         $this->resource = $resource;
 
@@ -102,12 +102,10 @@ class Products
             array_merge($this->siteVariantPriceAttributes, $siteVariantPriceAttributes) : [];
         $this->siteVariantStockAttributes = $this->stockAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantStockAttributes, $siteVariantStockAttributes) : [];
-        $this->siteVariantImageAttributes = $this->generalConfig->getUseSiteVariant() ?
+        $this->siteVariantImageAttributes = $this->imageAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantImageAttributes, $siteVariantImageAttributes) : [];
         $this->siteVariantAgeAttributes = $this->ageAttributeConfig->getUseSiteVariant() ?
             array_merge($this->siteVariantAgeAttributes, $siteVariantAgeAttributes) : [];
-        $this->siteVariantCustomAttributes = $this->generalConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantCustomAttributes, $siteVariantCustomAttributes) : [];
     }
 
     /**
@@ -244,6 +242,7 @@ class Products
      */
     private function collateProductData(array $productData): array
     {
+        $defaultStore = $this->generalConfig->getDefaultStore();
         $productStoreData = [];
         foreach ($productData as $row) {
             $productStoreData[$row['product_id']] = $productStoreData[$row['product_id']] ?? [];
@@ -251,6 +250,10 @@ class Products
                 $this->json->unserialize($row['attribute_data']);
             $productStoreData[$row['product_id']]['parent_id'] = $row['parent_id'];
             $productStoreData[$row['product_id']]['operation_type'] = $row['operation_type'];
+            // handle the case where a product does not belong to the default store
+            if (!isset($productStoreData[$row['product_id']]['default_store']) || $row['store_id'] === $defaultStore) {
+                $productStoreData[$row['product_id']]['default_store'] = (int)$row['store_id'];
+            }
         }
         return $productStoreData;
     }
@@ -269,9 +272,15 @@ class Products
         $defaultLocale = $this->generalConfig->getDefaultLocale();
         $products = [];
         foreach ($productStoreData as $productId => $productData) {
+            $defaultStore = $productData['default_store'];
             $product = [
                 'product_id' => "{$this->generalConfig->getProductPrefix()}$productId",
-                'attributes' => $this->convertAttributeDataToFredhopperFormat($productData, $defaultLocale),
+                'attributes' => $this->convertAttributeDataToFredhopperFormat(
+                    $productData,
+                    $defaultStore,
+                    $defaultLocale,
+                    $isVariants
+                ),
                 'locales' => [
                     $defaultLocale
                 ]
@@ -290,16 +299,28 @@ class Products
 
     /**
      * Converts product attribute data from multiple stores into a single array in the correct format for fredhopper
-     * @param $productData
-     * @param $defaultLocale
+     * @param array $productData
+     * @param int $defaultStore
+     * @param string $defaultLocale
+     * @param bool $isVariants
      * @return array
      */
-    private function convertAttributeDataToFredhopperFormat($productData, $defaultLocale): array
-    {
+    private function convertAttributeDataToFredhopperFormat(
+        array $productData,
+        int $defaultStore,
+        string $defaultLocale,
+        bool $isVariants
+    ): array {
         $attributes = [];
+        $categories = [];
         foreach ($productData['stores'] as $storeId => $storeData) {
             // convert to correct format for fredhopper export
             foreach ($storeData as $attributeCode => $attributeValues) {
+                // handle categories separately
+                if ($attributeCode === 'categories') {
+                    $categories[] = $attributeValues;
+                    continue;
+                }
                 if (!is_array($attributeValues)) {
                     $attributeValues = [$attributeValues];
                 }
@@ -312,7 +333,6 @@ class Products
                     case FHAttributeTypes::ATTRIBUTE_TYPE_SET:
                     case FHAttributeTypes::ATTRIBUTE_TYPE_SET64:
                     case FHAttributeTypes::ATTRIBUTE_TYPE_ASSET:
-                    case FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL:
                         // add locale to attribute data
                         $addLocale = true;
                         break;
@@ -329,7 +349,7 @@ class Products
                 $values = [];
                 foreach ($attributeValues as $value) {
                     $valueEntry = [
-                        'value' => $value
+                        'value' => (string)$value // ensure all values are strings
                     ];
                     if ($addLocale) {
                         $valueEntry['locale'] = $defaultLocale;
@@ -339,7 +359,7 @@ class Products
 
                 // will return attribute code with site variant if required
                 // return false if non-site-variant attribute in non-default store
-                $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId);
+                $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId, $defaultStore);
                 if ($attributeId) {
                     $attributes[] = [
                         'attribute_id' => $attributeId,
@@ -347,6 +367,21 @@ class Products
                     ];
                 }
             }
+        }
+        // collate categories from all stores - only for products
+        if (!$isVariants) {
+            $categories = array_unique(array_merge(...$categories));
+            $categoryValues = [];
+            foreach ($categories as $category) {
+                $categoryValues[] = [
+                    'value' => (string)$category,
+                    'locale' => $defaultLocale
+                ];
+            }
+            $attributes[] = [
+                'attribute_id' => 'categories',
+                'values' => $categoryValues
+            ];
         }
         return $attributes;
     }
@@ -363,8 +398,8 @@ class Products
         if ($attributeCode === 'categories') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_HIERARCHICAL;
         }
-        // check metadata configuration for custom attributes
-        foreach ($this->metaData->getCustomAttributeData() as $attributeData) {
+        // check custom attribute configuration
+        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeData) {
             if ($attributeData['attribute_code'] === $attributeCode) {
                 return $attributeData['fredhopper_type'];
             }
@@ -390,11 +425,11 @@ class Products
      * Otherwise, returns unchanged code for default store, false for any other store
      * @param string $attributeCode
      * @param int $storeId
+     * @param int $defaultStoreId
      * @return bool|string
      */
-    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId)
+    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId, int $defaultStoreId)
     {
-        $defaultStoreId = $this->generalConfig->getDefaultStore();
         $siteVariantAttributes = $this->attributeConfig->getSiteVariantAttributes();
         if ($this->generalConfig->getUseSiteVariant()) {
             $siteVariant = $this->generalConfig->getSiteVariant($storeId);
@@ -402,7 +437,7 @@ class Products
                 in_array($attributeCode, $this->siteVariantStockAttributes) ||
                 in_array($attributeCode, $this->siteVariantImageAttributes) ||
                 in_array($attributeCode, $this->siteVariantAgeAttributes) ||
-                in_array($attributeCode, $this->siteVariantCustomAttributes) ||
+                in_array($attributeCode, $this->customAttributeConfig->getSiteVariantCustomAttributes()) ||
                 $this->isSiteVariantPriceAttribute($attributeCode)) {
                 return "{$attributeCode}_$siteVariant";
             }
