@@ -112,18 +112,18 @@ class Products
      * @param bool $isIncremental
      * @return array
      */
-    public function getProductData(bool $isIncremental): array
+    public function getAllProductIds(bool $isIncremental): array
     {
-        return $this->getProcessedProductData($isIncremental);
+        return $this->getAllIds($isIncremental, false);
     }
 
     /**
      * @param bool $isIncremental
      * @return array
      */
-    public function getVariantData(bool $isIncremental): array
+    public function getAllVariantIds(bool $isIncremental): array
     {
-        return $this->getProcessedProductData($isIncremental, true);
+        return $this->getAllIds($isIncremental, true);
     }
 
     /**
@@ -131,9 +131,54 @@ class Products
      * @param bool $isVariants
      * @return array
      */
-    private function getProcessedProductData(bool $isIncremental, bool $isVariants = false): array
+    private function getAllIds(bool $isIncremental, bool $isVariants): array
     {
-        $rawProductData = $this->getRawProductData($isIncremental, $isVariants);
+        $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
+        $connection = $this->resource->getConnection();
+        $select = $connection->select();
+        $select->from(
+            DataHandler::INDEX_TABLE_NAME,
+            ['product_id' => 'product_id']
+        );
+        $select->where("product_type = ?", $productType);
+        if ($isIncremental) {
+            $select->where('operation_type is not null');
+        } else {
+            $select->where("ifnull(operation_type, '') <> 'd'");
+        }
+
+        return $connection->fetchCol($select);
+    }
+
+    /**
+     * @param array $productIds
+     * @param bool $isIncremental
+     * @return array
+     */
+    public function getProductData(array $productIds, bool $isIncremental): array
+    {
+        return $this->getProcessedProductData($productIds, $isIncremental);
+    }
+
+    /**
+     * @param array $productIds
+     * @param bool $isIncremental
+     * @return array
+     */
+    public function getVariantData(array $productIds, bool $isIncremental): array
+    {
+        return $this->getProcessedProductData($productIds, $isIncremental, true);
+    }
+
+    /**
+     * @param array $productIds
+     * @param bool $isIncremental
+     * @param bool $isVariants
+     * @return array
+     */
+    private function getProcessedProductData(array $productIds, bool $isIncremental, bool $isVariants = false): array
+    {
+        $rawProductData = $this->getRawProductData($productIds, $isIncremental, $isVariants);
         return $this->processProductData(
             $rawProductData,
             $isVariants,
@@ -142,24 +187,26 @@ class Products
     }
 
     /**
+     * @param array $productIds
      * @param bool $isIncremental
      * @param bool $isVariants
      * @return array
      */
-    protected function getRawProductData(bool $isIncremental, bool $isVariants) : array
+    protected function getRawProductData(array $productIds, bool $isIncremental, bool $isVariants) : array
     {
         $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
         $connection = $this->resource->getConnection();
         $select = $connection->select()
             ->from(DataHandler::INDEX_TABLE_NAME)
             ->columns([
-                'store_id' => 'store_id',
-                'product_type' => 'product_type',
-                'product_id' => 'product_id',
-                'parent_id' => 'parent_id',
-                'attribute_data' => 'attribute_data'
-            ])
-            ->where("product_type = ?", $productType);
+                          'store_id' => 'store_id',
+                          'product_type' => 'product_type',
+                          'product_id' => 'product_id',
+                          'parent_id' => 'parent_id',
+                          'attribute_data' => 'attribute_data'
+                      ])
+            ->where("product_type = ?", $productType)
+            ->where('product_id in (?)', $productIds);
         if ($isIncremental) {
             $select->where('operation_type is not null');
         } else {
