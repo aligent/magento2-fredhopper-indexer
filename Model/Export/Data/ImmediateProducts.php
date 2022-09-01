@@ -142,13 +142,9 @@ class ImmediateProducts extends Products
     }
 
     /**
-     * Get Raw Product Data
-     *
-     * @param bool $isIncremental
-     * @param bool $isVariants
-     * @return array
+     * @inheritDoc
      */
-    protected function getRawProductData(bool $isIncremental, bool $isVariants) : array
+    protected function getRawProductData(array $productIds, bool $isIncremental, bool $isVariants) : array
     {
         $engine = $this->engineProvider->get();
         if (!($engine instanceof FredhopperEngine)) {

@@ -192,7 +192,7 @@ class Products
      * @param bool $isVariants
      * @return array
      */
-    private function getRawProductData(array $productIds, bool $isIncremental, bool $isVariants) : array
+    protected function getRawProductData(array $productIds, bool $isIncremental, bool $isVariants) : array
     {
         $productType = $isVariants ? self::PRODUCT_TYPE_VARIANT : self::PRODUCT_TYPE_PRODUCT;
         $connection = $this->resource->getConnection();
