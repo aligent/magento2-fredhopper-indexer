@@ -110,6 +110,6 @@ class PriceFieldsProvider implements AdditionalFieldsProviderInterface
             $result[$row['website_id']][$row['entity_id']][$row['customer_group_id']] = $prices;
         }
 
-        return $result[$websiteId];
+        return $result[$websiteId] ?? [];
     }
 }
