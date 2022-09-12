@@ -211,7 +211,7 @@ abstract class AbstractProductExporter implements ExporterInterface
             $fileIndex = 0;
             foreach (array_chunk($variantIds, $this->productLimit) as $ids) {
                 $variantData = $this->products->getVariantData($ids, $isIncremental);
-                if (!$this-$this->generateVariantsJson($variantData, $fileIndex)) {
+                if (!$this->generateVariantsJson($variantData, $fileIndex)) {
                     return false;
                 }
                 $fileIndex++;
