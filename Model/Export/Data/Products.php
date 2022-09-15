@@ -146,6 +146,7 @@ class Products
         } else {
             $select->where("ifnull(operation_type, '') <> 'd'");
         }
+        $select->distinct();
 
         return $connection->fetchCol($select);
     }
