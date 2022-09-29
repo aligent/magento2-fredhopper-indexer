@@ -8,12 +8,14 @@ use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute;
 use Magento\Elasticsearch\Model\Adapter\FieldType\Date as DateFieldType;
+use Magento\Store\Model\App\Emulation;
 
 class ProductMapper
 {
 
     private DataProvider $dataProvider;
     private DateFieldType $dateFieldType;
+    private Emulation $emulation;
 
     private array $excludedAttributes;
     private array $attributeOptionsCache;
@@ -45,15 +47,18 @@ class ProductMapper
      * ProductMapper constructor.
      * @param DataProvider $dataProvider
      * @param DateFieldType $dateFieldType
+     * @param Emulation $emulation
      * @param array $excludedAttributes
      */
     public function __construct(
         DataProvider $dataProvider,
         DateFieldType $dateFieldType,
+        Emulation $emulation,
         array $excludedAttributes = []
     ) {
         $this->dataProvider = $dataProvider;
         $this->dateFieldType = $dateFieldType;
+        $this->emulation = $emulation;
         $this->excludedAttributes = array_merge($this->defaultExcludedAttributes, $excludedAttributes);
     }
 
@@ -135,7 +140,7 @@ class ProductMapper
             }
 
             $attributeValues = $this->prepareAttributeValues($productId, $attribute, $attributeValues, $storeId);
-            $productAttributes += $this->convertAttribute($attribute, $attributeValues);
+            $productAttributes += $this->convertAttribute($attribute, $attributeValues, $storeId);
         }
 
         return $productAttributes;
@@ -146,11 +151,13 @@ class ProductMapper
      *
      * @param Attribute $attribute
      * @param array $attributeValues
+     * @param int $storeId
      * @return array
      */
     private function convertAttribute(
         Attribute $attribute,
-        array $attributeValues
+        array $attributeValues,
+        int $storeId
     ): array {
         $attributeCode = $attribute->getAttributeCode();
         $combinedProductAttributes = [];
@@ -160,7 +167,8 @@ class ProductMapper
             foreach ($productIds as $productId) {
                 $productAttributes = $this->convertAttribute(
                     $attribute,
-                    [$productId => $attributeValues[$productId]]
+                    [$productId => $attributeValues[$productId]],
+                    $storeId
                 );
                 $attributeValue = '';
                 if (isset($productAttributes[$attributeCode][$productId])) {
@@ -179,6 +187,7 @@ class ProductMapper
                     $attributeLabels = $this->getValuesLabels(
                         $attribute,
                         $attributeValues,
+                        $storeId,
                         $attribute->getFrontendInput() === 'multiselect'
                     );
                     $retrievedLabel = $this->retrieveFieldValue($attributeLabels);
@@ -260,17 +269,19 @@ class ProductMapper
      *
      * @param Attribute $attribute
      * @param array $attributeValues
+     * @param int $storeId
      * @param bool $isMultiSelect
      * @return array
      */
     private function getValuesLabels(
         Attribute $attribute,
         array $attributeValues,
+        int $storeId,
         bool $isMultiSelect
     ): array {
         $attributeLabels = [];
 
-        $options = $this->getAttributeOptions($attribute);
+        $options = $this->getAttributeOptions($attribute, $storeId);
         if (empty($options)) {
             return $attributeLabels;
         }
@@ -297,19 +308,25 @@ class ProductMapper
      * Retrieve options for attribute
      *
      * @param Attribute $attribute
+     * @param int $storeId
      * @return array
      */
-    private function getAttributeOptions(Attribute $attribute): array
+    private function getAttributeOptions(Attribute $attribute, int $storeId): array
     {
-        if (!isset($this->attributeOptionsCache[$attribute->getId()])) {
+        if (!isset($this->attributeOptionsCache[$storeId])) {
+            $this->attributeOptionsCache[$storeId] = [];
+        }
+        if (!isset($this->attributeOptionsCache[$storeId][$attribute->getId()])) {
             $options = [];
+            $this->emulation->startEnvironmentEmulation($storeId);
             foreach ($attribute->getOptions() ?? [] as $option) {
                 $options[$option->getValue()] = $option->getLabel();
             }
-            $this->attributeOptionsCache[$attribute->getId()] = $options;
+            $this->emulation->stopEnvironmentEmulation();
+            $this->attributeOptionsCache[$storeId][$attribute->getId()] = $options;
         }
 
-        return $this->attributeOptionsCache[$attribute->getId()];
+        return $this->attributeOptionsCache[$storeId][$attribute->getId()];
     }
 
     /**
