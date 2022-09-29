@@ -144,14 +144,28 @@ class ImmediateProducts extends Products
     /**
      * @inheritDoc
      */
+    public function getAllProductIds(bool $isIncremental): array
+    {
+        return $this->productResource->getProductsIdsBySkus($this->skus);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllVariantIds(bool $isIncremental): array
+    {
+        return $this->getAllProductIds($isIncremental);
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function getRawProductData(array $productIds, bool $isIncremental, bool $isVariants) : array
     {
         $engine = $this->engineProvider->get();
         if (!($engine instanceof FredhopperEngine)) {
             throw new \RuntimeException("Fredhopper is not configured as the search engine in Catalog Search");
         }
-
-        $productIds = $this->productResource->getProductsIdsBySkus($this->skus);
 
         /** @var DataHandler $dataHandler */
         $dataHandler = $this->dataHandlerFactory->create();
