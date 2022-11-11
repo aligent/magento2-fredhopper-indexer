@@ -84,6 +84,13 @@ abstract class AbstractUpload
             return false;
         }
 
+        // Treat any response code other than 2xx as an error
+        $statusString = (string)$response['status_code'];
+        if (strlen($statusString) < 1 || $statusString[0] !== '2') {
+            $this->logger->error("HTTP error: $statusString");
+            return false;
+        }
+
         // get data id from the response body
         $dataIdString = $response['body'];
         if ($dataIdString) {
