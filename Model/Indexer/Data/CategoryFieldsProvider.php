@@ -9,9 +9,7 @@ use Aligent\FredhopperIndexer\Model\Export\Data\Meta;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
 use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
 use Magento\AdvancedSearch\Model\ResourceModel\Index;
-use Magento\Catalog\Model\ResourceModel\Category as CategoryResource;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Store\Model\StoreManagerInterface;
 
 class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
 {
@@ -19,8 +17,6 @@ class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
     private Index $index;
     private RelevantCategory $relevantCategory;
     private GeneralConfig $config;
-    private StoreManagerInterface $storeManager;
-    private CategoryResource $categoryResource;
 
     private int $rootCategoryId;
     /**
@@ -32,15 +28,11 @@ class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
     public function __construct(
         Index $index,
         RelevantCategory $relevantCategory,
-        GeneralConfig $config,
-        StoreManagerInterface $storeManager,
-        CategoryResource $categoryResource
+        GeneralConfig $config
     ) {
         $this->index = $index;
         $this->relevantCategory = $relevantCategory;
         $this->config = $config;
-        $this->storeManager = $storeManager;
-        $this->categoryResource = $categoryResource;
     }
 
     /**
@@ -60,13 +52,10 @@ class CategoryFieldsProvider implements AdditionalFieldsProviderInterface
             $this->allowCategories = $allowCategories;
         }
 
-        // generate list of store categories
+        // get list of store categories
         if (!isset($this->storeCategories[$storeId])) {
-            $storeGroupId = $this->storeManager->getStore($storeId)->getStoreGroupId();
-            $rootCategoryId = $this->storeManager->getGroup($storeGroupId)->getRootCategoryId();
-            // set recursion level high to ensure all categories are returned
-            $categoryNodes = $this->categoryResource->getCategories($rootCategoryId, 100, false, true);
-            $this->storeCategories[$storeId] = array_merge([$rootCategoryId], $categoryNodes->getAllIds());
+            $collection = $this->relevantCategory->getCollection($storeId);
+            $this->storeCategories[$storeId] = $collection->getAllIds();
         }
 
         $result = [];
