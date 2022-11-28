@@ -7,8 +7,10 @@ namespace Aligent\FredhopperIndexer\Model;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\Catalog\Model\ResourceModel\Category\Collection;
+use Magento\Catalog\Model\ResourceModel\Category\Collection as CategoryCollection;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -62,6 +64,7 @@ class RelevantCategory
     /**
      * @param int|null $storeId
      * @return Collection
+     * @throws LocalizedException
      */
     public function getCollection(?int $storeId = null): Collection
     {
@@ -77,8 +80,13 @@ class RelevantCategory
             if (in_array($store->getId(), $this->config->getExcludedStores())) {
                 continue;
             }
+            $storeGroupId = $store->getStoreGroupId();
+            $rootCategoryForStore = $this->storeManager->getGroup($storeGroupId)->getRootCategoryId();
+            /** @var CategoryCollection $categories */
             $categories = $this->categoryCollectionFactory->create();
             $categories->setStoreId((int)$store->getId());
+            $regExpPathFilter = sprintf('.*/%s/[/0-9]*$', $rootCategoryForStore);
+            $categories->addPathFilter($regExpPathFilter);
             $categories->addAttributeToFilter(CategoryInterface::KEY_IS_ACTIVE, 1);
             if (count($ancestorIds) > 0) {
                 $categories->addAttributeToFilter('entity_id', ['nin' => $ancestorIds]);
