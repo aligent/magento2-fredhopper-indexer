@@ -71,6 +71,7 @@ class RelevantCategory
         $ancestorIds = $this->getAncestorCategoryIds();
 
         $categoryIds = [];
+        $rootCategories = [$this->config->getRootCategoryId()];
         // loop through each store as is_active may be set at store level
         foreach ($this->storeManager->getStores() as $store) {
             // if store id is given, then skip other stores
@@ -82,6 +83,8 @@ class RelevantCategory
             }
             $storeGroupId = $store->getStoreGroupId();
             $rootCategoryForStore = $this->storeManager->getGroup($storeGroupId)->getRootCategoryId();
+            $rootCategories[] = $rootCategoryForStore;
+
             /** @var CategoryCollection $categories */
             $categories = $this->categoryCollectionFactory->create();
             $categories->setStoreId((int)$store->getId());
@@ -95,7 +98,7 @@ class RelevantCategory
         }
 
         // ensure the root category is in the collection
-        $categoryIds = array_merge([$this->config->getRootCategoryId()], ...$categoryIds);
+        $categoryIds = array_merge($rootCategories, ...$categoryIds);
         $categories = $this->categoryCollectionFactory->create();
         $categories->addIdFilter($categoryIds);
         $categories->addNameToResult();
