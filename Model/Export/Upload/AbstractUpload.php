@@ -181,7 +181,7 @@ abstract class AbstractUpload
      * @param $request
      * @return array|false
      */
-    private function sendRequest($request)
+    private function sendRequest($request): bool|array
     {
         if ($this->dryRun) {
             $this->logger->info("Dry run; not exporting");

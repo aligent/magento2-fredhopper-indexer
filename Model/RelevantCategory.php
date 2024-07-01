@@ -11,7 +11,6 @@ use Magento\Catalog\Model\ResourceModel\Category\Collection as CategoryCollectio
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
 class RelevantCategory
@@ -54,7 +53,7 @@ class RelevantCategory
             array_pop($rootAncestors);
 
             $this->ancestorCategories = array_filter($rootAncestors);
-        } catch (\Exception $ex) {
+        } catch (\Exception) {
             // Root category configured incorrectly?
             $this->ancestorCategories = [];
         }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\AttributeDataProvider;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Context;
 use Magento\Framework\View\Element\Html\Select;
@@ -12,46 +12,42 @@ use Magento\Framework\View\Element\Html\Select;
 class Attributes extends Select
 {
 
-    private DataProvider $dataProvider;
-
     /**
-     * Attributes constructor.
      * @param Context $context
-     * @param DataProvider $dataProvider
+     * @param AttributeDataProvider $dataProvider
      * @param array $data
      */
     public function __construct(
         Context $context,
-        DataProvider $dataProvider,
+        private readonly AttributeDataProvider $dataProvider,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->dataProvider = $dataProvider;
     }
 
     /**
      * @param $value
      * @return $this
-     * @throws LocalizedException
      */
     public function setInputName($value): Select
     {
-        return $this->setName($value);
+        return $this->setData('name', $value);
     }
 
     /**
      * @return string
+     * @throws LocalizedException
      */
     public function _toHtml(): string
     {
         if (empty($this->getOptions())) {
-            $attributes = $this->dataProvider->getSearchableAttributes();
+            $attributes = $this->dataProvider->getIndexableAttributes();
             foreach ($attributes as $attributeCode => $attribute) {
                 // only interested in attribute codes, not ids
                 if (is_numeric($attributeCode)) {
                     continue;
                 }
-                $this->addOption($attributeCode, $attribute->getStoreLabel());
+                $this->addOption($attributeCode, implode(' - ', [$attributeCode, $attribute->getStoreLabel()]));
             }
         }
 

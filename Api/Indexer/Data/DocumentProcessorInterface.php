@@ -7,8 +7,11 @@ namespace Aligent\FredhopperIndexer\Api\Indexer\Data;
 interface DocumentProcessorInterface
 {
     /**
+     * Perform additional processing on documents
+     *
      * @param array $documents
      * @param int $scopeId
+     * @return array
      */
-    public function processDocuments(array &$documents, int $scopeId) : void;
+    public function processDocuments(array $documents, int $scopeId) : array;
 }

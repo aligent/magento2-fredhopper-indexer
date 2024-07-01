@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
-use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
-use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
-use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
-use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
 
 class Products
@@ -23,89 +20,33 @@ class Products
 
     private const OPERATION_TYPE_ADD = 'add';
     private const OPERATION_TYPE_UPDATE = 'update';
-    private const OPERATION_TYPE_REPLACE = 'replace';
     private const OPERATION_TYPE_DELETE = 'delete';
 
     private const OPERATION_TYPE_MAPPING = [
         DataHandler::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
         DataHandler::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
-        DataHandler::OPERATION_TYPE_REPLACE => self::OPERATION_TYPE_REPLACE,
         DataHandler::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
     ];
 
     private GeneralConfig $generalConfig;
     private AttributeConfig $attributeConfig;
-    private PricingAttributeConfig $pricingAttributeConfig;
-    private StockAttributeConfig $stockAttributeConfig;
-    private AgeAttributeConfig $ageAttributeConfig;
-    private ImageAttributeConfig $imageAttributeConfig;
     private CustomAttributeConfig $customAttributeConfig;
     private Json $json;
     private ResourceConnection $resource;
-    /**
-     * @var string[]
-     */
-    private array $siteVariantPriceAttributes = [
-        'regular_price',
-        'special_price',
-        'min_price',
-        'max_price'
-    ];
-    /**
-     * @var string[]
-     */
-    private array $siteVariantStockAttributes = [
-        'stock_qty',
-        'stock_status'
-    ];
-    /**
-     * @var string[]
-     */
-    private array $siteVariantImageAttributes = [
-        '_imageurl',
-        '_thumburl'
-    ];
-    /**
-     * @var string[]
-     */
-    private array $siteVariantAgeAttributes = [
-        'is_new',
-        'days_online'
-    ];
+
 
     public function __construct(
         GeneralConfig $generalConfig,
         AttributeConfig $attributeConfig,
-        PricingAttributeConfig $pricingAttributeConfig,
-        StockAttributeConfig $stockAttributeConfig,
-        AgeAttributeConfig $ageAttributeConfig,
-        ImageAttributeConfig $imageAttributeConfig,
         CustomAttributeConfig $customAttributeConfig,
         Json $json,
-        ResourceConnection $resource,
-        $siteVariantPriceAttributes = [],
-        $siteVariantStockAttributes = [],
-        $siteVariantImageAttributes = [],
-        $siteVariantAgeAttributes = []
+        ResourceConnection $resource
     ) {
         $this->generalConfig = $generalConfig;
         $this->attributeConfig = $attributeConfig;
-        $this->pricingAttributeConfig = $pricingAttributeConfig;
-        $this->stockAttributeConfig = $stockAttributeConfig;
-        $this->ageAttributeConfig = $ageAttributeConfig;
-        $this->imageAttributeConfig = $imageAttributeConfig;
         $this->customAttributeConfig = $customAttributeConfig;
         $this->json = $json;
         $this->resource = $resource;
-
-        $this->siteVariantPriceAttributes = $this->pricingAttributeConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantPriceAttributes, $siteVariantPriceAttributes) : [];
-        $this->siteVariantStockAttributes = $this->stockAttributeConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantStockAttributes, $siteVariantStockAttributes) : [];
-        $this->siteVariantImageAttributes = $this->imageAttributeConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantImageAttributes, $siteVariantImageAttributes) : [];
-        $this->siteVariantAgeAttributes = $this->ageAttributeConfig->getUseSiteVariant() ?
-            array_merge($this->siteVariantAgeAttributes, $siteVariantAgeAttributes) : [];
     }
 
     /**
@@ -155,6 +96,7 @@ class Products
      * @param array $productIds
      * @param bool $isIncremental
      * @return array
+     * @throws LocalizedException
      */
     public function getProductData(array $productIds, bool $isIncremental): array
     {
@@ -165,6 +107,7 @@ class Products
      * @param array $productIds
      * @param bool $isIncremental
      * @return array
+     * @throws LocalizedException
      */
     public function getVariantData(array $productIds, bool $isIncremental): array
     {
@@ -176,6 +119,7 @@ class Products
      * @param bool $isIncremental
      * @param bool $isVariants
      * @return array
+     * @throws LocalizedException
      */
     private function getProcessedProductData(array $productIds, bool $isIncremental, bool $isVariants = false): array
     {
@@ -223,6 +167,7 @@ class Products
      * @param bool $isVariants
      * @param bool $isIncremental
      * @return array
+     * @throws LocalizedException
      */
     private function processProductData(array $rawProductData, bool $isVariants, bool $isIncremental) : array
     {
@@ -264,6 +209,7 @@ class Products
      * @param bool $isVariants
      * @param bool $isIncremental
      * @return array
+     * @throws LocalizedException
      */
     private function convertProductDataToFredhopperFormat(
         array $productStoreData,
@@ -305,6 +251,7 @@ class Products
      * @param string $defaultLocale
      * @param bool $isVariants
      * @return array
+     * @throws LocalizedException
      */
     private function convertAttributeDataToFredhopperFormat(
         array $productData,
@@ -392,8 +339,9 @@ class Products
      * Returns false is the type cannot be found
      * @param string $attributeCode
      * @return bool|string
+     * @throws LocalizedException
      */
-    private function getAttributeFredhopperTypeByCode(string $attributeCode)
+    private function getAttributeFredhopperTypeByCode(string $attributeCode): bool|string
     {
         // categories attribute is hierarchical
         if ($attributeCode === 'categories') {
@@ -406,16 +354,16 @@ class Products
             }
         }
         // all price attributes are floats
-        if (strpos($attributeCode, 'price') !== false) {
+        if (str_contains($attributeCode, 'price')) {
             return FHAttributeTypes::ATTRIBUTE_TYPE_FLOAT;
         }
         // all stock and age attributes are ints (boolean -> 1/0 for indicators)
-        if (strpos($attributeCode, 'stock') !== false ||
+        if (str_contains($attributeCode, 'stock') ||
             $attributeCode === 'is_new' || $attributeCode === 'days_online') {
             return FHAttributeTypes::ATTRIBUTE_TYPE_INT;
         }
         // all url attributes are assets
-        if (strpos($attributeCode, 'url') !== false) {
+        if (str_contains($attributeCode, 'url')) {
             return FHAttributeTypes::ATTRIBUTE_TYPE_ASSET;
         }
         return $this->attributeConfig->getAttributesWithFredhopperType()[$attributeCode] ?? false;
@@ -428,37 +376,19 @@ class Products
      * @param int $storeId
      * @param int $defaultStoreId
      * @return bool|string
+     * @throws LocalizedException
      */
-    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId, int $defaultStoreId)
+    private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId, int $defaultStoreId): bool|string
     {
         $siteVariantAttributes = $this->attributeConfig->getSiteVariantAttributes();
         if ($this->generalConfig->getUseSiteVariant()) {
             $siteVariant = $this->generalConfig->getSiteVariant($storeId);
             if (in_array($attributeCode, $siteVariantAttributes) ||
-                in_array($attributeCode, $this->siteVariantStockAttributes) ||
-                in_array($attributeCode, $this->siteVariantImageAttributes) ||
-                in_array($attributeCode, $this->siteVariantAgeAttributes) ||
-                in_array($attributeCode, $this->customAttributeConfig->getSiteVariantCustomAttributes()) ||
-                $this->isSiteVariantPriceAttribute($attributeCode)) {
+                in_array($attributeCode, $this->customAttributeConfig->getSiteVariantCustomAttributes())) {
                 return "{$attributeCode}_$siteVariant";
             }
         }
         // when not using store variants, only retain attributes in the default store
         return $storeId === $defaultStoreId ? $attributeCode : false;
-    }
-
-    /**
-     * Price attributes may have a suffix (e.g. regular_price_min), so use strpos for comparison
-     * @param string $attributeCode
-     * @return bool
-     */
-    private function isSiteVariantPriceAttribute(string $attributeCode): bool
-    {
-        foreach ($this->siteVariantPriceAttributes as $code) {
-            if (strpos($attributeCode, $code) === 0) {
-                return true;
-            }
-        }
-        return false;
     }
 }

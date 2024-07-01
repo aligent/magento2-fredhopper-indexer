@@ -29,7 +29,7 @@ class DeletedProductsValidator implements PreExportValidatorInterface
      * @inheritDoc
      * @throws \Zend_Db_Statement_Exception
      */
-    public function validateState()
+    public function validateState(): void
     {
         // check the number of deleted products does not reach the threshold
         $connection = $this->resourceConnection->getConnection();

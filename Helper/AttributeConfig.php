@@ -4,84 +4,85 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Helper;
 
-use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
-use Magento\Framework\App\Helper\Context;
-use Magento\Framework\Locale\Resolver;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\AttributeDataProvider;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Store\Model\StoreManagerInterface;
 
-class AttributeConfig extends GeneralConfig
+class AttributeConfig
 {
     public const XML_PATH_PREFIX = 'fredhopper_indexer/product_config/';
     public const XML_PATH_USE_VARIANT_PRODUCTS = self::XML_PATH_PREFIX . 'use_variant_products';
     public const XML_PATH_PRODUCT_ATTRIBUTES = self::XML_PATH_PREFIX . 'product_attributes';
     public const XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
 
-    private Json $json;
-    private DataProvider $dataProvider;
-    private CustomAttributeConfig $customAttributeConfig;
-
-    private bool $useVariantProducts;
     private array $productAttributes;
     private array $variantAttributes;
     private array $allAttributes;
     private array $booleanAttributes;
     private array $productAttributeCodes;
     private array $variantAttributeCodes;
-    private array $searchableAttributes;
     private array $staticAttributes;
     private array $attributesWithFredhopperType;
     private array $eavAttributesByType;
     private array $siteVariantAttributes;
 
+    /**
+     * @param GeneralConfig $generalConfig
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Json $json
+     * @param CustomAttributeConfig $customAttributeConfig
+     * @param AttributeDataProvider $attributeDataProvider
+     */
     public function __construct(
-        Context $context,
-        Resolver $localeResolver,
-        StoreManagerInterface $storeManager,
-        Json $json,
-        DataProvider $dataProvider,
-        CustomAttributeConfig $customAttributeConfig
+        private readonly GeneralConfig $generalConfig,
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly Json $json,
+        private readonly CustomAttributeConfig $customAttributeConfig,
+        private readonly AttributeDataProvider $attributeDataProvider
     ) {
-        parent::__construct($context, $localeResolver, $storeManager);
-        $this->json = $json;
-        $this->dataProvider = $dataProvider;
-        $this->customAttributeConfig = $customAttributeConfig;
     }
 
     /**
+     * Gets whether to use variant products
+     *
      * @return bool
      */
     public function getUseVariantProducts(): bool
     {
-        if (!isset($this->useVariantProducts)) {
-            $this->useVariantProducts = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_VARIANT_PRODUCTS);
-        }
-        return $this->useVariantProducts;
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_USE_VARIANT_PRODUCTS);
+
     }
 
     /**
+     * Get all configured product attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getProductAttributes(): array
     {
         if (!isset($this->productAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_ATTRIBUTES);
             $productAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
-            $this->addMagentoAttributeData($productAttributes);
+            $productAttributes = $this->addMagentoAttributeData($productAttributes);
             $this->productAttributes = $productAttributes;
         }
         return $this->productAttributes;
     }
 
     /**
+     * Get all configured variant attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getVariantAttributes(): array
     {
         if (!isset($this->variantAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_ATTRIBUTES);
             $variantAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
-            $this->addMagentoAttributeData($variantAttributes);
+            $variantAttributes = $this->addMagentoAttributeData($variantAttributes);
             $this->variantAttributes = $variantAttributes;
         }
 
@@ -89,7 +90,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get all configured attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getAllAttributes(): array
     {
@@ -100,7 +104,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get all boolean attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getBooleanAttributes(): array
     {
@@ -116,8 +123,11 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get attribute codes for all configured product attributes
+     *
      * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
+     * @throws LocalizedException
      */
     public function getProductAttributeCodes(bool $includeCustom = false): array
     {
@@ -138,8 +148,11 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get attribute codes for all configured variant attributes
+     *
      * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
+     * @throws LocalizedException
      */
     public function getVariantAttributeCodes(bool $includeCustom = false): array
     {
@@ -160,39 +173,35 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
-     * @return array
-     */
-    private function getSearchableAttributes(): array
-    {
-        if (!isset($this->searchableAttributes)) {
-            $this->searchableAttributes = $this->dataProvider->getSearchableAttributes();
-        }
-        return $this->searchableAttributes;
-    }
-
-    /**
+     * Add Magento attribute data to array of attributes
+     *
      * @param array $attributesConfig
+     * @return array
+     * @throws LocalizedException
      */
-    private function addMagentoAttributeData(array &$attributesConfig): void
+    private function addMagentoAttributeData(array $attributesConfig): array
     {
-        $defaultStoreId = $this->getDefaultStore();
-        $searchableAttributes = $this->getSearchableAttributes();
-        foreach ($attributesConfig as &$attributeConfig) {
+        $defaultStoreId = $this->generalConfig->getDefaultStore();
+        $indexableAttributes = $this->attributeDataProvider->getIndexableAttributes();
+        foreach ($attributesConfig as $key => $attributeConfig) {
             $attributeCode = $attributeConfig['attribute'];
-            foreach ($searchableAttributes as $searchableAttributeCode => $attribute) {
-                if ($attributeCode === $searchableAttributeCode) {
-                    $attributeConfig['backend_type'] = $attribute->getBackendType();
-                    $attributeConfig['attribute_id'] = $attribute->getAttributeId();
-                    $attributeConfig['frontend_input'] = $attribute->getFrontendInput();
-                    $attributeConfig['label'] = $attribute->getStoreLabel($defaultStoreId);
-                    break;
-                }
+            $indexableAttribute = $indexableAttributes[$attributeCode] ?? null;
+            if ($indexableAttribute !== null) {
+                $attributeConfig['backend_type'] = $indexableAttribute->getBackendType();
+                $attributeConfig['attribute_id'] = $indexableAttribute->getAttributeId();
+                $attributeConfig['frontend_input'] = $indexableAttribute->getFrontendInput();
+                $attributeConfig['label'] = $indexableAttribute->getStoreLabel($defaultStoreId);
             }
+            $attributesConfig[$key] = $attributeConfig;
         }
+        return $attributesConfig;
     }
 
     /**
+     * Get all static attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getStaticAttributes(): array
     {
@@ -209,7 +218,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get all attributes along with their FH attribute type
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getAttributesWithFredhopperType(): array
     {
@@ -225,7 +237,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get all EAV attributes with grouped by backend type
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getEavAttributesByType(): array
     {
@@ -248,7 +263,10 @@ class AttributeConfig extends GeneralConfig
     }
 
     /**
+     * Get all configured site variant attributes
+     *
      * @return array
+     * @throws LocalizedException
      */
     public function getSiteVariantAttributes(): array
     {

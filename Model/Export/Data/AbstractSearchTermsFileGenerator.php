@@ -49,7 +49,7 @@ abstract class AbstractSearchTermsFileGenerator implements FileGeneratorInterfac
         try {
             $this->fileSystem->filePutContents($filename, $fileContent);
             return $filename;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return '';
         }
     }

@@ -29,7 +29,7 @@ class StructureHandler implements IndexStructureInterface
      * @inheritDoc
      */
     // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.FilesystemFunctions.WarnFilesystem
-    public function delete($index, array $dimensions = [])
+    public function delete($index, array $dimensions = []): void
     {
         $tableName = $this->indexScopeResolver->resolve($index, $dimensions);
         if ($this->resource->getConnection()->isTableExists($tableName)) {
@@ -41,7 +41,7 @@ class StructureHandler implements IndexStructureInterface
      * @inheritDoc
      * @throws \Zend_Db_Exception
      */
-    public function create($index, array $fields, array $dimensions = [])
+    public function create($index, array $fields, array $dimensions = []): void
     {
         $this->createWorkingIndexTable($this->indexScopeResolver->resolve($index, $dimensions));
     }
@@ -50,7 +50,7 @@ class StructureHandler implements IndexStructureInterface
      * @param $tableName
      * @throws \Zend_Db_Exception
      */
-    private function createWorkingIndexTable($tableName)
+    private function createWorkingIndexTable($tableName): void
     {
         $table = $this->resource->getConnection()->newTable($tableName)
             ->addColumn(

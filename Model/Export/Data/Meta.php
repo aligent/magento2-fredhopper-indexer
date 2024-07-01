@@ -5,54 +5,25 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
-use Aligent\FredhopperIndexer\Helper\AgeAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
 use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
-use Aligent\FredhopperIndexer\Helper\ImageAttributeConfig;
-use Aligent\FredhopperIndexer\Helper\PricingAttributeConfig;
-use Aligent\FredhopperIndexer\Helper\StockAttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
 use Magento\Catalog\Model\Category;
-use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
 
 class Meta
 {
     public const ROOT_CATEGORY_NAME = 'catalog01';
 
-    private RelevantCategory $relevantCategory;
-    private GroupRepositoryInterface $customerGroupRepository;
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private AttributeConfig $attributeConfig;
-    private PricingAttributeConfig $pricingAttributeConfig;
-    private StockAttributeConfig $stockAttributeConfig;
-    private AgeAttributeConfig $ageAttributeConfig;
-    private ImageAttributeConfig $imageAttributeConfig;
-    private CustomAttributeConfig $customAttributeConfig;
-
     private int $rootCategoryId = 1;
 
     public function __construct(
-        RelevantCategory $relevantCategory,
-        GroupRepositoryInterface $customerGroupRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        AttributeConfig $attributeConfig,
-        PricingAttributeConfig $pricingAttributeConfig,
-        StockAttributeConfig $stockAttributeConfig,
-        AgeAttributeConfig $ageAttributeConfig,
-        ImageAttributeConfig $imageAttributeConfig,
-        CustomAttributeConfig $customAttributeConfig
+        private readonly RelevantCategory $relevantCategory,
+        private readonly GeneralConfig $generalConfig,
+        private readonly AttributeConfig $attributeConfig,
+        private readonly CustomAttributeConfig $customAttributeConfig
     ) {
-        $this->relevantCategory = $relevantCategory;
-        $this->customerGroupRepository = $customerGroupRepository;
-        $this->attributeConfig = $attributeConfig;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->pricingAttributeConfig = $pricingAttributeConfig;
-        $this->stockAttributeConfig = $stockAttributeConfig;
-        $this->ageAttributeConfig = $ageAttributeConfig;
-        $this->imageAttributeConfig = $imageAttributeConfig;
-        $this->customAttributeConfig = $customAttributeConfig;
     }
 
     /**
@@ -86,8 +57,8 @@ class Meta
     private function getAttributesArray() : array
     {
         $attributeArray = [];
-        $defaultLocale = $this->attributeConfig->getDefaultLocale();
-        $siteVariantSuffixes = $this->attributeConfig->getAllSiteVariantSuffixes();
+        $defaultLocale = $this->generalConfig->getDefaultLocale();
+        $siteVariantSuffixes = $this->generalConfig->getAllSiteVariantSuffixes();
         /**
          * returns an array with the keys (only relevant keys listed):
          * attribute, fredhopper_type, label
@@ -114,7 +85,7 @@ class Meta
             }
         }
 
-        if ($this->attributeConfig->getUseSiteVariant()) {
+        if ($this->generalConfig->getUseSiteVariant()) {
             $attributeArray[] = [
                 'attribute_id' => 'site_variant',
                 'type' => FHAttributeTypes::ATTRIBUTE_TYPE_SET64,
@@ -127,193 +98,10 @@ class Meta
             ];
         }
 
-        if ($this->pricingAttributeConfig->getUseCustomerGroup()) {
-            $attributeArray[] = [
-                'attribute_id' => 'customer_group',
-                'type' => FHAttributeTypes::ATTRIBUTE_TYPE_SET,
-                'names' => [
-                    [
-                        'locale' => $defaultLocale,
-                        'name' => __('Customer Group')
-                    ]
-                ]
-            ];
-        }
-
         return array_merge(
             $attributeArray,
-            $this->getPriceAttributesArray($defaultLocale),
-            $this->getStockAttributesArray($defaultLocale),
-            $this->getImageAttributesArray($defaultLocale),
-            $this->getAgeAttributesArray($defaultLocale),
             $this->getCustomAttributesArray($defaultLocale)
         );
-    }
-
-    /**
-     * @param string $defaultLocale
-     * @return array
-     * @throws LocalizedException
-     */
-    private function getPriceAttributesArray(string $defaultLocale): array
-    {
-        $priceAttributes = [
-            'regular_price' => 'Regular Price',
-            'special_price' => 'Special Price'
-        ];
-        if ($this->pricingAttributeConfig->getUseRange()) {
-            $priceAttributes['min_price'] = 'Minimum Price';
-            $priceAttributes['max_price'] = 'Maximum Price';
-        }
-        // check for any custom attributes that are prices
-        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
-            if (($attributeData['type'] ?? null) === 'price') {
-                $priceAttributes[$attributeCode] = $attributeData['label'];
-            }
-        }
-
-        $attributesArray = [];
-        $siteVariantSuffixes = $this->pricingAttributeConfig->getAllSiteVariantSuffixes();
-        $suffixes = [];
-        $customerGroups = $this->customerGroupRepository->getList($this->searchCriteriaBuilder->create())->getItems();
-        if ($this->pricingAttributeConfig->getUseCustomerGroup()) {
-            foreach ($customerGroups as $customerGroup) {
-                foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
-                    $key = $siteVariant . '_' . $customerGroup->getId();
-                    $suffixes[$key] = '_' . $customerGroup->getId() . $siteVariantSuffix;
-                }
-            }
-        } else {
-            $suffixes = $siteVariantSuffixes;
-        }
-
-        foreach ($suffixes as $key => $suffix) {
-            foreach ($priceAttributes as $attributeCode => $label) {
-                $attributesArray[] = [
-                    'attribute_id' => $attributeCode . $suffix,
-                    'type' => FHAttributeTypes::ATTRIBUTE_TYPE_FLOAT,
-                    'names' => [
-                        [
-                            'locale' => $defaultLocale,
-                            'name' => __($label) . (is_numeric($key)  ? '' : (' ' . $key))
-                        ]
-                    ]
-                ];
-            }
-        }
-
-        return $attributesArray;
-    }
-
-    /**
-     * @param string $defaultLocale
-     * @return array
-     */
-    private function getStockAttributesArray(string $defaultLocale): array
-    {
-        $stockAttributes = [];
-        if ($this->stockAttributeConfig->getSendStockCount()) {
-            $stockAttributes['stock_qty'] = 'Stock Count';
-        }
-        if ($this->stockAttributeConfig->getSendStockStatus()) {
-            $stockAttributes['stock_status'] = 'Stock Status';
-        }
-        // check for any custom stock attributes
-        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
-            if (($attributeData['type'] ?? null) === 'stock') {
-                $stockAttributes[$attributeCode] = $attributeData['label'];
-            }
-        }
-
-        $attributesArray = [];
-        $siteVariantSuffixes = $this->stockAttributeConfig->getAllSiteVariantSuffixes();
-
-        foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
-            foreach ($stockAttributes as $attributeCode => $label) {
-                $attributesArray[] = [
-                    'attribute_id' => $attributeCode . $siteVariantSuffix,
-                    'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
-                    'names' => [
-                        [
-                            'locale' => $defaultLocale,
-                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
-                        ]
-                    ]
-                ];
-            }
-        }
-
-        return $attributesArray;
-    }
-
-    /**
-     * @param string $defaultLocale
-     * @return array
-     */
-    private function getImageAttributesArray(string $defaultLocale): array
-    {
-        $imageAttributes = [
-            '_imageurl' => 'Image URL',
-            '_thumburl' => 'Thumbnail URL'
-        ];
-        // check for custom image attributes
-        foreach ($this->customAttributeConfig->getCustomAttributeData() as $attributeCode => $attributeData) {
-            if (($attributeData['type'] ?? null) === 'image') {
-                $imageAttributes[$attributeCode] = $attributeData['label'];
-            }
-        }
-
-        $attributeArray = [];
-        $suffixes = $this->imageAttributeConfig->getAllSiteVariantSuffixes();
-        foreach ($suffixes as $siteVariant => $suffix) {
-            foreach ($imageAttributes as $attributeCode => $label) {
-                $attributeArray[] = [
-                    'attribute_id' => $attributeCode . $suffix,
-                    'type' => FHAttributeTypes::ATTRIBUTE_TYPE_ASSET,
-                    'names' => [
-                        [
-                            'locale' => $defaultLocale,
-                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
-                        ]
-                    ]
-                ];
-            }
-        }
-        return $attributeArray;
-    }
-
-    /**
-     * @param string $defaultLocale
-     * @return array
-     */
-    private function getAgeAttributesArray(string $defaultLocale): array
-    {
-        $ageAttributes = [];
-        if ($this->ageAttributeConfig->getSendNewIndicator()) {
-            $ageAttributes['is_new'] = 'New';
-        }
-        if ($this->ageAttributeConfig->getSendDaysOnline()) {
-            $ageAttributes['days_online'] = 'Newest Products'; // label used for sorting
-        }
-
-        $attributesArray = [];
-        $siteVariantSuffixes = $this->ageAttributeConfig->getAllSiteVariantSuffixes();
-        foreach ($siteVariantSuffixes as $siteVariant => $siteVariantSuffix) {
-            foreach ($ageAttributes as $attributeCode => $label) {
-                $attributesArray[] = [
-                    'attribute_id' => $attributeCode . $siteVariantSuffix,
-                    'type' => FHAttributeTypes::ATTRIBUTE_TYPE_INT,
-                    'names' => [
-                        [
-                            'locale' => $defaultLocale,
-                            'name' => __($label) . (is_numeric($siteVariant) ? '' : (' ' . $siteVariant))
-                        ]
-                    ]
-                ];
-            }
-        }
-
-        return $attributesArray;
     }
 
     /**
@@ -323,7 +111,7 @@ class Meta
     private function getCustomAttributesArray(string $defaultLocale): array
     {
         $attributesArray = [];
-        $siteVariantSuffixes = $this->attributeConfig->getAllSiteVariantSuffixes();
+        $siteVariantSuffixes = $this->generalConfig->getAllSiteVariantSuffixes();
         foreach ($this->customAttributeConfig->getCustomAttributeData() as $customAttribute) {
             // check if attribute has already been processed as price/stock/image attribute
             if (!empty($customAttribute['type'])) {
@@ -362,6 +150,7 @@ class Meta
 
     /**
      * @return string[]
+     * @throws LocalizedException
      */
     private function getCategoryArray() : array
     {
@@ -370,7 +159,7 @@ class Meta
         $allCategories = $categoryCollection->getItems();
 
         /** @var Category $rootCategory */
-        $this->rootCategoryId = $this->attributeConfig->getRootCategoryId();
+        $this->rootCategoryId = $this->generalConfig->getRootCategoryId();
         $rootCategory = $allCategories[$this->rootCategoryId] ?? null;
         return $this->getCategoryDataWithChildren($rootCategory, $allCategories);
     }
@@ -390,7 +179,7 @@ class Meta
         ];
         $names =[
             [
-                'locale' => $this->attributeConfig->getDefaultLocale(),
+                'locale' => $this->generalConfig->getDefaultLocale(),
                 'name' => $allCategories[$category->getId()]->getName()
             ]
         ];

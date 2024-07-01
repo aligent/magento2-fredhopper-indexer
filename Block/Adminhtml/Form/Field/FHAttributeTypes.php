@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field;
 
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Html\Select;
 
 class FHAttributeTypes extends Select
@@ -33,11 +32,10 @@ class FHAttributeTypes extends Select
     /**
      * @param $value
      * @return $this
-     * @throws LocalizedException
      */
     public function setInputName($value): Select
     {
-        return $this->setName($value);
+        return $this->setData('name', $value);
     }
 
     /**

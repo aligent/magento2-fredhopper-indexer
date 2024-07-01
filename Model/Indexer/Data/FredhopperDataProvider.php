@@ -5,64 +5,52 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
+use Aligent\FredhopperIndexer\Helper\GeneralConfig;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\Process\PrepareProductIndex;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\Product\GetProductAttributes;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\Product\GetProductChildIds;
+use Aligent\FredhopperIndexer\Model\Indexer\Data\Product\GetSearchableProducts;
 use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
-use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
-use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 
 class FredhopperDataProvider
 {
 
-    private ResourceConnection $resource;
-    private DataProvider $searchDataProvider;
-    private AdditionalFieldsProviderInterface $additionalFieldsProvider;
-    private Status $catalogProductStatus;
-    private AttributeConfig $attributeConfig;
-    private ProductMapper $productMapper;
-
-    private int $batchSize;
-    private array $variantIdParentMapping = [];
-
     public function __construct(
-        ResourceConnection $resource,
-        DataProvider $dataProvider,
-        AdditionalFieldsProviderInterface $additionalFieldsProvider,
-        Status $catalogProductStatus,
-        AttributeConfig $attributeConfig,
-        ProductMapper $productMapper,
-        $batchSize = 500
+        private readonly AdditionalFieldsProviderInterface $additionalFieldsProvider,
+        private readonly AttributeDataProvider $attributeDataProvider,
+        private readonly GeneralConfig $generalConfig,
+        private readonly AttributeConfig $attributeConfig,
+        private readonly GetSearchableProducts $getSearchableProducts,
+        private readonly GetProductChildIds $getProductChildIds,
+        private readonly GetProductAttributes $getProductAttributes,
+        private readonly PrepareProductIndex $prepareProductIndex,
+        private readonly int $batchSize = 500
     ) {
-        $this->resource = $resource;
-        $this->searchDataProvider = $dataProvider;
-        $this->additionalFieldsProvider = $additionalFieldsProvider;
-        $this->catalogProductStatus = $catalogProductStatus;
-        $this->attributeConfig = $attributeConfig;
-        $this->productMapper = $productMapper;
-        $this->batchSize = $batchSize;
     }
 
     /**
-     * @param $storeId
-     * @param $productIds
+     * @param int $storeId
+     * @param array $productIds
      * @return \Generator
+     * @throws LocalizedException
+     * @throws \Exception
      */
-    public function rebuildStoreIndex($storeId, $productIds) : \Generator
+    public function rebuildStoreIndex(int $storeId, array $productIds) : \Generator
     {
-        // ensure store id is an integer
-        $storeId = (int)$storeId;
         // check if store is excluded from indexing
-        if (in_array($storeId, $this->attributeConfig->getExcludedStores())) {
+        if (in_array($storeId, $this->generalConfig->getExcludedStores())) {
             return;
         }
-        if ($productIds !== null) {
-            $productIds = array_unique($productIds);
-        }
+        $productIds = array_unique($productIds);
 
         $lastProductId = 0;
         $staticAttributes = $this->attributeConfig->getStaticAttributes();
-        $products = $this->searchDataProvider->getSearchableProducts(
+
+        $products = $this->getSearchableProducts->execute(
             $storeId,
-            [],
+            $staticAttributes,
             $productIds,
             $lastProductId,
             $this->batchSize
@@ -79,17 +67,16 @@ class FredhopperDataProvider
 
             // ensure that status attribute is always included
             $eavAttributesByType = $this->attributeConfig->getEavAttributesByType();
-            $statusAttribute = $this->searchDataProvider->getSearchableAttribute('status');
+            $statusAttribute = $this->attributeDataProvider->getAttribute('status');
             $eavAttributesByType['int'][] = $statusAttribute->getAttributeId();
-            $productsAttributes = $this->searchDataProvider->getProductAttributes(
+            $productsAttributes = $this->getProductAttributes->execute(
                 $storeId,
                 $allProductIds,
-                $eavAttributesByType
+                $eavAttributesByType,
+                $staticAttributes
             );
 
-            // Static field data are not included in searchDataProvider::getProductAttributes
-            $this->addStaticAttributes($productsAttributes, $staticAttributes);
-
+            // add any custom fields
             $additionalFields = $this->additionalFieldsProvider->getFields($allProductIds, $storeId);
 
             foreach ($products as $productData) {
@@ -108,12 +95,12 @@ class FredhopperDataProvider
                     );
                     $productIndex = $productIndex + $childProductsIndex;
                 }
-                $index = $this->prepareProductIndex($productIndex, $productData, $storeId, $additionalFields);
+                $index = $this->prepareProductIndex->execute($productIndex, $productData, $storeId, $additionalFields);
                 yield $lastProductId => $index;
             }
-            $products = $this->searchDataProvider->getSearchableProducts(
+            $products = $this->getSearchableProducts->execute(
                 $storeId,
-                [],
+                $staticAttributes,
                 $productIds,
                 $lastProductId,
                 $this->batchSize
@@ -124,37 +111,37 @@ class FredhopperDataProvider
     /**
      * @param int $parentId
      * @param array $relatedProducts
-     * @param array $productsAttributes
+     * @param array $productAttributes
      * @return array
+     * @throws LocalizedException
      */
     private function getChildProductsIndex(
         int $parentId,
         array $relatedProducts,
-        array $productsAttributes
+        array $productAttributes
     ) : array {
         $productIndex = [];
 
         foreach ($relatedProducts[$parentId] as $productChildId) {
-            if ($this->isProductEnabled($productChildId, $productsAttributes)) {
-                $productIndex[$productChildId] = $productsAttributes[$productChildId];
+            if ($this->isProductEnabled($productChildId, $productAttributes)) {
+                $productIndex[$productChildId] = $productAttributes[$productChildId];
             }
         }
         return $productIndex;
     }
 
     /**
-     * @param $products
+     * Get related products
+     *
+     * @param array $products
      * @return array
      */
-    private function getRelatedProducts($products): array
+    private function getRelatedProducts(array $products): array
     {
         $relatedProducts = [];
         foreach ($products as $productData) {
             $entityId = (int)$productData['entity_id'];
-            $relatedProducts[$entityId] = $this->searchDataProvider->getProductChildIds(
-                $entityId,
-                $productData['type_id']
-            );
+            $relatedProducts[$entityId] = $this->getProductChildIds->execute($entityId, $productData['type_id']);
         }
         return array_filter($relatedProducts);
     }
@@ -163,103 +150,13 @@ class FredhopperDataProvider
      * @param $productId
      * @param array $productsAttributes
      * @return bool
+     * @throws LocalizedException
      */
     private function isProductEnabled($productId, array $productsAttributes): bool
     {
-        $status = $this->searchDataProvider->getSearchableAttribute('status');
-        $allowedStatuses = $this->catalogProductStatus->getVisibleStatusIds();
+        $status = $this->attributeDataProvider->getAttribute('status');
+        $allowedStatuses = [Status::STATUS_ENABLED];
         return isset($productsAttributes[$productId][$status->getId()]) &&
             in_array($productsAttributes[$productId][$status->getId()], $allowedStatuses);
-    }
-
-    /**
-     * @param array $productsAttributes
-     * @param array $staticAttributes
-     */
-    private function addStaticAttributes(array &$productsAttributes, array $staticAttributes): void
-    {
-        if (count($productsAttributes) == 0 || count($staticAttributes) == 0) {
-            return;
-        }
-        $attributeIds = array_flip($staticAttributes);
-
-        $conn = $this->resource->getConnection();
-        $select = $conn->select()
-            ->from($conn->getTableName('catalog_product_entity'), ['entity_id'])
-            ->columns($staticAttributes)
-            ->where('entity_id IN (?)', array_keys($productsAttributes));
-        foreach ($conn->query($select) as $row) {
-            $productId = $row['entity_id'];
-            unset($row['entity_id']);
-            foreach ($row as $col => $val) {
-                $productsAttributes[$productId][$attributeIds[$col]] = $val;
-            }
-        }
-    }
-
-    /**
-     * @param array $productIndex
-     * @param array $productData
-     * @param int $storeId
-     * @param array $additionalFields
-     * @return array
-     */
-    private function prepareProductIndex(
-        array $productIndex,
-        array $productData,
-        int $storeId,
-        array $additionalFields
-    ): array {
-        // ensure product id is an integer
-        $productId = (int)$productData['entity_id'];
-        $typeId = $productData['type_id'];
-
-        // first convert index to be based on attributes at top level, also converting values where necessary
-        $index = $this->searchDataProvider->prepareProductIndex($productIndex, $productData, $storeId);
-
-        // map attribute ids to attribute codes, get values for options
-        $indexData = $this->productMapper->mapProduct(
-            $index,
-            $productId,
-            $storeId,
-            $typeId,
-            $additionalFields
-        );
-
-        // boolean attributes with value of "No" (0) get removed by above functions - replace them here
-        $this->populateBooleanAttributes($indexData);
-
-        foreach ($indexData['variants'] as $variantId => $variantData) {
-            $this->variantIdParentMapping[$variantId] = $productId;
-        }
-        return $indexData;
-    }
-
-    /**
-     * @param array $indexData
-     * @return void
-     */
-    private function populateBooleanAttributes(array &$indexData): void
-    {
-        // all boolean attributes are of type "int"
-        $booleanAttributes = $this->attributeConfig->getBooleanAttributes();
-        foreach ($booleanAttributes as $attribute) {
-            if (!isset($indexData['product'][$attribute['attribute']])) {
-                $indexData['product'][$attribute['attribute']] = '0';
-            }
-            foreach ($indexData['variants'] as &$variantData) {
-                if (!isset($variantData[$attribute['attribute']])) {
-                    $variantData[$attribute['attribute']] = '0';
-                }
-            }
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function getVariantIdParentMapping() : array
-    {
-        return $this->variantIdParentMapping;
     }
 }

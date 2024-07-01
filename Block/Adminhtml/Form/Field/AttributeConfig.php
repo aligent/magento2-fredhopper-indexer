@@ -19,7 +19,7 @@ class AttributeConfig extends AbstractFieldArray
     /**
      * @throws LocalizedException
      */
-    protected function _prepareToRender()
+    protected function _prepareToRender(): void
     {
         $this->addColumn(
             'attribute',
@@ -115,7 +115,7 @@ class AttributeConfig extends AbstractFieldArray
      * @param DataObject $row
      * @throws LocalizedException
      */
-    protected function _prepareArrayRow(DataObject $row)
+    protected function _prepareArrayRow(DataObject $row): void
     {
         $attributeRendererHash = $this->getAttributeRenderer()->calcOptionHash($row->getData('attribute'));
         $fhAttributeTypeRendererHash = $this->getFHAttributeTypeRenderer()->calcOptionHash(

@@ -30,21 +30,6 @@ class GeneralConfig extends AbstractHelper
     private Resolver $localeResolver;
     private StoreManagerInterface $storeManager;
 
-    private string $username;
-    private string $password;
-    private string $environmentName;
-    private string $endpointName;
-    private string $productPrefix;
-    private string $variantPrefix;
-    private bool $useSiteVariant;
-    private int $defaultStore;
-    private array $excludedStores;
-    private string $defaultLocale;
-    private int $rootCategoryId;
-    private bool $debugLogging;
-
-    /** @var string[] */
-    private array $siteVariants = [];
     /** @var string[] */
     private array $allSiteVariantSuffixes;
 
@@ -63,10 +48,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getUsername(): string
     {
-        if (!isset($this->username)) {
-            $this->username = (string)$this->scopeConfig->getValue(self::XML_PATH_USERNAME);
-        }
-        return $this->username;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_USERNAME);
     }
 
     /**
@@ -74,10 +56,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getPassword(): string
     {
-        if (!isset($this->password)) {
-            $this->password = (string)$this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
-        }
-        return $this->password;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_PASSWORD);
     }
 
     /**
@@ -85,10 +64,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getEnvironmentName(): string
     {
-        if (!isset($this->environmentName)) {
-            $this->environmentName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
-        }
-        return $this->environmentName;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_ENVIRONMENT);
     }
 
     /**
@@ -96,10 +72,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getEndpointName(): string
     {
-        if (!isset($this->endpointName)) {
-            $this->endpointName = (string)$this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
-        }
-        return $this->endpointName;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_ENDPOINT);
     }
 
     /**
@@ -107,10 +80,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getProductPrefix(): string
     {
-        if (!isset($this->productPrefix)) {
-            $this->productPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
-        }
-        return $this->productPrefix;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_PRODUCT_PREFIX);
     }
 
     /**
@@ -118,10 +88,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getVariantPrefix(): string
     {
-        if (!isset($this->variantPrefix)) {
-            $this->variantPrefix = (string)$this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
-        }
-        return $this->variantPrefix;
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_VARIANT_PREFIX);
     }
 
     /**
@@ -129,10 +96,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getUseSiteVariant(): bool
     {
-        if (!isset($this->useSiteVariant)) {
-            $this->useSiteVariant = $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
-        }
-        return $this->useSiteVariant;
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_USE_SITE_VARIANT);
     }
 
     /**
@@ -140,10 +104,7 @@ class GeneralConfig extends AbstractHelper
      */
     public function getDefaultStore(): int
     {
-        if (!isset($this->defaultStore)) {
-            $this->defaultStore = (int)$this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
-        }
-        return $this->defaultStore;
+        return (int)$this->scopeConfig->getValue(self::XML_PATH_DEFAULT_STORE);
     }
 
     /**
@@ -151,11 +112,8 @@ class GeneralConfig extends AbstractHelper
      */
     public function getExcludedStores(): array
     {
-        if (!isset($this->excludedStores)) {
-            $configValue = (string)$this->scopeConfig->getValue((self::XML_PATH_EXCLUDED_STORES));
-            $this->excludedStores = explode(',', $configValue);
-        }
-        return $this->excludedStores;
+        $configValue = (string)$this->scopeConfig->getValue((self::XML_PATH_EXCLUDED_STORES));
+        return explode(',', $configValue);
     }
 
     /**
@@ -163,12 +121,10 @@ class GeneralConfig extends AbstractHelper
      */
     public function getDefaultLocale(): string
     {
-        if (!isset($this->defaultLocale)) {
-            $this->localeResolver->emulate($this->getDefaultStore());
-            $this->defaultLocale = $this->localeResolver->getLocale();
-            $this->localeResolver->revert();
-        }
-        return $this->defaultLocale;
+        $this->localeResolver->emulate($this->getDefaultStore());
+        $defaultLocale = $this->localeResolver->getLocale();
+        $this->localeResolver->revert();
+        return $defaultLocale;
     }
 
     /**
@@ -177,15 +133,11 @@ class GeneralConfig extends AbstractHelper
      */
     public function getSiteVariant(?int $storeId = null): ?string
     {
-        $storeKey = $storeId ?? 'default';
-        if (!isset($this->siteVariants[$storeKey])) {
-            $this->siteVariants[$storeKey] = $this->scopeConfig->getValue(
-                self::XML_PATH_SITE_VARIANT,
-                ScopeInterface::SCOPE_STORE,
-                $storeId
-            );
-        }
-        return $this->siteVariants[$storeKey];
+        return $this->scopeConfig->getValue(
+            self::XML_PATH_SITE_VARIANT,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     /**
@@ -198,10 +150,11 @@ class GeneralConfig extends AbstractHelper
                 $this->allSiteVariantSuffixes = ['']; // single empty string, rather than empty array
             } else {
                 foreach ($this->storeManager->getStores() as $store) {
-                    if (in_array($store->getId(), $this->getExcludedStores())) {
+                    $storeId = (int)$store->getId();
+                    if (in_array($storeId, $this->getExcludedStores())) {
                         continue;
                     }
-                    $siteVariant = $this->getSiteVariant((int)$store->getId());
+                    $siteVariant = $this->getSiteVariant($storeId);
                     $this->allSiteVariantSuffixes[$siteVariant] = '_' . $siteVariant;
                 }
             }
@@ -214,13 +167,11 @@ class GeneralConfig extends AbstractHelper
      */
     public function getRootCategoryId(): int
     {
-        if (!isset($this->rootCategoryId)) {
-            $this->rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
-            if ($this->rootCategoryId <= 0) {
-                $this->rootCategoryId = Category::TREE_ROOT_ID;
-            }
+        $rootCategoryId = (int) $this->scopeConfig->getValue(self::XML_PATH_ROOT_CATEGORY);
+        if ($rootCategoryId <= 0) {
+            return Category::TREE_ROOT_ID;
         }
-        return $this->rootCategoryId;
+        return $rootCategoryId;
     }
 
     /**
@@ -228,9 +179,6 @@ class GeneralConfig extends AbstractHelper
      */
     public function getDebugLogging(): bool
     {
-        if (!isset($this->debugLogging)) {
-            $this->debugLogging = $this->scopeConfig->isSetFlag(self::XML_PATH_DEBUG_LOGGING);
-        }
-        return $this->debugLogging;
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_DEBUG_LOGGING);
     }
 }
