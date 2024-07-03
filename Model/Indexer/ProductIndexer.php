@@ -20,6 +20,14 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     private const INDEXER_ID = 'fredhopper';
     private const DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
 
+    /**
+     * @param DimensionProviderInterface $dimensionProvider
+     * @param FredhopperDataProvider $fredhopperDataProvider
+     * @param DataHandler $dataHandler
+     * @param DeploymentConfig $deploymentConfig
+     * @param FulltextResource $fulltextResource
+     * @param int $batchSize
+     */
     public function __construct(
         private readonly DimensionProviderInterface $dimensionProvider,
         private readonly FredhopperDataProvider $fredhopperDataProvider,
@@ -31,6 +39,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
+     * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function execute($ids): void
@@ -39,6 +49,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
+     * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function executeFull(): void
@@ -47,6 +59,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
+     * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function executeList(array $ids): void
@@ -61,8 +75,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
-     * @param $id
-     * @return void
+     * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function executeRow($id): void
@@ -76,6 +90,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
+     * @inheritDoc
+     *
      * @throws FileSystemException
      * @throws RuntimeException
      * @throws LocalizedException
@@ -104,6 +120,8 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     }
 
     /**
+     * Process next batch of products
+     *
      * @throws LocalizedException
      */
     private function processBatch(array $dimensions, array $entityIds): void

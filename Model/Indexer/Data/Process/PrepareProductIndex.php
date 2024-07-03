@@ -36,35 +36,9 @@ class PrepareProductIndex
 
         $index = [];
 
-        foreach ($this->attributeDataProvider->getIndexableAttributes('static') as $attribute) {
-            $attributeCode = $attribute->getAttributeCode();
-
-            if (isset($productData[$attributeCode])) {
-                if ('store_id' === $attributeCode) {
-                    continue;
-                }
-            }
-
-            $value = $this->attributeDataProvider->getAttributeValue(
-                $attribute->getId(),
-                $productData[$attributeCode],
-                $storeId
-            );
-            if ($value) {
-                if (isset($index[$attribute->getId()])) {
-                    if (!is_array($index[$attribute->getId()])) {
-                        $index[$attribute->getId()] = [$index[$attribute->getId()]];
-                    }
-                    $index[$attribute->getId()][] = $value;
-                } else {
-                    $index[$attribute->getId()] = $value;
-                }
-            }
-        }
-
         foreach ($productIndex as $entityId => $attributeData) {
             foreach ($attributeData as $attributeId => $attributeValues) {
-                $value = $this->attributeDataProvider->getAttributeValue($attributeId, $attributeValues, $storeId);
+                $value = $this->attributeDataProvider->getAttributeValue($attributeValues);
                 if ($value !== '') {
                     if (!isset($index[$attributeId])) {
                         $index[$attributeId] = [];
@@ -97,7 +71,7 @@ class PrepareProductIndex
         foreach ($indexData['variants'] as $variantId => $variantData) {
             $this->variantToProductMapping->addMapping($variantId, $productId);
         }
-        return $index;
+        return $indexData;
     }
 
     /**

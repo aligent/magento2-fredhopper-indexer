@@ -3,6 +3,7 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data\Product;
 
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
@@ -46,13 +47,31 @@ class GetSearchableProducts
                 ]
             ]
         );
-        $collection->removeAttributeToSelect();
-        $collection->addAttributeToSelect($staticFields);
         $collection->addFieldToFilter('entity_id', ['gt' => $lastProductId]);
         if (!empty($productIds)) {
             $collection->addIdFilter($productIds);
         }
         $collection->setPageSize($batchSize);
-        return $collection->getItems();
+        return $this->getProductsAsArray(
+            $collection->getItems(),
+            array_merge($staticFields, ['entity_id', 'type_id'])
+        );
+    }
+
+    /**
+     * Return product data as an array, rather than as entities
+     *
+     * @param array $productEntities
+     * @param array $attributes
+     * @return array
+     */
+    private function getProductsAsArray(array $productEntities, array $attributes): array
+    {
+        $productData = [];
+        foreach ($productEntities as $productEntity) {
+            /** @var Product $productEntity */
+            $productData[] = $productEntity->toArray($attributes);
+        }
+        return $productData;
     }
 }

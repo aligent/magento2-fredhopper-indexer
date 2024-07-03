@@ -3,20 +3,26 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data\Product;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\EntityManager\EntityMetadataInterface;
+use Magento\Framework\EntityManager\MetadataPool;
 
 class GetProductChildIds
 {
 
+    /**
+     * @param ResourceConnection $resourceConnection
+     * @param MetadataPool $metadataPool
+     * @param GetProductTypeInstance $getProductTypeInstance
+     * @param GetProductEmulator $getProductEmulator
+     */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
-        private readonly EntityMetadataInterface $entityMetadata,
+        private readonly MetadataPool $metadataPool,
         private readonly GetProductTypeInstance $getProductTypeInstance,
         private readonly GetProductEmulator $getProductEmulator,
     ) {
-
     }
 
     /**
@@ -52,7 +58,8 @@ class GetProductChildIds
         );
         $select->join(
             ['e' => $this->resourceConnection->getTableName('catalog_product_entity')],
-            'e.' . $this->entityMetadata->getLinkField() . ' = main.' . $parentFieldName
+            'e.' . $this->metadataPool->getMetadata(ProductInterface::class)->getLinkField() .
+            ' = main.' . $parentFieldName
         )->where(
             'e.entity_id = ?',
             $productId

@@ -14,7 +14,6 @@ class AttributeDataProvider
 {
     private array $attributes;
     private array $attributesByBackendType;
-    private array $attributeOptions = [];
 
     public function __construct(
         private readonly EavConfig $eavConfig,
@@ -44,6 +43,8 @@ class AttributeDataProvider
 
             foreach ($attributes as $attribute) {
                 $attribute->setEntity($entity);
+                // ensure ids are integers
+                $attribute->setAttributeId((int)$attribute->getAttributeId());
                 $this->attributes[$attribute->getAttributeId()] = $attribute;
                 $this->attributes[$attribute->getAttributeCode()] = $attribute;
             }
@@ -91,60 +92,17 @@ class AttributeDataProvider
     /**
      * Get consolidated attribute value
      *
-     * @param int $attributeId
      * @param string|null $valueIds
-     * @param int $storeId
      * @return string
-     * @throws LocalizedException
      */
-    public function getAttributeValue(int $attributeId, string|null $valueIds, int $storeId): string
+    public function getAttributeValue(string|null $valueIds): string
     {
-        $value = $valueIds;
-        if (false !== $valueIds) {
-            $optionValue = $this->getAttributeOptionValue($attributeId, $valueIds, $storeId);
-            if (null === $optionValue) {
-                $value = $this->filterAttributeValue($value);
-            } else {
-                $value = implode(',', array_filter([$value, $optionValue]));
-            }
-        }
-        return $value;
+        return $this->filterAttributeValue($valueIds);
     }
 
     /**
+     * Filter attribute value
      *
-     *
-     * @param int $attributeId
-     * @param string|null $valueIds
-     * @param int $storeId
-     * @return string|null
-     * @throws LocalizedException
-     */
-    private function getAttributeOptionValue(int $attributeId, ?string $valueIds, int $storeId): ?string
-    {
-        $optionKey = $attributeId . '-' . $storeId;
-        $attributeValueIds = $valueIds !== null ? explode(',', $valueIds) : [];
-        $attributeOptionValue = '';
-
-        if (!array_key_exists($optionKey, $this->attributeOptions)) {
-            $attribute = $this->getAttributeModel($attributeId);
-            $attribute->setData('store_id', $storeId);
-            $options = $attribute->getSource()->toOptionArray();
-            $this->attributeOptions[$optionKey] = array_column($options, 'label', 'value');
-            foreach ($this->attributeOptions[$optionKey] as $id => $optionValue) {
-                $this->attributeOptions[$optionKey][$id] = $this->filterAttributeValue($optionValue);
-            }
-        }
-
-        foreach ($attributeValueIds as $attributeValueId) {
-            if (isset($this->attributeOptions[$optionKey][$attributeValueId])) {
-                $attributeOptionValue .= $this->attributeOptions[$optionKey][$attributeValueId] . ' ';
-            }
-        }
-        return empty($attributeOptionValue) ? null : trim($attributeOptionValue);
-    }
-
-    /**
      * @param string|null $value
      * @return string
      */
@@ -153,7 +111,7 @@ class AttributeDataProvider
         if ($value === null) {
             return '';
         }
-        return preg_replace('/\s+iu', ' ', trim(strip_tags($value)));
+        return preg_replace('/\s+/iu', ' ', trim(strip_tags($value)));
     }
 
     /**

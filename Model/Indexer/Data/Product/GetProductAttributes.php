@@ -5,6 +5,7 @@ namespace Aligent\FredhopperIndexer\Model\Indexer\Data\Product;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Select;
 use Magento\Framework\EntityManager\MetadataPool;
 use Zend_Db_Expr;
 use Zend_Db_Select;
@@ -18,15 +19,22 @@ class GetProductAttributes
     }
 
     /**
-     * @throws \Exception
+     * Get specified attribute data for given products
+     *
+     * @param int $storeId
+     * @param array $productIds
+     * @param array $attributesByBackendType
+     * @param array $staticAttributes
+     * @return array
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function execute(
         int $storeId,
         array $productIds,
         array $attributesByBackendType,
         array $staticAttributes
-    ): array
-    {
+    ): array {
         $result = [];
         $selects = [];
 
@@ -55,7 +63,7 @@ class GetProductAttributes
                 ['t' => $tableName],
                 [
                     $linkField => 't.' . $linkField,
-                    'attribute_id' => 't_attribute_id',
+                    'attribute_id' => 't.attribute_id',
                     'value' => $this->unifyField($ifStoreValue, $backendType)
                 ]
             );
@@ -79,10 +87,11 @@ class GetProductAttributes
             );
             $select->where(' t.attribute_id IN (?)', $attributeIds);
             $select->where('t.' . $linkField . ' IN (?)', array_keys($productLinkFieldsToEntityIdMap));
+            $selects[] = $select;
         }
 
         if ($selects) {
-            $select = $connection->select()->union($selects, Zend_Db_Select::SQL_UNION_ALL);
+            $select = $connection->select()->union($selects, Select::SQL_UNION_ALL);
             $query = $connection->query($select);
             while ($row = $query->fetch()) {
                 $entityId = $productLinkFieldsToEntityIdMap[$row[$linkField]];
@@ -94,14 +103,16 @@ class GetProductAttributes
         if (!empty($staticAttributes)) {
             $attributeIds = array_flip($staticAttributes);
             $select = $connection->select();
-            $select->from(['e' => 'catalog_product_entity'], $staticAttributes);
+            $select->from(['e' => 'catalog_product_entity'], array_merge(['entity_id', 'type_id'], $staticAttributes));
             $select->where('e.entity_id IN (?)', $productLinkFieldsToEntityIdMap);
 
             foreach ($connection->query($select) as $row) {
                 $entityId = $row['entity_id'];
                 unset($row['entity_id']);
                 foreach ($row as $column => $value) {
-                    $result[$entityId][$attributeIds[$column]] = $value;
+                    if (array_key_exists($column, $attributeIds)) {
+                        $result[$entityId][$attributeIds[$column]] = $value;
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Aligent\FredhopperIndexer\Model\Mview\View\Attribute;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\DB\Ddl\Trigger;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Ddl\TriggerFactory;
@@ -41,7 +42,6 @@ class CatalogProductLinkSubscription extends Subscription
      * @param string $tableName
      * @param string $columnName
      * @param MetadataPool $metadataPool
-     * @param string|null $entityInterface
      * @param array $ignoredUpdateColumns
      * @param array $ignoredUpdateColumnsBySubscription
      * @param Config|null $mviewConfig
@@ -55,7 +55,6 @@ class CatalogProductLinkSubscription extends Subscription
         $tableName,
         $columnName,
         private readonly MetadataPool $metadataPool,
-        private readonly ?string $entityInterface = null,
         private readonly array $ignoredUpdateColumns = [],
         private readonly array $ignoredUpdateColumnsBySubscription = [],
         Config $mviewConfig = null
@@ -166,21 +165,21 @@ class CatalogProductLinkSubscription extends Subscription
     private function buildEntityIdStatementByEventType(string $eventType): string
     {
         return vsprintf(
-            'SET @entity_id = (SELECT %1$s FROM %2$s WHERE %3$s = %4$s.%5$s);',
-            [
-                $this->connection->quoteIdentifier(
-                    $this->getEntityMetadata()->getIdentifierField()
-                ),
-                $this->connection->quoteIdentifier(
-                    $this->resource->getTableName($this->getEntityMetadata()->getEntityTable())
-                ),
-                $this->connection->quoteIdentifier(
-                    $this->getEntityMetadata()->getLinkField()
-                ),
-                $eventType,
-                self::CATALOG_PRODUCT_LINK_PRODUCT_ID
-            ]
-        ) . PHP_EOL;
+                'SET @entity_id = (SELECT %1$s FROM %2$s WHERE %3$s = %4$s.%5$s);',
+                [
+                    $this->connection->quoteIdentifier(
+                        $this->getEntityMetadata()->getIdentifierField()
+                    ),
+                    $this->connection->quoteIdentifier(
+                        $this->resource->getTableName($this->getEntityMetadata()->getEntityTable())
+                    ),
+                    $this->connection->quoteIdentifier(
+                        $this->getEntityMetadata()->getLinkField()
+                    ),
+                    $eventType,
+                    self::CATALOG_PRODUCT_LINK_PRODUCT_ID
+                ]
+            ) . PHP_EOL;
     }
 
     /**
@@ -219,12 +218,14 @@ class CatalogProductLinkSubscription extends Subscription
     }
 
     /**
+     * Get Catalog Product metadata
+     *
      * @throws \Exception
      */
     private function getEntityMetaData(): EntityMetadataInterface
     {
         if (!isset($this->entityMetadata)) {
-            $this->entityMetadata = $this->metadataPool->getMetadata($this->entityInterface);
+            $this->entityMetadata = $this->metadataPool->getMetadata(ProductInterface::class);
         }
         return $this->entityMetadata;
     }
