@@ -8,6 +8,11 @@
         </arguments>
     </type>
 
+    <type name="Aligent\FredhopperIndexer\Model\Indexer\ProductIndexer">
+        <arguments>
+            <argument name="dimensionProvider" xsi:type="object" shared="false">Magento\Store\Model\StoreDimensionProvider</argument>
+        </arguments>
+    </type>
 
     <virtualType name="additionalFieldsProviderForFredhopper" type="Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProvider">
     </virtualType>
