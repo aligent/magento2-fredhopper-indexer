@@ -15,6 +15,11 @@
     </type>
 
     <virtualType name="additionalFieldsProviderForFredhopper" type="Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProvider">
+        <arguments>
+            <argument name="fieldsProviders" xsi:type="array">
+                <item name="categories" xsi:type="object">Aligent\FredhopperIndexer\Model\Indexer\Data\CategoryFieldsProvider</item>
+            </argument>
+        </arguments>
     </virtualType>
     <type name="Aligent\FredhopperIndexer\Model\Indexer\Data\FredhopperDataProvider">
         <arguments>
