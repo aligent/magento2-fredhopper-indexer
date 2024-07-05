@@ -18,6 +18,7 @@
         <arguments>
             <argument name="fieldsProviders" xsi:type="array">
                 <item name="categories" xsi:type="object">Aligent\FredhopperIndexer\Model\Indexer\Data\CategoryFieldsProvider</item>
+                <item name="images" xsi:type="object">Aligent\FredhopperIndexer\Model\Indexer\Data\ImageFieldsProvider</item>
             </argument>
         </arguments>
     </virtualType>

@@ -12,8 +12,6 @@
                 comment="Parent Product ID"/>
         <column xsi:type="mediumtext" name="attribute_data" nullable="false"
                 comment="JSON-encoded attribute data to be sent to Fredhopper"/>
-        <column xsi:type="varchar" name="operation_type" length="1" nullable="true"
-                comment="Operation Type (a=Add,u=Update,r=Replace,d=Delete)"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="store_id"/>
             <column name="product_type"/>
@@ -22,5 +20,15 @@
         <index referenceId="FREDHOPPER_PRODUCT_DATA_OPERATION_INDEX" indexType="btree">
             <column name="operation_type"/>
         </index>
+    </table>
+    <table name="fredhopper_product_changelog" resource="default" engine="innodb" comment="Change log for Fredhopper product data">
+        <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Version ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Product ID"/>
+        <column xsi:type="varchar" name="operation_type" length="1" nullable="false" comment="Operation Type"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="version_id"/>
+        </constraint>
     </table>
 </schema>
