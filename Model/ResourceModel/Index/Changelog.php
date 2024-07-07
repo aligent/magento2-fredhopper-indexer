@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Aligent\FredhopperIndexer\Model\ResourceModel\Index;
+
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Magento\Framework\App\ResourceConnection;
 
@@ -12,7 +14,7 @@ class Changelog
     public const OPERATION_TYPE_UPDATE = 'u';
     public const OPERATION_TYPE_DELETE = 'd';
 
-    private const TABLE_NAME = 'fredhopper_product_changelog';
+    public const TABLE_NAME = 'fredhopper_product_changelog';
 
     /**
      * @param ResourceConnection $resourceConnection
