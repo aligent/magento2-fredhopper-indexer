@@ -18,7 +18,9 @@ interface ExportInterface
     public const FIELD_VARIANT_DELETE_COUNT = 'variant_delete_count';
     public const FIELD_DIRECTORY = 'directory';
     public const FIELD_CREATED_AT = 'created_at';
+    public const FIELD_UPDATED_AT = 'updated_at';
     public const FIELD_STATUS = 'status';
+    public const FIELD_DATA_STATUS = 'data_status';
     public const FIELD_ERROR = 'error';
     public const FIELD_DATA_ID = 'data_id';
     public const FIELD_VERSION_ID = 'version_id';
@@ -30,6 +32,13 @@ interface ExportInterface
     public const STATUS_COMPLETE = 'c';
     public const STATUS_ERROR = 'e';
     public const STATUS_INVALID = 'i';
+
+    public const DATA_STATUS_UNKNOWN = 'unknown';
+    public const DATA_STATUS_SCHEDULED = 'scheduled';
+    public const DATA_STATUS_RUNNING = 'running';
+    public const DATA_STATUS_DELAYED = 'delayed';
+    public const DATA_STATUS_SUCCESS = 'success';
+    public const DATA_STATUS_FAILURE = 'failure';
 
     /**
      * Retrieves the export ID
@@ -94,9 +103,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of added products
      *
-     * @return int
+     * @return int|null
      */
-    public function getProductAddCount(): int;
+    public function getProductAddCount(): ?int;
 
     /**
      * Sets the total number of added products
@@ -109,9 +118,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of updated products
      *
-     * @return int
+     * @return int|null
      */
-    public function getProductUpdateCount(): int;
+    public function getProductUpdateCount(): ?int;
 
     /**
      * Sets the total number of updated products
@@ -124,9 +133,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of deleted products
      *
-     * @return int
+     * @return int|null
      */
-    public function getProductDeleteCount(): int;
+    public function getProductDeleteCount(): ?int;
 
     /**
      * Sets the total number of deleted products
@@ -139,9 +148,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of added variants
      *
-     * @return int
+     * @return int|null
      */
-    public function getVariantAddCount(): int;
+    public function getVariantAddCount(): ?int;
 
     /**
      * Sets the total number of added variants
@@ -154,9 +163,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of updated variants
      *
-     * @return int
+     * @return int|null
      */
-    public function getVariantUpdateCount(): int;
+    public function getVariantUpdateCount(): ?int;
 
     /**
      * Sets the total number of updated variants
@@ -169,9 +178,9 @@ interface ExportInterface
     /**
      * Retrieves the total number of deleted variants
      *
-     * @return int
+     * @return int|null
      */
-    public function getVariantDeleteCount(): int;
+    public function getVariantDeleteCount(): ?int;
 
     /**
      * Sets the total number of deleted variants
@@ -201,15 +210,30 @@ interface ExportInterface
      *
      * @return int
      */
-    public function getCreatedAt(): int;
+    public function getCreatedAt(): string;
 
     /**
      * Sets the creation time of the export
      *
-     * @param int $createdAt
+     * @param string $createdAt
      * @return void
      */
-    public function setCreatedAt(int $createdAt): void;
+    public function setCreatedAt(string $createdAt): void;
+
+    /**
+     * Retrieves the update time of the export
+     *
+     * @return int
+     */
+    public function getUpdatedAt(): string;
+
+    /**
+     * Sets the update time of the export
+     *
+     * @param string $updatedAt
+     * @return void
+     */
+    public function setUpdatedAt(string $updatedAt): void;
 
     /**
      * Retrieves the export's status
@@ -225,6 +249,21 @@ interface ExportInterface
      * @return void
      */
     public function setStatus(string $status): void;
+
+    /**
+     * Gets the data status from Fredhopper
+     *
+     * @return string|null
+     */
+    public function getDataStatus(): ?string;
+
+    /**
+     * Sets the data status from Fredhopper
+     *
+     * @param string $dataStatus
+     * @return void
+     */
+    public function setDataStatus(string $dataStatus): void;
 
     /**
      * Retrieves the error message for the export (if one exists)
@@ -244,9 +283,9 @@ interface ExportInterface
     /**
      * Retrieves the Fredhopper Data ID associated with the export
      *
-     * @return string
+     * @return string|null
      */
-    public function getDataId(): string;
+    public function getDataId(): ?string;
 
     /**
      * Sets the Fredhopper Data ID associated with the export

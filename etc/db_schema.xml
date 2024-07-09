@@ -62,13 +62,17 @@
                 comment="Directory containing export files"/>
         <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
                 comment="Export created at"/>
+        <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Export created at"/>
         <column xsi:type="varchar" name="status" length="1" nullable="false"
                 comment="Export status"/>
+        <column xsi:type="varchar" name="data_status" length="1" nullable="false"
+                comment="Fredhopper data status"/>
         <column xsi:type="varchar" name="data_id" length="20" nullable="true"
                 comment="Fredhopper Data ID associated with the export"/>
         <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="false"
                 comment="Latest Version ID included in the export"/>
-        <constraint xsi:type="primary" referenceId="PRIMARAY">
+        <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="export_id"/>
         </constraint>
     </table>

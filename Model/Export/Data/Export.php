@@ -14,7 +14,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getExportId(): int
     {
-        return (int) $this->getData(self::FIELD_EXPORT_ID);
+        return (int)$this->getData(self::FIELD_EXPORT_ID);
     }
 
     /**
@@ -30,7 +30,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getExportType(): string
     {
-        return $this->getData(self::FIELD_EXPORT_TYPE);
+        return (string)$this->getData(self::FIELD_EXPORT_TYPE);
     }
 
     /**
@@ -46,7 +46,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getProductCount(): int
     {
-        return $this->getData(self::FIELD_PRODUCT_COUNT);
+        return (int)$this->getData(self::FIELD_PRODUCT_COUNT);
     }
 
     /**
@@ -62,7 +62,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getVariantCount(): int
     {
-        return $this->getData(self::FIELD_VARIANT_COUNT);
+        return (int)$this->getData(self::FIELD_VARIANT_COUNT);
     }
 
     /**
@@ -76,9 +76,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getProductAddCount(): int
+    public function getProductAddCount(): ?int
     {
-        return $this->getData(self::FIELD_PRODUCT_ADD_COUNT);
+        $count = $this->getData(self::FIELD_PRODUCT_ADD_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -92,9 +93,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getProductUpdateCount(): int
+    public function getProductUpdateCount(): ?int
     {
-        return $this->getData(self::FIELD_PRODUCT_UPDATE_COUNT);
+        $count = $this->getData(self::FIELD_PRODUCT_UPDATE_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -108,9 +110,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getProductDeleteCount(): int
+    public function getProductDeleteCount(): ?int
     {
-        return $this->getData(self::FIELD_PRODUCT_DELETE_COUNT);
+        $count = $this->getData(self::FIELD_PRODUCT_DELETE_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -124,9 +127,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getVariantAddCount(): int
+    public function getVariantAddCount(): ?int
     {
-        return $this->getData(self::FIELD_VARIANT_ADD_COUNT);
+        $count = $this->getData(self::FIELD_VARIANT_ADD_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -140,9 +144,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getVariantUpdateCount(): int
+    public function getVariantUpdateCount(): ?int
     {
-        return $this->getData(self::FIELD_VARIANT_UPDATE_COUNT);
+        $count = $this->getData(self::FIELD_VARIANT_UPDATE_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -156,9 +161,10 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getVariantDeleteCount(): int
+    public function getVariantDeleteCount(): ?int
     {
-        return $this->getData(self::FIELD_VARIANT_DELETE_COUNT);
+        $count = $this->getData(self::FIELD_VARIANT_DELETE_COUNT);
+        return $count ? (int)$count : null;
     }
 
     /**
@@ -174,7 +180,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getDirectory(): string
     {
-        return $this->getData(self::FIELD_DIRECTORY);
+        return (string)$this->getData(self::FIELD_DIRECTORY);
     }
 
     /**
@@ -188,15 +194,15 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getCreatedAt(): int
+    public function getCreatedAt(): string
     {
-        return $this->getData(self::FIELD_CREATED_AT);
+        return (string)$this->getData(self::FIELD_CREATED_AT);
     }
 
     /**
      * @inheritDoc
      */
-    public function setCreatedAt(int $createdAt): void
+    public function setCreatedAt(string $createdAt): void
     {
         $this->setData(self::FIELD_CREATED_AT, $createdAt);
     }
@@ -204,9 +210,25 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
+    public function getUpdatedAt(): string
+    {
+        return (string)$this->getData(self::FIELD_UPDATED_AT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setUpdatedAt(string $updatedAt): void
+    {
+        $this->setData(self::FIELD_CREATED_AT, $updatedAt);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getStatus(): string
     {
-        return $this->getData(self::FIELD_STATUS);
+        return (string)$this->getData(self::FIELD_STATUS);
     }
 
     /**
@@ -215,6 +237,22 @@ class Export extends AbstractModel implements ExportInterface
     public function setStatus(string $status): void
     {
         $this->setData(self::FIELD_STATUS, $status);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDataStatus(): ?string
+    {
+        return $this->getData(self::FIELD_DATA_STATUS);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setDataStatus(string $dataStatus): void
+    {
+        $this->setData(self::FIELD_DATA_STATUS, $dataStatus);
     }
 
     /**
@@ -236,7 +274,7 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function getDataId(): string
+    public function getDataId(): ?string
     {
         return $this->getData(self::FIELD_DATA_ID);
     }
