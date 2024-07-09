@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
 use Aligent\FredhopperIndexer\Api\Export\Data\ExportInterface;
-use Magento\Framework\DataObject;
+use Magento\Framework\Model\AbstractModel;
 
-class Export extends DataObject implements ExportInterface
+class Export extends AbstractModel implements ExportInterface
 {
 
     /**

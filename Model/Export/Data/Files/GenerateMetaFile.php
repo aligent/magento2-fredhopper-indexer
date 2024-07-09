@@ -1,8 +1,7 @@
 <?php
 
 declare(strict_types=1);
-
-namespace Aligent\FredhopperIndexer\Model\Export\Data;
+namespace Aligent\FredhopperIndexer\Model\Export\Data\Files;
 
 use Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\FHAttributeTypes;
 use Aligent\FredhopperIndexer\Helper\AttributeConfig;
@@ -10,28 +9,46 @@ use Aligent\FredhopperIndexer\Helper\CustomAttributeConfig;
 use Aligent\FredhopperIndexer\Helper\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\RelevantCategory;
 use Magento\Catalog\Model\Category;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Serialize\Serializer\Json;
 
-class Meta
+class GenerateMetaFile
 {
-    public const ROOT_CATEGORY_NAME = 'catalog01';
-
+    private const FILENAME = 'meta.json';
+    private const ROOT_CATEGORY_NAME = 'catalog01';
     private int $rootCategoryId = 1;
 
+    /**
+     * @param GeneralConfig $generalConfig
+     * @param AttributeConfig $attributeConfig
+     * @param CustomAttributeConfig $customAttributeConfig
+     * @param RelevantCategory $relevantCategory
+     * @param Json $json
+     * @param File $file
+     */
     public function __construct(
-        private readonly RelevantCategory $relevantCategory,
         private readonly GeneralConfig $generalConfig,
         private readonly AttributeConfig $attributeConfig,
-        private readonly CustomAttributeConfig $customAttributeConfig
+        private readonly CustomAttributeConfig $customAttributeConfig,
+        private readonly RelevantCategory $relevantCategory,
+        private readonly Json $json,
+        private readonly File $file
     ) {
     }
 
     /**
-     * @return array
+     * Create meta information file for export to Fredhopper
+     *
+     * @param string $directory
+     * @return string
      * @throws LocalizedException
+     * @throws FileSystemException
      */
-    public function getMetaData() : array
+    public function execute(string $directory): string
     {
+        $filename = $directory . DIRECTORY_SEPARATOR . self::FILENAME;
         $attributesArray = array_merge(
             $this->getAttributesArray(),
             [
@@ -44,14 +61,19 @@ class Meta
                 ]
             ]
         );
-        return [
+        $content = [
             'meta' => [
                 'attributes' => array_values($attributesArray)
             ]
         ];
+
+        $this->file->filePutContents($filename, $this->json->serialize($content));
+        return $filename;
     }
 
     /**
+     * Get attribute meta information
+     *
      * @throws LocalizedException
      */
     private function getAttributesArray() : array
@@ -105,6 +127,8 @@ class Meta
     }
 
     /**
+     * Get custom attribute information
+     *
      * @param string $defaultLocale
      * @return array
      */
@@ -149,6 +173,8 @@ class Meta
     }
 
     /**
+     * Get array of category information
+     *
      * @return string[]
      * @throws LocalizedException
      */

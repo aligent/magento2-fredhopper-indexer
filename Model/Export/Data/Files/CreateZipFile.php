@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Aligent\FredhopperIndexer\Model\Export;
+namespace Aligent\FredhopperIndexer\Model\Export\Data\Files;
 
 use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
 
-class ZipFile
+class CreateZipFile
 {
 
     private File $file;
@@ -26,7 +26,7 @@ class ZipFile
      * @param array $files
      * @return bool
      */
-    public function createZipFile(string $zipFilePath, array $files): bool
+    public function execute(string $zipFilePath, array $files): bool
     {
         $zipArchive = new \ZipArchive();
         if ($zipArchive->open($zipFilePath, \ZipArchive::CREATE) !== true) {

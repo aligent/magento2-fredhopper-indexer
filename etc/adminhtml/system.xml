@@ -49,7 +49,11 @@
                     <comment>Subcategories are sent to Fredhopper</comment>
                     <source_model>Aligent\CategorySelector\Model\Config\Source\Category</source_model>
                 </field>
-                <field id="debug_logging" translate="label comment" type="select" sortOrder="120" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="export_directory" translate="label comment" sortOrder="120" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Export Directory</label>
+                    <comment>Base directory into which export files will be saved (in sub-directories)</comment>
+                </field>
+                <field id="debug_logging" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Debug Logging</label>
                     <comment>Enable debug logging for export process</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -63,12 +67,6 @@
                 <field id="delete_products" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Maximum products to delete</label>
                     <comment>Applies to both full and incremental exports</comment>
-                </field>
-                <field id="cat_tier1" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Minimum products per tier 1 category</label>
-                </field>
-                <field id="cat_tier2" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Minimum products per tier 2 category</label>
                 </field>
                 <field id="report_email" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Email failures to</label>
@@ -92,6 +90,12 @@
                     <label>Variant-Level Attributes</label>
                     <comment>Attributes sent to Fredhopper at product level</comment>
                     <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="attribute_mapping" translate="label comment" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Attribute Name Mapping</label>
+                    <comment>Mapping of Magento attribute codes to Fredhopper attribute ids</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeNameMapping</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
             </group>

@@ -28,11 +28,21 @@
         </arguments>
     </type>
 
+    <virtualType name="BlacklistFileGenerator" type="Aligent\FredhopperIndexer\Model\Data\Suggest\SearchTermsFileGenerator">
+        <arguments>
+            <argument name="isBlacklist" xsi:type="boolean">true</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="WhitelistFileGenerator" type="Aligent\FredhopperIndexer\Model\Data\Suggest\SearchTermsFileGenerator">
+        <arguments>
+            <argument name="isBlacklist" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
     <type name="Aligent\FredhopperIndexer\Model\Export\SuggestExporter">
         <arguments>
             <argument name="fileGenerators" xsi:type="array">
-                <item name="blacklist" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Data\BlacklistFileGenerator</item>
-                <item name="whitelist" xsi:type="object">Aligent\FredhopperIndexer\Model\Export\Data\WhitelistFileGenerator</item>
+                <item name="blacklist" xsi:type="object">BlacklistFileGenerator</item>
+                <item name="whitelist" xsi:type="object">WhitelistFileGenerator</item>
             </argument>
         </arguments>
     </type>

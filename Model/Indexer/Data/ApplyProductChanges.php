@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Indexer\Data;
 
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
+use Aligent\FredhopperIndexer\Model\ResourceModel\Index\Changelog;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Psr\Log\LoggerInterface;
@@ -14,7 +15,7 @@ class ApplyProductChanges
 
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
-        private readonly \Changelog $changelogResource,
+        private readonly Changelog $changelogResource,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -170,6 +171,9 @@ class ApplyProductChanges
     /**
      * Determine which products have been updated between the main and temporary table
      *
+     * @param string $productType
+     * @param AdapterInterface $connection
+     * @return array
      * @throws \Zend_Db_Select_Exception
      */
     private function getUpdatedProductsByType(string $productType, AdapterInterface $connection): array

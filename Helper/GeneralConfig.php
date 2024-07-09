@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Helper;
 
 use Magento\Catalog\Model\Category;
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Locale\Resolver;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-class GeneralConfig extends AbstractHelper
+class GeneralConfig
 {
     public const XML_PATH_PREFIX = 'fredhopper_indexer/general/';
     public const XML_PATH_USERNAME = self::XML_PATH_PREFIX . 'username';
@@ -25,22 +24,17 @@ class GeneralConfig extends AbstractHelper
     public const XML_PATH_EXCLUDED_STORES = self::XML_PATH_PREFIX . 'excluded_stores';
     public const XML_PATH_SITE_VARIANT = self::XML_PATH_PREFIX . 'site_variant';
     public const XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
+    public const XML_PATH_EXPORT_DIRECTORY = self::XML_PATH_PREFIX . 'export_directory';
     public const XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
-
-    private Resolver $localeResolver;
-    private StoreManagerInterface $storeManager;
 
     /** @var string[] */
     private array $allSiteVariantSuffixes;
 
     public function __construct(
-        Context $context,
-        Resolver $localeResolver,
-        StoreManagerInterface $storeManager
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly Resolver $localeResolver,
+        private readonly StoreManagerInterface $storeManager
     ) {
-        parent::__construct($context);
-        $this->localeResolver = $localeResolver;
-        $this->storeManager = $storeManager;
     }
 
     /**
@@ -172,6 +166,16 @@ class GeneralConfig extends AbstractHelper
             return Category::TREE_ROOT_ID;
         }
         return $rootCategoryId;
+    }
+
+    /**
+     * Get configured export directory path
+     *
+     * @return string
+     */
+    public function getExportDirectory(): string
+    {
+        return (string)$this->scopeConfig->getValue(self::XML_PATH_EXPORT_DIRECTORY);
     }
 
     /**

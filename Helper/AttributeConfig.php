@@ -15,6 +15,7 @@ class AttributeConfig
     public const XML_PATH_USE_VARIANT_PRODUCTS = self::XML_PATH_PREFIX . 'use_variant_products';
     public const XML_PATH_PRODUCT_ATTRIBUTES = self::XML_PATH_PREFIX . 'product_attributes';
     public const XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
+    public const XML_PATH_ATTRIBUTE_MAPPING = self::XML_PATH_PREFIX . 'attribute_mapping';
 
     private array $productAttributes;
     private array $variantAttributes;
@@ -26,6 +27,7 @@ class AttributeConfig
     private array $attributesWithFredhopperType;
     private array $eavAttributesByType;
     private array $siteVariantAttributes;
+    private array $attributeNameMapping;
 
     /**
      * @param GeneralConfig $generalConfig
@@ -280,5 +282,19 @@ class AttributeConfig
             $this->siteVariantAttributes = array_unique($siteVariantAttributes);
         }
         return $this->siteVariantAttributes;
+    }
+
+    /**
+     * Get mapping of attribute names between Magento and Fredhopper
+     *
+     * @return array
+     */
+    public function getAttributeNameMapping(): array
+    {
+        if (!isset($this->attributeNameMapping)) {
+            $configValue = $this->scopeConfig->getValue(self::XML_PATH_ATTRIBUTE_MAPPING);
+            $this->attributeNameMapping = $this->json->unserialize($configValue ?? '[]') ?? [];
+        }
+        return $this->attributeNameMapping;
     }
 }

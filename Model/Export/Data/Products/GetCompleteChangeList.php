@@ -1,27 +1,54 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperIndexer\Model\Export\Data;
+namespace Aligent\FredhopperIndexer\Model\Export\Data\Products;
 
+use Aligent\FredhopperIndexer\Model\Export\Data\GetCurrentExportedVersion;
 use Aligent\FredhopperIndexer\Model\ResourceModel\Index\Changelog;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
 
 class GetCompleteChangeList
 {
+
+    // cached result, as we don't want the changelist to change during processing
+    private array $changeList = [];
+
+    /**
+     * @param ResourceConnection $resourceConnection
+     * @param GetCurrentExportedVersion $getCurrentExportedVersion
+     * @param Changelog $changelogResource
+     */
     public function __construct(
-        private readonly ResourceConnection $resourceConnection
+        private readonly ResourceConnection $resourceConnection,
+        private readonly GetCurrentExportedVersion $getCurrentExportedVersion,
+        private readonly Changelog $changelogResource
     ) {
     }
 
     /**
-     * @param int $fromVersionId
-     * @param int $toVersionId
+     * Get complete list of changes since the last export
+     *
      * @param string $productType
      * @return array
      * @throws LocalizedException
      */
-    public function execute(int $fromVersionId, int $toVersionId, string $productType): array
+    public function execute(string $productType): array
+    {
+        if (!isset($this->changeList[$productType])) {
+            $fromVersion = $this->getCurrentExportedVersion->execute();
+            $toVersion = $this->changelogResource->getLatestVersionId();
+            $this->changeList[$productType] = $this->getChangedProductIds($fromVersion, $toVersion, $productType);
+        }
+        return $this->changeList[$productType];
+    }
+
+    /**
+     * Get all added, updated or deleted products between the given versions
+     *
+     * @throws LocalizedException
+     */
+    private function getChangedProductIds(int $fromVersionId, int $toVersionId, string $productType): array
     {
         // need to get all changelog records between the given versions
         $connection = $this->resourceConnection->getConnection();
@@ -35,7 +62,7 @@ class GetCompleteChangeList
 
         $data = [];
         foreach ($rows as $row) {
-            $productId = $row['product_id'];
+            $productId = (int)$row['product_id'];
             if (array_key_exists($productId, $data)) {
                 // need to handle cases where a single product has multiple operations
                 $updatedOperation = $this->combineOperations($data[$productId], $row['operation_type']);

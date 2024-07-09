@@ -87,4 +87,19 @@ class Changelog
             $data
         );
     }
+
+    /**
+     * Get the latest version in the table
+     *
+     * @return int
+     */
+    public function getLatestVersionId(): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $select = $connection->select();
+        $select->from(self::TABLE_NAME, ['version_id']);
+        $select->order('version_id DESC');
+        $select->limit(1);
+        return (int)($connection->fetchOne($select));
+    }
 }

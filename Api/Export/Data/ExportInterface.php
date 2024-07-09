@@ -24,7 +24,7 @@ interface ExportInterface
     public const FIELD_VERSION_ID = 'version_id';
 
     public const EXPORT_TYPE_FULL = 'f';
-    public const EXPORT_TYPE_PARTIAL = 'p';
+    public const EXPORT_TYPE_INCREMENTAL = 'i';
 
     public const STATUS_PENDING = 'p';
     public const STATUS_COMPLETE = 'c';
