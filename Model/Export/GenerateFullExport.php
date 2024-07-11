@@ -19,12 +19,13 @@ use Psr\Log\LoggerInterface;
 
 class GenerateFullExport
 {
-    private const ZIP_FILE_NAME = 'data.zip';
+    private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_FULL;
 
     /**
      * @param ExportFactory $exportFactory
      * @param ExportResource $exportResource
      * @param GetAllProductIds $getAllProductIds
+     * @param IndexReplicaManagement $indexReplicaManagement
      * @param Changelog $changelogResource
      * @param CreateDirectory $createDirectory
      * @param GenerateMetaFile $generateMetaFile
@@ -54,7 +55,7 @@ class GenerateFullExport
             // create export entity
             /** @var Export $export */
             $export = $this->exportFactory->create();
-            $export->setExportType(ExportInterface::EXPORT_TYPE_INCREMENTAL);
+            $export->setExportType(ExportInterface::EXPORT_TYPE_FULL);
 
             // get id information
             $productIds = $this->getAllProductIds->execute(DataHandler::TYPE_PRODUCT);
@@ -94,6 +95,7 @@ class GenerateFullExport
             $zipFilePath = $directory . DIRECTORY_SEPARATOR . self::ZIP_FILE_NAME;
             $this->createZipFile->execute($zipFilePath, array_merge([$metaFile], $productFiles, $variantFiles));
 
+            $export->setStatus(ExportInterface::STATUS_PENDING);
             // save export
             $this->exportResource->save($export);
         } catch (\Exception $e) {

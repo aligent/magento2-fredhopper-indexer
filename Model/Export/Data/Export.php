@@ -290,6 +290,22 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
+    public function getTriggerId(): ?string
+    {
+        return $this->getData(self::FIELD_TRIGGER_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setTriggerId(string $triggerId): void
+    {
+        $this->setData(self::FIELD_TRIGGER_ID, $triggerId);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getVersionId(): int
     {
         return $this->getData(self::FIELD_VERSION_ID);
@@ -301,5 +317,21 @@ class Export extends AbstractModel implements ExportInterface
     public function setVersionId(int $versionId): void
     {
         $this->setData(self::FIELD_VERSION_ID, $versionId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getIsCurrent(): bool
+    {
+        return $this->getData(self::FIELD_IS_CURRENT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setIsCurrent(bool $isCurrent): void
+    {
+        $this->setData(self::FIELD_IS_CURRENT, $isCurrent);
     }
 }

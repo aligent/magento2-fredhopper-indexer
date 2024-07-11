@@ -3,15 +3,17 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model\Export\Data;
 
-use Aligent\FredhopperIndexer\Model\ResourceModel\Export\CurrentIds;
+use Aligent\FredhopperIndexer\Model\ResourceModel\Export\Data\Export\Collection;
+use Aligent\FredhopperIndexer\Model\ResourceModel\Export\Data\Export\CollectionFactory;
 
 class GetCurrentExportedVersion
 {
+
     /**
-     * @param CurrentIds $currentIds
+     * @param CollectionFactory $exportCollectionFactory
      */
     public function __construct(
-        private readonly CurrentIds $currentIds
+        private readonly CollectionFactory $exportCollectionFactory
     ) {
     }
 
@@ -22,7 +24,11 @@ class GetCurrentExportedVersion
      */
     public function execute(): int
     {
-        $currentIds = $this->currentIds->getCurrentIds();
-        return (int)($currentIds['version_id'] ?? 0);
+        /** @var Collection $collection */
+        $collection = $this->exportCollectionFactory->create();
+        $collection->addFieldToFilter('is_current', true);
+        /** @var Export $export */
+        $export = $collection->getFirstItem();
+        return $export->isEmpty() ? 0 : $export->getVersionId();
     }
 }

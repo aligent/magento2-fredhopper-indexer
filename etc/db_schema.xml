@@ -32,16 +32,11 @@
             <column name="version_id"/>
         </constraint>
     </table>
-    <table name="fredhopper_current_ids" resource="default" engine="innodb" comment="Current version and data IDs">
-        <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="false"
-                comment="Version ID"/>
-        <column xsi:type="varchar" name="data_id" length="30" nullable="false" comment="Fredhopper Data ID"/>
-    </table>
     <table name="fredhopper_export" resource="default" engine="innodb" comment="Export information for Fredhopper">
         <column xsi:type="int" name="export_id" padding="10" unsigned="true" nullable="false" identity="true"
                 comment="Export ID"/>
         <column xsi:type="varchar" name="export_type" length="1" nullable="false"
-                comment="Export Type ('f'ull or 'i'ncremental)"/>
+                comment="Export Type ('f'ull, 'i'ncremental, or 's'uggest)"/>
         <column xsi:type="int" name="product_count" padding="10" unsigned="true" identity="false" nullable="false"
                 comment="Total number of products in export"/>
         <column xsi:type="int" name="variant_count" padding="10" unsigned="true" identity="false" nullable="false"
@@ -70,8 +65,12 @@
                 comment="Fredhopper data status"/>
         <column xsi:type="varchar" name="data_id" length="20" nullable="true"
                 comment="Fredhopper Data ID associated with the export"/>
+        <column xsi:type="varchar" name="trigger_id" length="20" nullable="true"
+                comment="Fredhopper Trigger ID for checking export status within Fredhopper"/>
         <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="false"
                 comment="Latest Version ID included in the export"/>
+        <column xsi:type="tinyint" name="is_current" padding="1" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Indicates if the export's data is currently used within Fredhopper"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="export_id"/>
         </constraint>

@@ -20,8 +20,20 @@ use Psr\Log\LoggerInterface;
 class GenerateIncrementalExport
 {
 
-    private const ZIP_FILE_NAME = 'data-incremental.zip';
+    private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_INCREMENTAL;
 
+    /**
+     * @param ExportFactory $exportFactory
+     * @param ExportResource $exportResource
+     * @param GetCompleteChangeList $getCompleteChangeList
+     * @param IndexReplicaManagement $indexReplicaManagement
+     * @param Changelog $changelogResource
+     * @param CreateDirectory $createDirectory
+     * @param GenerateProductFiles $generateProductFiles
+     * @param GenerateVariantFiles $generateVariantFiles
+     * @param CreateZipFile $createZipFile
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         private readonly ExportFactory $exportFactory,
         private readonly ExportResource $exportResource,
@@ -104,6 +116,7 @@ class GenerateIncrementalExport
             $zipFilePath = $directory . DIRECTORY_SEPARATOR . self::ZIP_FILE_NAME;
             $this->createZipFile->execute($zipFilePath, array_merge($productFiles, $variantFiles));
 
+            $export->setStatus(ExportInterface::STATUS_PENDING);
             // save export
             $this->exportResource->save($export);
         } catch (\Exception $e) {

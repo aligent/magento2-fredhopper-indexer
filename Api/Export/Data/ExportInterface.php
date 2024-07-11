@@ -23,12 +23,20 @@ interface ExportInterface
     public const FIELD_DATA_STATUS = 'data_status';
     public const FIELD_ERROR = 'error';
     public const FIELD_DATA_ID = 'data_id';
+    public const FIELD_TRIGGER_ID = 'trigger_id';
     public const FIELD_VERSION_ID = 'version_id';
+    public const FIELD_IS_CURRENT = 'is_current';
 
     public const EXPORT_TYPE_FULL = 'f';
     public const EXPORT_TYPE_INCREMENTAL = 'i';
+    public const EXPORT_TYPE_SUGGEST = 's';
+
+    public const ZIP_FILENAME_FULL = 'data.zip';
+    public const ZIP_FILENAME_INCREMENTAL = 'data-incremental.zip';
+    public const ZIP_FILENAME_SUGGEST = 'data.zip';
 
     public const STATUS_PENDING = 'p';
+    public const STATUS_UPLOADED = 'u';
     public const STATUS_COMPLETE = 'c';
     public const STATUS_ERROR = 'e';
     public const STATUS_INVALID = 'i';
@@ -39,6 +47,15 @@ interface ExportInterface
     public const DATA_STATUS_DELAYED = 'delayed';
     public const DATA_STATUS_SUCCESS = 'success';
     public const DATA_STATUS_FAILURE = 'failure';
+
+    public const VALID_DATA_STATUSES = [
+        self::DATA_STATUS_UNKNOWN,
+        self::DATA_STATUS_SCHEDULED,
+        self::DATA_STATUS_RUNNING,
+        self::DATA_STATUS_DELAYED,
+        self::DATA_STATUS_SUCCESS,
+        self::DATA_STATUS_FAILURE
+    ];
 
     /**
      * Retrieves the export ID
@@ -208,7 +225,7 @@ interface ExportInterface
     /**
      * Retrieves the creation time of the export
      *
-     * @return int
+     * @return string
      */
     public function getCreatedAt(): string;
 
@@ -223,7 +240,7 @@ interface ExportInterface
     /**
      * Retrieves the update time of the export
      *
-     * @return int
+     * @return string
      */
     public function getUpdatedAt(): string;
 
@@ -296,6 +313,21 @@ interface ExportInterface
     public function setDataId(string $dataId): void;
 
     /**
+     * Retrieves the Fredhopper Trigger ID associated with the export
+     *
+     * @return string|null
+     */
+    public function getTriggerId(): ?string;
+
+    /**
+     * Sets the Fredhopper Trigger ID associated with the export
+     *
+     * @param string $triggerId
+     * @return void
+     */
+    public function setTriggerId(string $triggerId): void;
+
+    /**
      * Retrieves the version ID associated with the export
      *
      * @return int
@@ -309,5 +341,20 @@ interface ExportInterface
      * @return void
      */
     public function setVersionId(int $versionId): void;
+
+    /**
+     * Indicates if the export's data is currently in use in Fredhopper
+     *
+     * @return bool
+     */
+    public function getIsCurrent(): bool;
+
+    /**
+     * Sets the export's data as currently being used within Fredhopper
+     *
+     * @param bool $isCurrent
+     * @return void
+     */
+    public function setIsCurrent(bool $isCurrent): void;
 
 }

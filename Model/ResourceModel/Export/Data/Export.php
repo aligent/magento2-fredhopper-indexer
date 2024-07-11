@@ -9,7 +9,7 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 class Export extends AbstractDb
 {
 
-    private const MAIN_TABLE_NAME = 'aligent_fredhopper_export';
+    public const MAIN_TABLE_NAME = 'aligent_fredhopper_export';
 
     /**
      * @inheritDoc
