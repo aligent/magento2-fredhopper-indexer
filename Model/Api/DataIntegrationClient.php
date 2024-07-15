@@ -39,7 +39,6 @@ class DataIntegrationClient
      *
      * @param string $zipFilePath
      * @return string|null
-     * @throws FileSystemException
      */
     public function uploadFasData(string $zipFilePath): ?string
     {
@@ -51,7 +50,6 @@ class DataIntegrationClient
      *
      * @param string $zipFilePath
      * @return string|null
-     * @throws FileSystemException
      */
     public function uploadSuggestData(string $zipFilePath): ?string
     {
@@ -64,7 +62,6 @@ class DataIntegrationClient
      * @param string $zipFilePath
      * @param string $endpoint
      * @return string|null
-     * @throws FileSystemException
      */
     private function uploadData(string $zipFilePath, string $endpoint): ?string
     {
@@ -74,7 +71,12 @@ class DataIntegrationClient
 
         $fileInfo = $this->file->getPathInfo($zipFilePath);
         $fileName = $fileInfo['basename'];
-        $zipContent = $this->filesystemDriver->fileGetContents($zipFilePath);
+        try {
+            $zipContent = $this->filesystemDriver->fileGetContents($zipFilePath);
+        } catch (FileSystemException $e) {
+            $this->logger->critical($e->getMessage(), ['exception' => $e]);
+            return null;
+        }
         // md5 used for checksum, not for hashing password or secret information
         // phpcs:ignore Magento2.Security.InsecureFunction.FoundWithAlternative
         $checksum = md5($zipContent);

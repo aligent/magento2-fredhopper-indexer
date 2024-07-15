@@ -15,6 +15,7 @@ use Aligent\FredhopperIndexer\Model\Export\Data\Products\GetAllProductIds;
 use Aligent\FredhopperIndexer\Model\Indexer\DataHandler;
 use Aligent\FredhopperIndexer\Model\ResourceModel\Export\Data\Export as ExportResource;
 use Aligent\FredhopperIndexer\Model\ResourceModel\Index\Changelog;
+use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 
 class GenerateFullExport
@@ -56,6 +57,7 @@ class GenerateFullExport
             /** @var Export $export */
             $export = $this->exportFactory->create();
             $export->setExportType(ExportInterface::EXPORT_TYPE_FULL);
+            $export->setStatus(ExportInterface::STATUS_PENDING);
 
             // get id information
             $productIds = $this->getAllProductIds->execute(DataHandler::TYPE_PRODUCT);
@@ -93,9 +95,14 @@ class GenerateFullExport
 
             // create zip file
             $zipFilePath = $directory . DIRECTORY_SEPARATOR . self::ZIP_FILE_NAME;
-            $this->createZipFile->execute($zipFilePath, array_merge([$metaFile], $productFiles, $variantFiles));
+            $zipCreated = $this->createZipFile->execute(
+                $zipFilePath,
+                array_merge([$metaFile], $productFiles, $variantFiles)
+            );
+            if (!$zipCreated) {
+                throw new LocalizedException(__('Error while creating ZIP file.'));
+            }
 
-            $export->setStatus(ExportInterface::STATUS_PENDING);
             // save export
             $this->exportResource->save($export);
         } catch (\Exception $e) {
