@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <virtualType name="BlacklistFileGenerator" type="Aligent\FredhopperExport\Model\Data\Suggest\SearchTermsFileGenerator">
+        <arguments>
+            <argument name="isBlacklist" xsi:type="boolean">true</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="WhitelistFileGenerator" type="Aligent\FredhopperExport\Model\Data\Suggest\SearchTermsFileGenerator">
+        <arguments>
+            <argument name="isBlacklist" xsi:type="boolean">false</argument>
+        </arguments>
+    </virtualType>
+    <type name="Aligent\FredhopperExport\Model\GenerateSuggestExport">
+        <arguments>
+            <argument name="fileGenerators" xsi:type="array">
+                <item name="blacklist" xsi:type="object">BlacklistFileGenerator</item>
+                <item name="whitelist" xsi:type="object">WhitelistFileGenerator</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="FredhopperExportLoggerHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/fredhopper_export.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="FredhopperExportLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">FredhopperExport</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="fredhopper" xsi:type="object">FredhopperExportLoggerHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="fredhopper_exports_listing_data_source" xsi:type="string">
+                    Aligent\FredhopperExport\Model\ResourceModel\Export\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Aligent\FredhopperExport\Model\ResourceModel\Export\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">fredhopper_export</argument>
+            <argument name="resourceModel" xsi:type="string">Aligent\FredhopperExport\Model\ResourceModel\Data\Export</argument>
+        </arguments>
+    </virtualType>
+</config>

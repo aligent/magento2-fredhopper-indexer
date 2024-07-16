@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="fredhopper_product_data_index" resource="default" engine="innodb" comment="Indexing data for Fredhopper">
+        <column xsi:type="int" name="store_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Store ID"/>
+        <column xsi:type="varchar" name="product_type" length="1" nullable="false"
+                default="p" comment="Product Type (p=Product,v=Variant)"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Product ID"/>
+        <column xsi:type="int" name="parent_id" padding="10" unsigned="true" nullable="true" identity="false"
+                comment="Parent Product ID"/>
+        <column xsi:type="mediumtext" name="attribute_data" nullable="false"
+                comment="JSON-encoded attribute data to be sent to Fredhopper"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="store_id"/>
+            <column name="product_type"/>
+            <column name="product_id"/>
+        </constraint>
+        <index referenceId="FREDHOPPER_PRODUCT_DATA_OPERATION_INDEX" indexType="btree">
+            <column name="operation_type"/>
+        </index>
+    </table>
+    <table name="fredhopper_product_changelog" resource="default" engine="innodb"
+           comment="Change log for Fredhopper product data">
+        <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Version ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Product ID"/>
+        <column xsi:type="varchar" name="operation_type" length="1" nullable="false" comment="Operation Type"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="version_id"/>
+        </constraint>
+    </table>
+</schema>

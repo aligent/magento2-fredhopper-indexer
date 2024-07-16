@@ -1,0 +1,86 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="fredhopper_indexer" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Fredhopper Indexer</label>
+            <tab>aligent</tab>
+            <resource>Aligent_FredhopperIndexer::manage</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="username" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Fredhopper Username</label>
+                </field>
+                <field id="password" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Fredhopper Password</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="environment_name" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Fredhopper Environment Name</label>
+                </field>
+                <field id="endpoint_name" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Fredhopper Endpoint Name</label>
+                </field>
+                <field id="product_prefix" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Product Prefix</label>
+                </field>
+                <field id="variant_prefix" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Variant Prefix</label>
+                </field><field id="use_site_variant" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Use Site Variant</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="site_variant" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Site Variant</label>
+                    <depends>
+                        <field id="fredhopper_indexer/general/use_site_variant">1</field>
+                    </depends>
+                </field>
+                <field id="default_store" translate="label comment" type="select" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Default Store</label>
+                    <comment>Store to be used for attributes that are not site-specific</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Store</source_model>
+                </field>
+                <field id="excluded_stores" translate="label comment" type="multiselect" sortOrder="105" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Excluded Stores</label>
+                    <comment>Stores to be excluded when generating export data</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Store</source_model>
+                </field>
+                <field id="root_category" translate="label comment" type="select" sortOrder="110" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Root category</label>
+                    <comment>Subcategories are sent to Fredhopper</comment>
+                    <source_model>Aligent\CategorySelector\Model\Config\Source\Category</source_model>
+                </field>
+                <field id="debug_logging" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Debug Logging</label>
+                    <comment>Enable debug logging for export process</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="product_config" translate="label" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="1">
+                <label>Product Configuration</label>
+                <field id="use_variant_products" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Use Variant Products?</label>
+                    <comment>If enabled, variant products will be sent to Fredhopper</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="product_attributes" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Product-Level Attributes</label>
+                    <comment>Attributes sent to Fredhopper at product level</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="variant_attributes" translate="label comment" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Variant-Level Attributes</label>
+                    <comment>Attributes sent to Fredhopper at product level</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="attribute_mapping" translate="label comment" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Attribute Name Mapping</label>
+                    <comment>Mapping of Magento attribute codes to Fredhopper attribute ids</comment>
+                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeNameMapping</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
