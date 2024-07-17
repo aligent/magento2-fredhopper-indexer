@@ -8,15 +8,15 @@ use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\AlreadyExistsException;
 
-readonly class TriggerDataLoad
+class TriggerDataLoad
 {
     /**
      * @param DataIntegrationClient $dataIntegrationClient
      * @param ExportResource $exportResource
      */
     public function __construct(
-        private DataIntegrationClient $dataIntegrationClient,
-        private ExportResource $exportResource
+        private readonly DataIntegrationClient $dataIntegrationClient,
+        private readonly ExportResource $exportResource
     ) {
     }
 

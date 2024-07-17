@@ -9,14 +9,6 @@
                 <variant_prefix>v_</variant_prefix>
                 <debug_logging>0</debug_logging>
             </general>
-            <sanity_check>
-                <delete_products>10</delete_products>
-            </sanity_check>
-            <cron>
-                <incremental_schedule>*/15 * * * *</incremental_schedule>
-                <full_schedule>20 */6 * * *</full_schedule>
-                <suggest_schedule>40 */12 * * *</suggest_schedule>
-            </cron>
         </fredhopper_indexer>
     </default>
 </config>

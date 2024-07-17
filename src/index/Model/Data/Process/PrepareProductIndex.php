@@ -11,7 +11,7 @@ use Aligent\FredhopperIndexer\Model\Data\Product\VariantToProductMapping;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Exception\LocalizedException;
 
-readonly class PrepareProductIndex
+class PrepareProductIndex
 {
     /**
      * @param AttributeDataProvider $attributeDataProvider
@@ -22,12 +22,12 @@ readonly class PrepareProductIndex
      * @param VariantToProductMapping $variantToProductMapping
      */
     public function __construct(
-        private AttributeDataProvider $attributeDataProvider,
-        private AttributeConfig $attributeConfig,
-        private GetProductTypeInstance $getProductTypeInstance,
-        private GetProductEmulator $getProductEmulator,
-        private ProductMapper $productMapper,
-        private VariantToProductMapping $variantToProductMapping
+        private readonly AttributeDataProvider $attributeDataProvider,
+        private readonly AttributeConfig $attributeConfig,
+        private readonly GetProductTypeInstance $getProductTypeInstance,
+        private readonly GetProductEmulator $getProductEmulator,
+        private readonly ProductMapper $productMapper,
+        private readonly VariantToProductMapping $variantToProductMapping
     ) {
     }
 

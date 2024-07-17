@@ -10,14 +10,14 @@ use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 
-readonly class GetSearchableProducts
+class GetSearchableProducts
 {
 
     /**
      * @param ProductCollectionFactory $productCollectionFactory
      */
     public function __construct(
-        private ProductCollectionFactory $productCollectionFactory
+        private readonly ProductCollectionFactory $productCollectionFactory
     ) {
     }
 

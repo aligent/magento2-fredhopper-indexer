@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="fredhopper">
+        <job name="fredhopper_full_export"
+             instance="Aligent\FredhopperExport\Cron\Generate\Full" method="execute">
+            <config_path>fredhopper_indexer/cron/full_schedule</config_path>
+        </job>
+        <job name="fredhopper_incremental_export"
+             instance="Aligent\FredhopperExport\Cron\Generate\Incremental" method="execute">
+            <config_path>fredhopper_indexer/cron/incremental_schedule</config_path>
+        </job>
+        <job name="fredhopper_suggest_export"
+             instance="Aligent\FredhopperExport\Cron\Generate\Suggest" method="execute">
+            <config_path>fredhopper_indexer/cron/suggest_schedule</config_path>
+        </job>
+    </group>
+</config>

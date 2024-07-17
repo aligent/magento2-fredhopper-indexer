@@ -12,7 +12,7 @@ use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 
-class GenerateFullExport
+class GenerateSuggestExport
 {
     private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_SUGGEST;
 

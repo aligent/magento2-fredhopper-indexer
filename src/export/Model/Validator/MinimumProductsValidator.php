@@ -8,14 +8,14 @@ use Aligent\FredhopperExport\Api\PreExportValidatorInterface;
 use Aligent\FredhopperExport\Model\Config\SanityCheckConfig;
 use Magento\Framework\Validation\ValidationException;
 
-readonly class MinimumProductsValidator implements PreExportValidatorInterface
+class MinimumProductsValidator implements PreExportValidatorInterface
 {
 
     /**
      * @param SanityCheckConfig $sanityCheckConfig
      */
     public function __construct(
-        private SanityCheckConfig $sanityCheckConfig
+        private readonly SanityCheckConfig $sanityCheckConfig
     ) {
     }
 

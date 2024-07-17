@@ -9,7 +9,7 @@ use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
 
-readonly class UploadExport
+class UploadExport
 {
 
     /**
@@ -17,8 +17,8 @@ readonly class UploadExport
      * @param ExportResource $exportResource
      */
     public function __construct(
-        private DataIntegrationClient $dataIntegrationClient,
-        private ExportResource $exportResource
+        private readonly DataIntegrationClient $dataIntegrationClient,
+        private readonly ExportResource $exportResource
     ) {
     }
 

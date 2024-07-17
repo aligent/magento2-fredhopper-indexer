@@ -9,11 +9,11 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\EntityManager\MetadataPool;
 use Zend_Db_Expr;
 
-readonly class GetProductAttributes
+class GetProductAttributes
 {
     public function __construct(
-        private ResourceConnection $resourceConnection,
-        private MetadataPool $metadataPool
+        private readonly ResourceConnection $resourceConnection,
+        private readonly MetadataPool $metadataPool
     ) {
     }
 

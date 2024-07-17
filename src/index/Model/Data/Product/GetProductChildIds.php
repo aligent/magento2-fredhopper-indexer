@@ -8,7 +8,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\EntityManager\MetadataPool;
 
-readonly class GetProductChildIds
+class GetProductChildIds
 {
 
     /**
@@ -18,10 +18,10 @@ readonly class GetProductChildIds
      * @param GetProductEmulator $getProductEmulator
      */
     public function __construct(
-        private ResourceConnection $resourceConnection,
-        private MetadataPool $metadataPool,
-        private GetProductTypeInstance $getProductTypeInstance,
-        private GetProductEmulator $getProductEmulator,
+        private readonly ResourceConnection $resourceConnection,
+        private readonly MetadataPool $metadataPool,
+        private readonly GetProductTypeInstance $getProductTypeInstance,
+        private readonly GetProductEmulator $getProductEmulator
     ) {
     }
 

@@ -6,13 +6,13 @@ namespace Aligent\FredhopperExport\Model;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\App\ResourceConnection;
 
-readonly class SetCurrentExport
+class SetCurrentExport
 {
     /**
      * @param ResourceConnection $resourceConnection
      */
     public function __construct(
-        private ResourceConnection $resourceConnection
+        private readonly ResourceConnection $resourceConnection
     ) {
     }
 

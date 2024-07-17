@@ -10,7 +10,7 @@ use Aligent\FredhopperCommon\Model\Config\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\DataHandler;
 use Magento\Framework\Exception\LocalizedException;
 
-readonly class ConvertToFredhopperFormat
+class ConvertToFredhopperFormat
 {
     /**
      * @param GeneralConfig $generalConfig
@@ -18,9 +18,9 @@ readonly class ConvertToFredhopperFormat
      * @param CustomAttributeConfig $customAttributeConfig
      */
     public function __construct(
-        private GeneralConfig $generalConfig,
-        private AttributeConfig $attributeConfig,
-        private CustomAttributeConfig $customAttributeConfig,
+        private readonly GeneralConfig $generalConfig,
+        private readonly AttributeConfig $attributeConfig,
+        private readonly CustomAttributeConfig $customAttributeConfig,
     ) {
     }
 

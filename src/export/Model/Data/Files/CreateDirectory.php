@@ -8,15 +8,15 @@ use Aligent\FredhopperExport\Model\Config\DirectoryConfig;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;
 
-readonly class CreateDirectory
+class CreateDirectory
 {
     /**
      * @param DirectoryConfig $directoryConfig
      * @param File $file
      */
     public function __construct(
-        private DirectoryConfig $directoryConfig,
-        private File $file
+        private readonly DirectoryConfig $directoryConfig,
+        private readonly File $file
     ) {
     }
 

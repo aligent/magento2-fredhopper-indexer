@@ -6,15 +6,15 @@ namespace Aligent\FredhopperExport\Model\Data\Products;
 use Aligent\FredhopperCommon\Model\Config\GeneralConfig;
 use Magento\Framework\Serialize\Serializer\Json;
 
-readonly class CollateProductData
+class CollateProductData
 {
     /**
      * @param Json $json
      * @param GeneralConfig $generalConfig
      */
     public function __construct(
-        private Json $json,
-        private GeneralConfig $generalConfig
+        private readonly Json $json,
+        private readonly GeneralConfig $generalConfig
     ) {
     }
 

@@ -6,14 +6,14 @@ namespace Aligent\FredhopperExport\Model\Data;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\Collection;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\CollectionFactory;
 
-readonly class GetCurrentExportedVersion
+class GetCurrentExportedVersion
 {
 
     /**
      * @param CollectionFactory $exportCollectionFactory
      */
     public function __construct(
-        private CollectionFactory $exportCollectionFactory
+        private readonly CollectionFactory $exportCollectionFactory
     ) {
     }
 

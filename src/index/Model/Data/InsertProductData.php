@@ -8,7 +8,7 @@ use Aligent\FredhopperIndexer\Model\DataHandler;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Serialize\Serializer\Json;
 
-readonly class InsertProductData
+class InsertProductData
 {
     /**
      * @param Json $json
@@ -16,9 +16,9 @@ readonly class InsertProductData
      * @param VariantToProductMapping $variantToProductMapping
      */
     public function __construct(
-        private Json $json,
-        private ResourceConnection $resourceConnection,
-        private VariantToProductMapping $variantToProductMapping
+        private readonly Json $json,
+        private readonly ResourceConnection $resourceConnection,
+        private readonly VariantToProductMapping $variantToProductMapping
     ) {
     }
 

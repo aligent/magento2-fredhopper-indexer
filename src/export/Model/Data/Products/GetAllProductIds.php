@@ -6,13 +6,13 @@ namespace Aligent\FredhopperExport\Model\Data\Products;
 use Aligent\FredhopperIndexer\Model\DataHandler;
 use Magento\Framework\App\ResourceConnection;
 
-readonly class GetAllProductIds
+class GetAllProductIds
 {
     /**
      * @param ResourceConnection $resourceConnection
      */
     public function __construct(
-        private ResourceConnection $resourceConnection
+        private readonly ResourceConnection $resourceConnection
     ) {
     }
 

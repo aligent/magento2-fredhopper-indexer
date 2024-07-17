@@ -6,13 +6,13 @@ namespace Aligent\FredhopperIndexer\Model\Data\Process;
 use Aligent\FredhopperCommon\Model\Config\AttributeConfig;
 use Magento\Framework\Exception\LocalizedException;
 
-readonly class ProcessVariants
+class ProcessVariants
 {
     /**
      * @param AttributeConfig $attributeConfig
      */
     public function __construct(
-        private AttributeConfig $attributeConfig
+        private readonly AttributeConfig $attributeConfig
     ) {
     }
 

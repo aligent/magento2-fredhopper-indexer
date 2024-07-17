@@ -7,7 +7,7 @@ namespace Aligent\FredhopperExport\Model\Data\Files;
 use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
 
-readonly class CreateZipFile
+class CreateZipFile
 {
 
     /**
@@ -15,8 +15,8 @@ readonly class CreateZipFile
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private File $file,
-        private LoggerInterface $logger
+        private readonly File $file,
+        private readonly LoggerInterface $logger
     ) {
     }
 

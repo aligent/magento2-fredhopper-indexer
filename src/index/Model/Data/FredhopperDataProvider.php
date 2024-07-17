@@ -15,7 +15,7 @@ use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInte
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\Exception\LocalizedException;
 
-readonly class FredhopperDataProvider
+class FredhopperDataProvider
 {
 
     /**
@@ -30,15 +30,15 @@ readonly class FredhopperDataProvider
      * @param int $batchSize
      */
     public function __construct(
-        private AdditionalFieldsProviderInterface $additionalFieldsProvider,
-        private AttributeDataProvider $attributeDataProvider,
-        private GeneralConfig $generalConfig,
-        private AttributeConfig $attributeConfig,
-        private GetSearchableProducts $getSearchableProducts,
-        private GetProductChildIds $getProductChildIds,
-        private GetProductAttributes $getProductAttributes,
-        private PrepareProductIndex $prepareProductIndex,
-        private int $batchSize = 500
+        private readonly AdditionalFieldsProviderInterface $additionalFieldsProvider,
+        private readonly AttributeDataProvider $attributeDataProvider,
+        private readonly GeneralConfig $generalConfig,
+        private readonly AttributeConfig $attributeConfig,
+        private readonly GetSearchableProducts $getSearchableProducts,
+        private readonly GetProductChildIds $getProductChildIds,
+        private readonly GetProductAttributes $getProductAttributes,
+        private readonly PrepareProductIndex $prepareProductIndex,
+        private readonly int $batchSize = 500
     ) {
     }
 
