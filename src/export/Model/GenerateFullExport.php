@@ -73,7 +73,7 @@ class GenerateFullExport
             $this->indexReplicaManagement->createReplicaTable();
 
             // create directory
-            $directory = $this->createDirectory->execute(true);
+            $directory = $this->createDirectory->execute(ExportInterface::EXPORT_TYPE_FULL);
             $export->setDirectory($directory);
 
             $metaFile = $this->generateMetaFile->execute($directory);

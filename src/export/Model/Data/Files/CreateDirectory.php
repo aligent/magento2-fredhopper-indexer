@@ -3,6 +3,7 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperExport\Model\Data\Files;
 
+use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Config\DirectoryConfig;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;
@@ -22,22 +23,32 @@ readonly class CreateDirectory
     /**
      * Create a directory in the filesystem for the export
      *
-     * @param bool $isIncremental
+     * @param string $exportType
      * @return string
      * @throws FileSystemException
      */
-    public function execute(bool $isIncremental): string
+    public function execute(string $exportType): string
     {
         $baseDirectory = $this->directoryConfig->getExportDirectory();
-        $exportDirectory = $baseDirectory . $this->generateDirectoryName($isIncremental);
+        $exportDirectory = $baseDirectory . $this->generateDirectoryName($exportType);
         $this->file->createDirectory($exportDirectory);
         return $exportDirectory;
     }
 
-
-    private function generateDirectoryName(bool $isIncremental): string
+    /**
+     * Create a directory name based on the export type and current time
+     *
+     * @param string $exportType
+     * @return string
+     */
+    private function generateDirectoryName(string $exportType): string
     {
-        // code to generate directory name
-        return 'fh_export_' . ($isIncremental ? 'incremental' : '') . '_' . time();
+        $type = match ($exportType) {
+            ExportInterface::EXPORT_TYPE_FULL => 'full',
+            ExportInterface::EXPORT_TYPE_INCREMENTAL => 'incremental',
+            ExportInterface::EXPORT_TYPE_SUGGEST => 'suggest',
+            default => ''
+        };
+        return 'fh_export_' . $type . '_' . time();
     }
 }

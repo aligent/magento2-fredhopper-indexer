@@ -33,7 +33,7 @@ readonly class UploadExport
     {
         try {
             $exportType = $export->getExportType();
-            $filename = match ($export->getExportType()) {
+            $filename = match ($exportType) {
                 ExportInterface::EXPORT_TYPE_FULL => ExportInterface::ZIP_FILENAME_FULL,
                 ExportInterface::EXPORT_TYPE_INCREMENTAL => ExportInterface::ZIP_FILENAME_INCREMENTAL,
                 ExportInterface::EXPORT_TYPE_SUGGEST => ExportInterface::ZIP_FILENAME_SUGGEST,
