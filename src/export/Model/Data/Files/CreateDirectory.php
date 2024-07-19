@@ -4,19 +4,22 @@ declare(strict_types=1);
 namespace Aligent\FredhopperExport\Model\Data\Files;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
-use Aligent\FredhopperExport\Model\Config\DirectoryConfig;
+use Aligent\FredhopperExport\Model\Config\ExportConfig;
 use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Driver\File;
 
 class CreateDirectory
 {
     /**
-     * @param DirectoryConfig $directoryConfig
+     * @param ExportConfig $exportConfig
      * @param File $file
+     * @param DirectoryList $directoryList
      */
     public function __construct(
-        private readonly DirectoryConfig $directoryConfig,
-        private readonly File $file
+        private readonly ExportConfig $exportConfig,
+        private readonly File $file,
+        private readonly DirectoryList $directoryList
     ) {
     }
 
@@ -29,8 +32,9 @@ class CreateDirectory
      */
     public function execute(string $exportType): string
     {
-        $baseDirectory = $this->directoryConfig->getExportDirectory();
-        $exportDirectory = $baseDirectory . $this->generateDirectoryName($exportType);
+        $rootDirectory = $this->directoryList->getRoot();
+        $baseDirectory = $rootDirectory . DIRECTORY_SEPARATOR . $this->exportConfig->getExportDirectory();
+        $exportDirectory = $baseDirectory . DIRECTORY_SEPARATOR . $this->generateDirectoryName($exportType);
         $this->file->createDirectory($exportDirectory);
         return $exportDirectory;
     }

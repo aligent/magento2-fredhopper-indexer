@@ -8,6 +8,7 @@ use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class UploadExport
 {
@@ -15,10 +16,12 @@ class UploadExport
     /**
      * @param DataIntegrationClient $dataIntegrationClient
      * @param ExportResource $exportResource
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly DataIntegrationClient $dataIntegrationClient,
-        private readonly ExportResource $exportResource
+        private readonly ExportResource $exportResource,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -27,7 +30,6 @@ class UploadExport
      *
      * @param ExportInterface $export
      * @return void
-     * @throws AlreadyExistsException
      */
     public function execute(ExportInterface $export): void
     {
@@ -54,7 +56,14 @@ class UploadExport
         } catch (\Exception $e) {
             $export->setStatus(ExportInterface::STATUS_ERROR);
             $export->setError($e->getMessage());
-            $this->exportResource->save($export);
+            try {
+                $this->exportResource->save($export);
+            } catch (\Exception $e) {
+                $this->logger->error(
+                    sprintf('Error saving export %i', $export->getExportId()),
+                    ['exception' => $e]
+                );
+            }
         }
     }
 }

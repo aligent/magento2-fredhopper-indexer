@@ -13,5 +13,17 @@
              instance="Aligent\FredhopperExport\Cron\Generate\Suggest" method="execute">
             <config_path>fredhopper_indexer/cron/suggest_schedule</config_path>
         </job>
+        <job name="fredhopper_upload_export"
+             instance="Aligent\FredhopperExport\Cron\Upload" method="execute">
+            <schedule>*/10 * * * *</schedule>
+        </job>
+        <job name="fredhopper_update_status"
+             instance="Aligent\FredhopperExport\Cron\UpdateInvalidExports" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+        <job name="fredhopper_clean_exports"
+             instance="Aligent\FredhopperExport\Cron\Clean" method="execute">
+            <schedule>30 1 * * *</schedule>
+        </job>
     </group>
 </config>

@@ -6,6 +6,10 @@
                     <label>Export Directory</label>
                     <comment>Base directory into which export files will be saved (in sub-directories)</comment>
                 </field>
+                <field id="export_retention" translate="label comment" sortOrder="130" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Export Retention (Days)</label>
+                    <comment>How long export files are kept on the server for (in days)</comment>
+                </field>
             </group>
             <group id="sanity_check" translate="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Sanity checks</label>

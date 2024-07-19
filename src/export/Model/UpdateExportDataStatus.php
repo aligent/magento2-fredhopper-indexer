@@ -7,6 +7,7 @@ use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\AlreadyExistsException;
+use Psr\Log\LoggerInterface;
 
 class UpdateExportDataStatus
 {
@@ -14,10 +15,14 @@ class UpdateExportDataStatus
     /**
      * @param DataIntegrationClient $dataIntegrationClient
      * @param ExportResource $exportResource
+     * @param SetCurrentExport $setCurrentExport
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly DataIntegrationClient $dataIntegrationClient,
-        private readonly ExportResource $exportResource
+        private readonly ExportResource $exportResource,
+        private readonly SetCurrentExport $setCurrentExport,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -26,7 +31,6 @@ class UpdateExportDataStatus
      *
      * @param ExportInterface $export
      * @return void
-     * @throws AlreadyExistsException
      */
     public function execute(ExportInterface $export): void
     {
@@ -46,10 +50,23 @@ class UpdateExportDataStatus
         } else {
             $export->setDataStatus(ExportInterface::DATA_STATUS_UNKNOWN);
         }
-        $this->exportResource->save($export);
 
-        if ($dataStatus === ExportInterface::DATA_STATUS_UNKNOWN) {
-            $export->setIsCurrent(true);
+        if ($dataStatus === ExportInterface::DATA_STATUS_FAILURE) {
+            $export->setStatus(ExportInterface::STATUS_ERROR);
+        } elseif ($dataStatus === ExportInterface::DATA_STATUS_SUCCESS) {
+            $export->setStatus(ExportInterface::STATUS_COMPLETE);
+        }
+        try {
+            $this->exportResource->save($export);
+        } catch (\Exception $e) {
+            $this->logger->error(
+                sprintf('Error saving export %i', $export->getExportId()),
+                ['exception' => $e]
+            );
+        }
+
+        if ($dataStatus === ExportInterface::DATA_STATUS_SUCCESS) {
+            $this->setCurrentExport->execute($export->getExportId());
         }
     }
 }

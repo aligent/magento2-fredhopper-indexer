@@ -37,6 +37,7 @@ interface ExportInterface
 
     public const STATUS_PENDING = 'p';
     public const STATUS_UPLOADED = 'u';
+    public const STATUS_TRIGGERED = 't';
     public const STATUS_COMPLETE = 'c';
     public const STATUS_ERROR = 'e';
     public const STATUS_INVALID = 'i';
