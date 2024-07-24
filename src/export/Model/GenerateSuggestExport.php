@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperIndexer\Model\Export;
+namespace Aligent\FredhopperExport\Model;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Api\FileGeneratorInterface;

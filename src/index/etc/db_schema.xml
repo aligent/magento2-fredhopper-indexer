@@ -17,9 +17,6 @@
             <column name="product_type"/>
             <column name="product_id"/>
         </constraint>
-        <index referenceId="FREDHOPPER_PRODUCT_DATA_OPERATION_INDEX" indexType="btree">
-            <column name="operation_type"/>
-        </index>
     </table>
     <table name="fredhopper_product_changelog" resource="default" engine="innodb"
            comment="Change log for Fredhopper product data">

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="Aligent_FredhopperIndexer">
+    <module name="Aligent_FredhopperExport">
         <sequence>
             <module name="Aligent_FredhopperCommon"/>
             <module name="Aligent_FredhopperIndexer"/>

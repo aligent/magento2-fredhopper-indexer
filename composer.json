@@ -14,7 +14,9 @@
     ],
     "autoload": {
         "files": [
-            "registration.php"
+            "src/common/registration.php",
+            "src/export/registration.php",
+            "src/index/registration.php"
         ],
         "psr-4": {
             "Aligent\\FredhopperIndexer\\": "src\\index",

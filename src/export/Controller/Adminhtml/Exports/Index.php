@@ -6,10 +6,13 @@ namespace Aligent\FredhopperExport\Controller\Adminhtml\Exports;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\View\Result\Page;
-use Magento\Backend\Model\View\Result\PageFactory;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface as HttpGetActionInterface;
 
-class Index extends Action
+class Index extends Action implements HttpGetActionInterface
 {
+
+    const string ADMIN_RESOURCE = 'Aligent_FredhopperExport::manage';
 
     /**
      * @param Context $context
@@ -29,7 +32,7 @@ class Index extends Action
     {
         /** @var Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->setActiveMenu('Aligent_FredhopperExport::fredhopper_exports');
+        $resultPage->setActiveMenu('Aligent_FredhopperExport::exports');
         $resultPage->getConfig()->getTitle()->prepend(__('Fredhopper Exports'));
 
         return $resultPage;

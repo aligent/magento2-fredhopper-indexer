@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Aligent_FredhopperExport::fredhopper" title="Fredhopper" translate="title"
+             module="Aligent_FredhopperExport" sortOrder="60" dependsOnModule="Aligent_FredhopperExport"
+             resource="Aligent_FredhopperExport::manage"/>
+        <add id="Aligent_FredhopperExport::exports" title="Exports" translate="title" action="fredhopper/exports"
+             module="Aligent_FredhopperExport" sortOrder="10" parent="Aligent_FredhopperExport::fredhopper"
+             dependsOnModule="Aligent_FredhopperExport" resource="Aligent_FredhopperExport::manage"/>
+    </menu>
+</config>

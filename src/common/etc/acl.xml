@@ -7,7 +7,7 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Aligent_FredhopperIndexer::manage" title="Fredhopper Indexer Settings" sortOrder="99999" />
+                            <resource id="Aligent_FredhopperCommon::manage" title="Fredhopper Indexer Settings" sortOrder="99999" />
                         </resource>
                     </resource>
                 </resource>
