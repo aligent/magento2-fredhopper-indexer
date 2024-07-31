@@ -15,15 +15,15 @@ use Psr\Log\LoggerInterface;
 class DataIntegrationClient
 {
 
-    private const ENDPOINT_FAS = 'fas';
-    private const ENDPOINT_SUGGEST = 'suggest';
+    private const string ENDPOINT_FAS = 'fas';
+    private const string ENDPOINT_SUGGEST = 'suggest';
 
-    private const UPLOAD_ENDPOINT = 'data/input/%s?';
-    private const FAS_TRIGGER_ENDPOINT = 'trigger/load-data';
-    private const FAS_MONITOR_ENDPOINT = 'trigger/load-data/%s/status';
-    private const FAS_DATA_QUALITY_ENDPOINT = 'trigger/analyze/%s-fas_load-data/logs/data-quality-summary-report.txt';
-    private const SUGGEST_TRIGGER_ENDPOINT = 'trigger/generate';
-    private const SUGGEST_MONITOR_ENDPOINT = 'trigger/generate/%s%/status';
+    private const string UPLOAD_ENDPOINT = 'data/input/%s?';
+    private const string FAS_TRIGGER_ENDPOINT = 'trigger/load-data';
+    private const string FAS_MONITOR_ENDPOINT = 'trigger/load-data/%s/status';
+    private const string FAS_DATA_QUALITY_ENDPOINT = 'trigger/analyze/%s-fas_load-data/logs/data-quality-summary-report.txt';
+    private const string SUGGEST_TRIGGER_ENDPOINT = 'trigger/generate';
+    private const string SUGGEST_MONITOR_ENDPOINT = 'trigger/generate/%s/status';
 
     /**
      * @param GeneralConfig $generalConfig
@@ -107,10 +107,7 @@ class DataIntegrationClient
             return null;
         }
 
-        // Treat any response code other than 2xx as an error
-        $statusString = (string)$response['status_code'];
-        if (strlen($statusString) < 1 || $statusString[0] !== '2') {
-            $this->logger->error("HTTP error: $statusString");
+        if (!$this->checkResponseStatusCode($response)) {
             return null;
         }
 
@@ -122,9 +119,9 @@ class DataIntegrationClient
      * Trigger the loading of fas data matching the data id within Fredhopper
      *
      * @param string $dataId
-     * @return string
+     * @return string|null
      */
-    public function triggerFasDataLoad(string $dataId): string
+    public function triggerFasDataLoad(string $dataId): ?string
     {
         return $this->triggerDataLoad($dataId, self::ENDPOINT_FAS);
     }
@@ -133,9 +130,9 @@ class DataIntegrationClient
      * Trigger the loading of data matching the data id within Fredhopper
      *
      * @param string $dataId
-     * @return string
+     * @return string|null
      */
-    public function triggerSuggestDataLoad(string $dataId): string
+    public function triggerSuggestDataLoad(string $dataId): ?string
     {
         return $this->triggerDataLoad($dataId, self::ENDPOINT_SUGGEST);
     }
@@ -166,14 +163,22 @@ class DataIntegrationClient
         }
         $request = $this->generateRequest($triggerUrl, $parameters, Request::METHOD_PUT);
         $response = $this->sendRequest($request);
+
+        if (!$this->checkResponseStatusCode($response)) {
+            return null;
+        }
+
         // check that the data load was triggered correctly
         $location = $response['headers']['location'] ?? null;
         if ($location === null) {
             return null;
         }
-        // return the path of the location URL - this is the trigger id
+        // return the last part of the path of the location URL - this is the trigger id
         $locationUri = UriFactory::factory($location);
-        return ltrim('/', $locationUri->getPath());
+        $path = $locationUri->getPath();
+        $pathParts = explode('/', $path);
+        $triggerId = end($pathParts);
+        return $triggerId ?: null;
     }
 
     /**
@@ -216,6 +221,10 @@ class DataIntegrationClient
         $request = $this->generateRequest($statusUrl, [], Request::METHOD_GET);
         $response = $this->sendRequest($request);
 
+        if (!$this->checkResponseStatusCode($response)) {
+            return null;
+        }
+
         // status will be the response body
         return $response['body'] ?? null;
     }
@@ -231,6 +240,11 @@ class DataIntegrationClient
         $dataQualityUrl = sprintf(self::FAS_DATA_QUALITY_ENDPOINT, $triggerId);
         $request = $this->generateRequest($dataQualityUrl, [], Request::METHOD_GET);
         $response = $this->sendRequest($request);
+
+        if (!$this->checkResponseStatusCode($response)) {
+            return null;
+        }
+
         return $response['body'] ?? null;
     }
 
@@ -290,6 +304,29 @@ class DataIntegrationClient
         ];
     }
 
+    /**
+     * Returns whether the response status code is a 2xx status
+     *
+     * @param array $response
+     * @return bool
+     */
+    private function checkResponseStatusCode(array $response): bool
+    {
+        // Treat any response code other than 2xx as an error
+        $statusString = (string)$response['status_code'];
+        if (strlen($statusString) < 1 || $statusString[0] !== '2') {
+            $this->logger->error("HTTP error: $statusString");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get the base URL for API calls
+     *
+     * @param string $endpoint
+     * @return string
+     */
     private function getBaseUrl(string $endpoint): string
     {
         return 'https://my.' . $this->generalConfig->getEndpointName() . '.fredhopperservices.com/'.

@@ -6,7 +6,6 @@ namespace Aligent\FredhopperExport\Model;
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
-use Magento\Framework\Exception\AlreadyExistsException;
 use Psr\Log\LoggerInterface;
 
 class UpdateExportDataStatus
