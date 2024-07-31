@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * Test class for DataIntegrationClient
+ * @group Aligent_Unit
  */
 class DataIntegrationClientTest extends TestCase
 {
