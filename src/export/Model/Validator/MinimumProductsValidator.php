@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperIndexer\Model\Export\Validator;
+namespace Aligent\FredhopperExport\Model\Validator;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Api\PreExportValidatorInterface;
@@ -29,7 +29,7 @@ class MinimumProductsValidator implements PreExportValidatorInterface
             if ($export->getProductCount() < $minProducts) {
                 throw new ValidationException(
                     __(
-                        'Total number of products (%1) does not meet threshold (%3)',
+                        'Total number of products (%1) does not meet threshold (%2)',
                        $export->getProductCount(),
                        $minProducts
                     ),

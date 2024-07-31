@@ -30,7 +30,7 @@ class DeletedProductsValidator implements PreExportValidatorInterface
         if ($export->getProductDeleteCount() > $maxDeletes) {
             throw new ValidationException(
                 __(
-                    'Number of deleted products (%1) exceeds threshold (%3)',
+                    'Number of deleted products (%1) exceeds threshold (%2)',
                     $export->getProductDeleteCount(),
                     $maxDeletes
                 )
