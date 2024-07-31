@@ -202,6 +202,23 @@ class DataIntegrationClientTest extends TestCase
         $this->setupClientMock($httpStatus, $expectedResult);
     }
 
+    /**
+     * @param int $httpStatus
+     * @param string|null $expectedResult
+     * @return void
+     */
+    private function setupClientMock(int $httpStatus, ?string $expectedResult): void
+    {
+        $requestMock = $this->getRequestMock();
+        $this->httpClientMock->expects($this->any())->method('getRequest')->willReturn($requestMock);
+
+        $response = $this->createMock(Response::class);
+        $response->method('getStatusCode')->willReturn($httpStatus);
+        $response->method('getBody')->willReturn((string)$expectedResult);
+
+        $this->httpClientMock->expects($this->any())->method('send')->willReturn($response);
+    }
+
     private function getRequestMock(): Request|MockObject
     {
         $requestMock = $this->createMock(Request::class);
@@ -244,22 +261,5 @@ class DataIntegrationClientTest extends TestCase
             'Successful report' => [200, 'report content'],
             'HTTP status not 2xx' => [400, null]
         ];
-    }
-
-    /**
-     * @param int $httpStatus
-     * @param string|null $expectedResult
-     * @return void
-     */
-    private function setupClientMock(int $httpStatus, ?string $expectedResult): void
-    {
-        $requestMock = $this->getRequestMock();
-        $this->httpClientMock->expects($this->any())->method('getRequest')->willReturn($requestMock);
-
-        $response = $this->createMock(Response::class);
-        $response->method('getStatusCode')->willReturn($httpStatus);
-        $response->method('getBody')->willReturn((string)$expectedResult);
-
-        $this->httpClientMock->expects($this->any())->method('send')->willReturn($response);
     }
 }
