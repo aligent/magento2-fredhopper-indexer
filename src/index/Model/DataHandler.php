@@ -21,17 +21,28 @@ use Magento\Framework\Search\Request\Dimension;
 
 class DataHandler implements IndexerInterface
 {
-    public const INDEX_TABLE_NAME = 'fredhopper_product_data_index';
+    public const string INDEX_TABLE_NAME = 'fredhopper_product_data_index';
 
-    public const OPERATION_TYPE_ADD = 'a';
-    public const OPERATION_TYPE_DELETE = 'd';
-    public const OPERATION_TYPE_UPDATE = 'u';
+    public const string TYPE_PRODUCT = 'p';
+    public const string TYPE_VARIANT = 'v';
 
-    public const TYPE_PRODUCT = 'p';
-    public const TYPE_VARIANT = 'v';
+    private const int BATCH_SIZE = 1000;
 
-    private const BATCH_SIZE = 1000;
-
+    /**
+     * @param ResourceConnection $resource
+     * @param IndexScopeResolver $indexScopeResolver
+     * @param ScopeResolverInterface $scopeResolver
+     * @param IndexStructureInterface $indexStructure
+     * @param Batch $batch
+     * @param AttributeConfig $attributeConfig
+     * @param ProcessProducts $processProducts
+     * @param ProcessVariants $processVariants
+     * @param InsertProductData $insertProductData
+     * @param ApplyProductChanges $applyProductChanges
+     * @param array $documentPreProcessors
+     * @param array $documentPostProcessors
+     * @param int $batchSize
+     */
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly IndexScopeResolver $indexScopeResolver,

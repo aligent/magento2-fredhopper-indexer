@@ -13,8 +13,8 @@ use Magento\Framework\Serialize\Serializer\Json;
 class GenerateProductFiles
 {
 
-    private const PRODUCT_LIMIT_PER_FILE = 1000;
-    private const PRODUCT_FILE_PREFIX = 'products-';
+    private const int PRODUCT_LIMIT_PER_FILE = 1000;
+    private const string PRODUCT_FILE_PREFIX = 'products-';
 
     /**
      * @param GetFredhopperProductData $getFredhopperProductData

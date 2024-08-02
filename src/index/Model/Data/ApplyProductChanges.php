@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 
 class ApplyProductChanges
 {
-    private const TEMP_TABLE_NAME = DataHandler::INDEX_TABLE_NAME . '_temp';
+    private const string TEMP_TABLE_NAME = DataHandler::INDEX_TABLE_NAME . '_temp';
 
     /**
      * @param ResourceConnection $resourceConnection

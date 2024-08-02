@@ -8,7 +8,7 @@ use Magento\Framework\App\ResourceConnection;
 
 class IndexReplicaManagement
 {
-    public const REPLICA_TABLE_NAME = 'fredhopper_product_data_index_replica';
+    public const string REPLICA_TABLE_NAME = 'fredhopper_product_data_index_replica';
 
     /**
      * @param ResourceConnection $resourceConnection

@@ -11,11 +11,11 @@ use Magento\Framework\Serialize\Serializer\Json;
 
 class AttributeConfig
 {
-    public const XML_PATH_PREFIX = 'fredhopper_indexer/product_config/';
-    public const XML_PATH_USE_VARIANT_PRODUCTS = self::XML_PATH_PREFIX . 'use_variant_products';
-    public const XML_PATH_PRODUCT_ATTRIBUTES = self::XML_PATH_PREFIX . 'product_attributes';
-    public const XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
-    public const XML_PATH_ATTRIBUTE_MAPPING = self::XML_PATH_PREFIX . 'attribute_mapping';
+    public const string XML_PATH_PREFIX = 'fredhopper_indexer/product_config/';
+    public const string XML_PATH_USE_VARIANT_PRODUCTS = self::XML_PATH_PREFIX . 'use_variant_products';
+    public const string XML_PATH_PRODUCT_ATTRIBUTES = self::XML_PATH_PREFIX . 'product_attributes';
+    public const string XML_PATH_VARIANT_ATTRIBUTES = self::XML_PATH_PREFIX . 'variant_attributes';
+    public const string XML_PATH_ATTRIBUTE_MAPPING = self::XML_PATH_PREFIX . 'attribute_mapping';
 
     /**
      * @var array

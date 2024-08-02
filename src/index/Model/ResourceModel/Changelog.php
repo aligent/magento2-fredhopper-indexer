@@ -10,11 +10,11 @@ use Magento\Framework\App\ResourceConnection;
 class Changelog
 {
 
-    public const OPERATION_TYPE_ADD = 'a';
-    public const OPERATION_TYPE_UPDATE = 'u';
-    public const OPERATION_TYPE_DELETE = 'd';
+    public const string OPERATION_TYPE_ADD = 'a';
+    public const string OPERATION_TYPE_UPDATE = 'u';
+    public const string OPERATION_TYPE_DELETE = 'd';
 
-    public const TABLE_NAME = 'fredhopper_product_changelog';
+    public const string TABLE_NAME = 'fredhopper_product_changelog';
 
     /**
      * @param ResourceConnection $resourceConnection

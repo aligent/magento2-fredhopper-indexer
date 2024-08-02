@@ -8,10 +8,10 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 class ExportConfig
 {
 
-    private const MIN_RETENTION_DAYS = 1;
+    private const int MIN_RETENTION_DAYS = 1;
 
-    public const XML_PATH_EXPORT_DIRECTORY = 'fredhopper_indexer/general/export_directory';
-    public const XML_PATH_EXPORT_RETENTION = 'fredhopper_indexer/general/export_retention';
+    public const string XML_PATH_EXPORT_DIRECTORY = 'fredhopper_indexer/general/export_directory';
+    public const string XML_PATH_EXPORT_RETENTION = 'fredhopper_indexer/general/export_retention';
 
     /**
      * @param ScopeConfigInterface $scopeConfig

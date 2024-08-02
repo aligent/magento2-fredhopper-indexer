@@ -8,17 +8,17 @@ use Magento\Framework\View\Element\Html\Select;
 
 class FHAttributeTypes extends Select
 {
-    public const ATTRIBUTE_TYPE_INT = 'int';
-    public const ATTRIBUTE_TYPE_FLOAT = 'float';
-    public const ATTRIBUTE_TYPE_LIST = 'list';
-    public const ATTRIBUTE_TYPE_LIST64 = 'list64';
-    public const ATTRIBUTE_TYPE_SET = 'set';
-    public const ATTRIBUTE_TYPE_SET64 = 'set64';
-    public const ATTRIBUTE_TYPE_TEXT = 'text';
-    public const ATTRIBUTE_TYPE_ASSET = 'asset';
-    public const ATTRIBUTE_TYPE_HIERARCHICAL = 'hierarchical'; // only for categories
+    public const string ATTRIBUTE_TYPE_INT = 'int';
+    public const string ATTRIBUTE_TYPE_FLOAT = 'float';
+    public const string ATTRIBUTE_TYPE_LIST = 'list';
+    public const string ATTRIBUTE_TYPE_LIST64 = 'list64';
+    public const string ATTRIBUTE_TYPE_SET = 'set';
+    public const string ATTRIBUTE_TYPE_SET64 = 'set64';
+    public const string ATTRIBUTE_TYPE_TEXT = 'text';
+    public const string ATTRIBUTE_TYPE_ASSET = 'asset';
+    public const string ATTRIBUTE_TYPE_HIERARCHICAL = 'hierarchical'; // only for categories
 
-    private const ATTRIBUTE_TYPES = [
+    private const array ATTRIBUTE_TYPES = [
         self::ATTRIBUTE_TYPE_INT,
         self::ATTRIBUTE_TYPE_FLOAT,
         self::ATTRIBUTE_TYPE_LIST,

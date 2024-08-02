@@ -11,7 +11,7 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class Actions extends Column
 {
-    private const URL_PATH_REPORT = 'fredhopper/exports/report';
+    private const string URL_PATH_REPORT = 'fredhopper/exports/report';
 
     public function __construct(
         ContextInterface $context,

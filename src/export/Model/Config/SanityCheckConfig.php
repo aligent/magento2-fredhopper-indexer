@@ -8,11 +8,11 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class SanityCheckConfig
 {
-    public const EMAIL_TEMPLATE = 'fh_indexer_sanity_check_email_template';
-    public const XML_PATH_PREFIX = 'fredhopper_indexer/sanity_check/';
-    public const XML_PATH_MIN_TOTAL = self::XML_PATH_PREFIX . 'total_products';
-    public const XML_PATH_MAX_DELETE = self::XML_PATH_PREFIX . 'delete_products';
-    public const XML_PATH_REPORT_EMAIL = self::XML_PATH_PREFIX . 'report_email';
+    public const string EMAIL_TEMPLATE = 'fh_indexer_sanity_check_email_template';
+    public const string XML_PATH_PREFIX = 'fredhopper_indexer/sanity_check/';
+    public const string XML_PATH_MIN_TOTAL = self::XML_PATH_PREFIX . 'total_products';
+    public const string XML_PATH_MAX_DELETE = self::XML_PATH_PREFIX . 'delete_products';
+    public const string XML_PATH_REPORT_EMAIL = self::XML_PATH_PREFIX . 'report_email';
 
     /**
      * @param ScopeConfigInterface $scopeConfig

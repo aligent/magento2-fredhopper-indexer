@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 class GenerateSuggestExport
 {
-    private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_SUGGEST;
+    private const string ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_SUGGEST;
 
     /**
      * @param ExportFactory $exportFactory

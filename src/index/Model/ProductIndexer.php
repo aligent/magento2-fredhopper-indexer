@@ -17,8 +17,8 @@ use Magento\Store\Model\StoreDimensionProvider;
 
 class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterface, MviewActionInterface
 {
-    private const INDEXER_ID = 'fredhopper';
-    private const DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
+    private const string INDEXER_ID = 'fredhopper';
+    private const string DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
 
     /**
      * @param DimensionProviderInterface $dimensionProvider

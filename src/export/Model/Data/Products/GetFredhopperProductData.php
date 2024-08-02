@@ -4,20 +4,21 @@ declare(strict_types=1);
 namespace Aligent\FredhopperExport\Model\Data\Products;
 
 use Aligent\FredhopperIndexer\Model\DataHandler;
+use Aligent\FredhopperIndexer\Model\ResourceModel\Changelog;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
 
 class GetFredhopperProductData
 {
 
-    private const OPERATION_TYPE_ADD = 'add';
-    private const OPERATION_TYPE_UPDATE = 'update';
-    private const OPERATION_TYPE_DELETE = 'delete';
+    private const string OPERATION_TYPE_ADD = 'add';
+    private const string OPERATION_TYPE_UPDATE = 'update';
+    private const string OPERATION_TYPE_DELETE = 'delete';
 
-    private const OPERATION_TYPE_MAPPING = [
-        DataHandler::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
-        DataHandler::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
-        DataHandler::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
+    private const array OPERATION_TYPE_MAPPING = [
+        Changelog::OPERATION_TYPE_ADD => self::OPERATION_TYPE_ADD,
+        Changelog::OPERATION_TYPE_UPDATE => self::OPERATION_TYPE_UPDATE,
+        Changelog::OPERATION_TYPE_DELETE => self::OPERATION_TYPE_DELETE
     ];
 
     /**

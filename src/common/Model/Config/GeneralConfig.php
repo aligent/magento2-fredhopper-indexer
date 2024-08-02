@@ -12,21 +12,21 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class GeneralConfig
 {
-    public const ROOT_CATEGORY_NAME = 'catalog01';
+    public const string ROOT_CATEGORY_NAME = 'catalog01';
 
-    public const XML_PATH_PREFIX = 'fredhopper_indexer/general/';
-    public const XML_PATH_USERNAME = self::XML_PATH_PREFIX . 'username';
-    public const XML_PATH_PASSWORD = self::XML_PATH_PREFIX . 'password';
-    public const XML_PATH_ENVIRONMENT = self::XML_PATH_PREFIX . 'environment_name';
-    public const XML_PATH_ENDPOINT = self::XML_PATH_PREFIX . 'endpoint_name';
-    public const XML_PATH_PRODUCT_PREFIX = self::XML_PATH_PREFIX . 'product_prefix';
-    public const XML_PATH_VARIANT_PREFIX = self::XML_PATH_PREFIX . 'variant_prefix';
-    public const XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
-    public const XML_PATH_DEFAULT_STORE = self::XML_PATH_PREFIX . 'default_store';
-    public const XML_PATH_EXCLUDED_STORES = self::XML_PATH_PREFIX . 'excluded_stores';
-    public const XML_PATH_SITE_VARIANT = self::XML_PATH_PREFIX . 'site_variant';
-    public const XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
-    public const XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
+    public const string XML_PATH_PREFIX = 'fredhopper_indexer/general/';
+    public const string XML_PATH_USERNAME = self::XML_PATH_PREFIX . 'username';
+    public const string XML_PATH_PASSWORD = self::XML_PATH_PREFIX . 'password';
+    public const string XML_PATH_ENVIRONMENT = self::XML_PATH_PREFIX . 'environment_name';
+    public const string XML_PATH_ENDPOINT = self::XML_PATH_PREFIX . 'endpoint_name';
+    public const string XML_PATH_PRODUCT_PREFIX = self::XML_PATH_PREFIX . 'product_prefix';
+    public const string XML_PATH_VARIANT_PREFIX = self::XML_PATH_PREFIX . 'variant_prefix';
+    public const string XML_PATH_USE_SITE_VARIANT = self::XML_PATH_PREFIX . 'use_site_variant';
+    public const string XML_PATH_DEFAULT_STORE = self::XML_PATH_PREFIX . 'default_store';
+    public const string XML_PATH_EXCLUDED_STORES = self::XML_PATH_PREFIX . 'excluded_stores';
+    public const string XML_PATH_SITE_VARIANT = self::XML_PATH_PREFIX . 'site_variant';
+    public const string XML_PATH_ROOT_CATEGORY = self::XML_PATH_PREFIX . 'root_category';
+    public const string XML_PATH_DEBUG_LOGGING = self::XML_PATH_PREFIX . 'debug_logging';
 
     /** @var string[] */
     private array $allSiteVariantSuffixes;

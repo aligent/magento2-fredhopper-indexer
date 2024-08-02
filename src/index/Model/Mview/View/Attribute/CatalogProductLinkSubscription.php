@@ -20,7 +20,7 @@ use Magento\Framework\Mview\View\Subscription;
  */
 class CatalogProductLinkSubscription extends Subscription
 {
-    private const CATALOG_PRODUCT_LINK_PRODUCT_ID = 'product_id';
+    private const string CATALOG_PRODUCT_LINK_PRODUCT_ID = 'product_id';
 
     /**
      * @var EntityMetadataInterface

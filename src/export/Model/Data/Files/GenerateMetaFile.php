@@ -16,8 +16,8 @@ use Magento\Framework\Serialize\Serializer\Json;
 
 class GenerateMetaFile
 {
-    private const FILENAME = 'meta.json';
-    private const ROOT_CATEGORY_NAME = GeneralConfig::ROOT_CATEGORY_NAME;
+    private const string FILENAME = 'meta.json';
+    private const string ROOT_CATEGORY_NAME = GeneralConfig::ROOT_CATEGORY_NAME;
     /**
      * @var int
      */

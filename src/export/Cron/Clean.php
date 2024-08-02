@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 class Clean
 {
-    private const SECONDS_PER_DAY = 60 * 60 * 24;
+    private const int SECONDS_PER_DAY = 60 * 60 * 24;
 
     /**
      * @param ExportConfig $exportConfig

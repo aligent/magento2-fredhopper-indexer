@@ -6,8 +6,8 @@ namespace Aligent\FredhopperCommon\Model\Config;
 
 class CustomAttributeConfig
 {
-    private const ATTRIBUTE_LEVEL_PRODUCT = 'product';
-    private const ATTRIBUTE_LEVEL_VARIANT = 'variant';
+    private const string ATTRIBUTE_LEVEL_PRODUCT = 'product';
+    private const string ATTRIBUTE_LEVEL_VARIANT = 'variant';
 
     /**
      * @param array $customAttributeData

@@ -13,8 +13,8 @@ use Magento\Framework\Serialize\Serializer\Json;
 class GenerateVariantFiles
 {
 
-    private const PRODUCT_LIMIT_PER_FILE = 1000;
-    private const VARIANT_FILE_PREFIX = 'variants-';
+    private const int PRODUCT_LIMIT_PER_FILE = 1000;
+    private const string VARIANT_FILE_PREFIX = 'variants-';
 
     /**
      * @param GetFredhopperProductData $getFredhopperProductData

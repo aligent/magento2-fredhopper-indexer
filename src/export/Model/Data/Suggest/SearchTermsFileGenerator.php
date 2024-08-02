@@ -11,10 +11,10 @@ use Magento\Framework\Filesystem\Driver\File;
 class SearchTermsFileGenerator implements FileGeneratorInterface
 {
 
-    private const BLACKLIST_FILENAME = 'blacklist.csv';
-    private const WHITELIST_FILENAME = 'whitelist.csv';
-    private const HEADER_ROW = ['searchterm', 'locale'];
-    private const DELIMITER = "\t\t";
+    private const string BLACKLIST_FILENAME = 'blacklist.csv';
+    private const string WHITELIST_FILENAME = 'whitelist.csv';
+    private const array HEADER_ROW = ['searchterm', 'locale'];
+    private const string DELIMITER = "\t\t";
 
     /**
      * @param GeneralConfig $generalConfig

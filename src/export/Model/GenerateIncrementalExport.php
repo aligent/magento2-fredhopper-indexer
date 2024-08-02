@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class GenerateIncrementalExport
 {
 
-    private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_INCREMENTAL;
+    private const string ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_INCREMENTAL;
 
     /**
      * @param ExportFactory $exportFactory
@@ -93,7 +93,7 @@ class GenerateIncrementalExport
             $this->indexReplicaManagement->createReplicaTable();
 
             // create directory
-            $directory = $this->createDirectory->execute(true);
+            $directory = $this->createDirectory->execute(ExportInterface::EXPORT_TYPE_INCREMENTAL);
             $export->setDirectory($directory);
 
             // generate export files

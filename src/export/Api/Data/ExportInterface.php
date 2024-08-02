@@ -6,50 +6,50 @@ namespace Aligent\FredhopperExport\Api\Data;
 
 interface ExportInterface
 {
-    public const FIELD_EXPORT_ID = 'export_id';
-    public const FIELD_EXPORT_TYPE = 'export_type';
-    public const FIELD_PRODUCT_COUNT = 'product_count';
-    public const FIELD_VARIANT_COUNT = 'variant_count';
-    public const FIELD_PRODUCT_ADD_COUNT = 'product_add_count';
-    public const FIELD_PRODUCT_UPDATE_COUNT = 'product_update_count';
-    public const FIELD_PRODUCT_DELETE_COUNT = 'product_delete_count';
-    public const FIELD_VARIANT_ADD_COUNT = 'variant_add_count';
-    public const FIELD_VARIANT_UPDATE_COUNT = 'variant_update_count';
-    public const FIELD_VARIANT_DELETE_COUNT = 'variant_delete_count';
-    public const FIELD_DIRECTORY = 'directory';
-    public const FIELD_CREATED_AT = 'created_at';
-    public const FIELD_UPDATED_AT = 'updated_at';
-    public const FIELD_STATUS = 'status';
-    public const FIELD_DATA_STATUS = 'data_status';
-    public const FIELD_ERROR = 'error';
-    public const FIELD_DATA_ID = 'data_id';
-    public const FIELD_TRIGGER_ID = 'trigger_id';
-    public const FIELD_VERSION_ID = 'version_id';
-    public const FIELD_IS_CURRENT = 'is_current';
+    public const string FIELD_EXPORT_ID = 'export_id';
+    public const string FIELD_EXPORT_TYPE = 'export_type';
+    public const string FIELD_PRODUCT_COUNT = 'product_count';
+    public const string FIELD_VARIANT_COUNT = 'variant_count';
+    public const string FIELD_PRODUCT_ADD_COUNT = 'product_add_count';
+    public const string FIELD_PRODUCT_UPDATE_COUNT = 'product_update_count';
+    public const string FIELD_PRODUCT_DELETE_COUNT = 'product_delete_count';
+    public const string FIELD_VARIANT_ADD_COUNT = 'variant_add_count';
+    public const string FIELD_VARIANT_UPDATE_COUNT = 'variant_update_count';
+    public const string FIELD_VARIANT_DELETE_COUNT = 'variant_delete_count';
+    public const string FIELD_DIRECTORY = 'directory';
+    public const string FIELD_CREATED_AT = 'created_at';
+    public const string FIELD_UPDATED_AT = 'updated_at';
+    public const string FIELD_STATUS = 'status';
+    public const string FIELD_DATA_STATUS = 'data_status';
+    public const string FIELD_ERROR = 'error';
+    public const string FIELD_DATA_ID = 'data_id';
+    public const string FIELD_TRIGGER_ID = 'trigger_id';
+    public const string FIELD_VERSION_ID = 'version_id';
+    public const string FIELD_IS_CURRENT = 'is_current';
 
-    public const EXPORT_TYPE_FULL = 'f';
-    public const EXPORT_TYPE_INCREMENTAL = 'i';
-    public const EXPORT_TYPE_SUGGEST = 's';
+    public const string EXPORT_TYPE_FULL = 'f';
+    public const string EXPORT_TYPE_INCREMENTAL = 'i';
+    public const string EXPORT_TYPE_SUGGEST = 's';
 
-    public const ZIP_FILENAME_FULL = 'data.zip';
-    public const ZIP_FILENAME_INCREMENTAL = 'data-incremental.zip';
-    public const ZIP_FILENAME_SUGGEST = 'data.zip';
+    public const string ZIP_FILENAME_FULL = 'data.zip';
+    public const string ZIP_FILENAME_INCREMENTAL = 'data-incremental.zip';
+    public const string ZIP_FILENAME_SUGGEST = 'data.zip';
 
-    public const STATUS_PENDING = 'p';
-    public const STATUS_UPLOADED = 'u';
-    public const STATUS_TRIGGERED = 't';
-    public const STATUS_COMPLETE = 'c';
-    public const STATUS_ERROR = 'e';
-    public const STATUS_INVALID = 'i';
+    public const string STATUS_PENDING = 'p';
+    public const string STATUS_UPLOADED = 'u';
+    public const string STATUS_TRIGGERED = 't';
+    public const string STATUS_COMPLETE = 'c';
+    public const string STATUS_ERROR = 'e';
+    public const string STATUS_INVALID = 'i';
 
-    public const DATA_STATUS_UNKNOWN = 'unknown';
-    public const DATA_STATUS_SCHEDULED = 'scheduled';
-    public const DATA_STATUS_RUNNING = 'running';
-    public const DATA_STATUS_DELAYED = 'delayed';
-    public const DATA_STATUS_SUCCESS = 'success';
-    public const DATA_STATUS_FAILURE = 'failure';
+    public const string DATA_STATUS_UNKNOWN = 'unknown';
+    public const string DATA_STATUS_SCHEDULED = 'scheduled';
+    public const string DATA_STATUS_RUNNING = 'running';
+    public const string DATA_STATUS_DELAYED = 'delayed';
+    public const string DATA_STATUS_SUCCESS = 'success';
+    public const string DATA_STATUS_FAILURE = 'failure';
 
-    public const VALID_DATA_STATUSES = [
+    public const array VALID_DATA_STATUSES = [
         self::DATA_STATUS_UNKNOWN,
         self::DATA_STATUS_SCHEDULED,
         self::DATA_STATUS_RUNNING,

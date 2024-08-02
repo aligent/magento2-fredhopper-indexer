@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 
 class GenerateFullExport
 {
-    private const ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_FULL;
+    private const string ZIP_FILE_NAME = ExportInterface::ZIP_FILENAME_FULL;
 
     /**
      * @param ExportFactory $exportFactory
