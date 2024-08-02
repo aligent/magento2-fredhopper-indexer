@@ -4,8 +4,15 @@
     "require": {
         "php": "^8.3.0",
         "aligent/magento2-category-selector": "*",
-        "magento/module-catalog-search": "*",
         "magento/magento-composer-installer": "*",
+        "magento/module-advanced-search": "*",
+        "magento/module-catalog": "*",
+        "magento/module-catalog-search": "*",
+        "magento/module-config": "*",
+        "magento-module-configurable-product": "*",
+        "magento/module-eav": "*",
+        "magento/module-elasticsearch": "*",
+        "magento/module-store": "*",
         "ext-zip": "*"
     },
     "type": "magento2-module",

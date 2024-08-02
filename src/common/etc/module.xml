@@ -5,6 +5,8 @@
         <sequence>
             <module name="Aligent_CategorySelector"/>
             <module name="Magento_Catalog"/>
+            <module name="Magento_Config"/>
+            <module name="Magento_Eav"/>
             <module name="Magento_Store"/>
         </sequence>
     </module>
