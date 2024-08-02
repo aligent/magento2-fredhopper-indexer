@@ -1,15 +1,25 @@
 {
-    "fredhopper_product_data_index": {
+    "fredhopper_export": {
         "column": {
-            "store_id": true,
-            "product_type": true,
-            "product_id": true,
-            "parent_id": true,
-            "attribute_data": true,
-            "operation_type": true
-        },
-        "index": {
-            "FREDHOPPER_PRODUCT_DATA_INDEX_OPERATION_TYPE": true
+            "export_id": true,
+            "export_type": true,
+            "product_count": true,
+            "variant_count": true,
+            "product_add_count": true,
+            "variant_add_count": true,
+            "product_update_count": true,
+            "variant_update_count": true,
+            "product_delete_count": true,
+            "variant_delete_count": true,
+            "directory": true,
+            "created_at": true,
+            "updated_at": true,
+            "status": true,
+            "data_status": true,
+            "data_id": true,
+            "trigger_id": true,
+            "version_id": true,
+            "is_current": true
         },
         "constraint": {
             "PRIMARY": true

@@ -38,7 +38,7 @@
                 comment="Fredhopper Trigger ID for checking export status within Fredhopper"/>
         <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="false"
                 comment="Latest Version ID included in the export"/>
-        <column xsi:type="tinyint" name="is_current" padding="1" unsigned="true" nullable="false" identity="false"
+        <column xsi:type="tinyint" name="is_current" unsigned="true" nullable="false" identity="false"
                 default="0" comment="Indicates if the export's data is currently used within Fredhopper"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="export_id"/>

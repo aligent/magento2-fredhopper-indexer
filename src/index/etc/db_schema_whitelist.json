@@ -14,5 +14,15 @@
         "constraint": {
             "PRIMARY": true
         }
+    },
+    "fredhopper_product_changelog": {
+        "column": {
+            "version_id": true,
+            "product_id": true,
+            "operation_type": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
     }
 }
