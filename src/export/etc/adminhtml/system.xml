@@ -20,10 +20,6 @@
                     <label>Maximum products to delete</label>
                     <comment>Applies to both full and incremental exports</comment>
                 </field>
-                <field id="report_email" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Email failures to</label>
-                    <comment>Comma-separated list</comment>
-                </field>
             </group>
             <group id="suggest" translate="label" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Suggest Export</label>

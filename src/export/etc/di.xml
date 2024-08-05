@@ -21,6 +21,15 @@
         </arguments>
     </type>
 
+    <type name="Aligent\FredhopperExport\Model\UploadExport">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="deletedProductsValidator" xsi:type="object">Aligent\FredhopperExport\Model\Validator\DeletedProductsValidator</item>
+                <item name="minimumProductsValidator" xsi:type="object">Aligent\FredhopperExport\Model\Validator\MinimumProductsValidator</item>
+            </argument>
+        </arguments>
+    </type>
+
     <virtualType name="FredhopperExportLoggerHandler" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
             <argument name="fileName" xsi:type="string">/var/log/fredhopper_export.log</argument>

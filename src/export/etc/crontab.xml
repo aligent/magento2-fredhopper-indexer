@@ -17,8 +17,16 @@
              instance="Aligent\FredhopperExport\Cron\Upload" method="execute">
             <schedule>*/10 * * * *</schedule>
         </job>
-        <job name="fredhopper_update_status"
+        <job name="fredhopper_trigger_export"
+             instance="Aligent\FredhopperExport\Cron\Trigger" method="execute">
+            <schedule>*/10 * * * *</schedule>
+        </job>
+        <job name="fredhopper_invalidate_exports"
              instance="Aligent\FredhopperExport\Cron\UpdateInvalidExports" method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+        <job name="fredhopper_update_data_status"
+             instance="Aligent\FredhopperExport\Cron\UpdateTriggeredExports" method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
         <job name="fredhopper_clean_exports"

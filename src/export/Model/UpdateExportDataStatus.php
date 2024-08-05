@@ -5,6 +5,7 @@ namespace Aligent\FredhopperExport\Model;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
+use Aligent\FredhopperExport\Model\Data\Export;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,7 @@ class UpdateExportDataStatus
      */
     public function execute(ExportInterface $export): void
     {
+        /** @var Export $export */
         $exportType = $export->getExportType();
         $triggerId = $export->getTriggerId();
         // cannot check status without a trigger ID
