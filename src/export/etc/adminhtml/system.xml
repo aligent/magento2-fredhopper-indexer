@@ -26,13 +26,13 @@
                 <field id="blacklist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Blacklist Search Terms</label>
                     <comment>Used to remove suggestions which are found in the historic search data.</comment>
-                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <frontend_model>Aligent\FredhopperExport\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
                 <field id="whitelist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Whitelist Search Terms</label>
                     <comment>Used to add any additional suggestions which are not found in the historic search data.</comment>
-                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <frontend_model>Aligent\FredhopperExport\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
             </group>

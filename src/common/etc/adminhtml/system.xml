@@ -65,19 +65,19 @@
                 <field id="product_attributes" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Product-Level Attributes</label>
                     <comment>Attributes sent to Fredhopper at product level</comment>
-                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
+                    <frontend_model>Aligent\FredhopperCommon\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
                 <field id="variant_attributes" translate="label comment" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Variant-Level Attributes</label>
                     <comment>Attributes sent to Fredhopper at product level</comment>
-                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
+                    <frontend_model>Aligent\FredhopperCommon\Block\Adminhtml\Form\Field\AttributeConfig</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
                 <field id="attribute_mapping" translate="label comment" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Attribute Name Mapping</label>
                     <comment>Mapping of Magento attribute codes to Fredhopper attribute ids</comment>
-                    <frontend_model>Aligent\FredhopperIndexer\Block\Adminhtml\Form\Field\AttributeNameMapping</frontend_model>
+                    <frontend_model>Aligent\FredhopperCommon\Block\Adminhtml\Form\Field\AttributeNameMapping</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
             </group>
