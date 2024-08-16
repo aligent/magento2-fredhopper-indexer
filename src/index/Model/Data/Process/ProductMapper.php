@@ -292,7 +292,7 @@ class ProductMapper
 
         foreach ($attributeValues as $attributeValue) {
             if (isset($options[$attributeValue])) {
-                $attributeLabels[] = (string)$options[$attributeValue];
+                $attributeLabels[] = $options[$attributeValue];
             }
         }
 
@@ -315,7 +315,7 @@ class ProductMapper
             $options = [];
             $this->emulation->startEnvironmentEmulation($storeId);
             foreach ($attribute->getOptions() ?? [] as $option) {
-                $options[$option->getValue()] = $option->getLabel();
+                $options[$option->getValue()] = (string)$option->getLabel();
             }
             $this->emulation->stopEnvironmentEmulation();
             $this->attributeOptionsCache[$storeId][$attribute->getId()] = $options;
