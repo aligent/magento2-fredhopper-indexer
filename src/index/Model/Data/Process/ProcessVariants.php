@@ -69,9 +69,9 @@ class ProcessVariants
         foreach ($documentData['product'] as $attributeCode => $productData) {
             if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
                 $copyOfVariants = [];
-                foreach ($documentData['variants'] as $variantData) {
+                foreach ($documentData['variants'] as $variantId => $variantData) {
                     $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
-                    $copyOfVariants[] = $variantData;
+                    $copyOfVariants[$variantId] = $variantData;
                 }
                 $documentData['variants'] = $copyOfVariants;
                 if (!isset($productAttributeCodes[$attributeCode])) {
@@ -92,13 +92,13 @@ class ProcessVariants
     private function removeProductLevelAttributesFromVariants($documentData): array
     {
         $copyOfVariants = [];
-        foreach ($documentData['variants'] as $variantData) {
+        foreach ($documentData['variants'] as $variantId => $variantData) {
             foreach ($variantData as $attributeCode => $attributeValue) {
                 if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
                     unset($variantData[$attributeCode]);
                 }
             }
-            $copyOfVariants[] = $variantData;
+            $copyOfVariants[$variantId] = $variantData;
         }
         $documentData['variants'] = $copyOfVariants;
         return $documentData;
