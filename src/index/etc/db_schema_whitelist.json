@@ -19,6 +19,7 @@
         "column": {
             "version_id": true,
             "product_id": true,
+            "product_type": true,
             "operation_type": true
         },
         "constraint": {

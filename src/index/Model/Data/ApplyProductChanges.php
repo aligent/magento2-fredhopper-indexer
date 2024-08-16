@@ -80,7 +80,7 @@ class ApplyProductChanges
         $connection->beginTransaction();
         $connection->delete(
             DataHandler::INDEX_TABLE_NAME,
-            ['store_id = ?', $storeId]
+            ['store_id = ?' => $storeId]
         );
 
         // insert any new records and mark as "add"
@@ -164,7 +164,7 @@ class ApplyProductChanges
         );
         $select->joinLeft(
             ['temp_table' => ($isAddition ? self::TEMP_TABLE_NAME : DataHandler::INDEX_TABLE_NAME)],
-            'temp_table.product_id = main_table.product_id AND temp_table.product_type = main_table',
+            'temp_table.product_id = main_table.product_id AND temp_table.product_type = main_table.product_type',
         );
         $select->where('temp_table.product_id is null');
         $select->where('main_table.product_type = ?', $productType);
@@ -192,7 +192,7 @@ class ApplyProductChanges
             'main_table.product_id = temp_table.product_id AND main_table.product_type = temp_table.product_type'
         );
         $existingProductsSelect->distinct();
-        $existingProductsSelect->where('product_type = ?', DataHandler::TYPE_PRODUCT);
+        $existingProductsSelect->where('temp_table.product_type = ?', DataHandler::TYPE_PRODUCT);
         $existingProductIds = $connection->fetchCol($existingProductsSelect);
 
         // records that are in the new table, but not in the old table
@@ -204,12 +204,12 @@ class ApplyProductChanges
         $existingProductsTempMissingSelect->joinLeft(
             ['temp_table' => self::TEMP_TABLE_NAME],
             'main_table.product_id = temp_table.product_id AND ' .
-            'main_table.product_type = temp_table.product_type AND' .
+            'main_table.product_type = temp_table.product_type AND ' .
             'main_table.store_id = temp_table.store_id'
         );
         $existingProductsTempMissingSelect->where('temp_table.product_id IS NULL');
-        $existingProductsTempMissingSelect->where('product_type = ?', $productType);
-        $existingProductsTempMissingSelect->where('product_id in (?)', $existingProductIds);
+        $existingProductsTempMissingSelect->where('main_table.product_type = ?', $productType);
+        $existingProductsTempMissingSelect->where('main_table.product_id in (?)', $existingProductIds);
 
         // records that are in the old table, but not in the new table
         $existingProductsMainMissingSelect = $connection->select();
@@ -220,12 +220,12 @@ class ApplyProductChanges
         $existingProductsMainMissingSelect->joinLeft(
             ['main_table' => DataHandler::INDEX_TABLE_NAME],
             'main_table.product_id = temp_table.product_id AND ' .
-            'main_table.product_type = temp_table.product_type AND' .
+            'main_table.product_type = temp_table.product_type AND ' .
             'main_table.store_id = temp_table.store_id'
         );
         $existingProductsMainMissingSelect->where('main_table.product_id IS NULL');
-        $existingProductsMainMissingSelect->where('product_type = ?', $productType);
-        $existingProductsMainMissingSelect->where('product_id in (?)', $existingProductIds);
+        $existingProductsMainMissingSelect->where('temp_table.product_type = ?', $productType);
+        $existingProductsMainMissingSelect->where('temp_table.product_id in (?)', $existingProductIds);
 
         // records that differ by parent_id or attribute_data
         $existingProductsDifferenceSelect = $connection->select();
@@ -236,12 +236,12 @@ class ApplyProductChanges
         $existingProductsDifferenceSelect->joinInner(
             ['temp_table' => self::TEMP_TABLE_NAME],
             'main_table.product_id = temp_table.product_id AND ' .
-            'main_table.product_type = temp_table.product_type AND' .
+            'main_table.product_type = temp_table.product_type AND ' .
             'main_table.store_id = temp_table.store_id AND '.
             '(main_table.parent_id <=> temp_table.parent_id OR main_table.attribute_data <=> temp_table.attribute_data)'
         );
-        $existingProductsDifferenceSelect->where('product_type = ?', DataHandler::TYPE_PRODUCT);
-        $existingProductsDifferenceSelect->where('product_id in (?)', $existingProductIds);
+        $existingProductsDifferenceSelect->where('main_table.product_type = ?', DataHandler::TYPE_PRODUCT);
+        $existingProductsDifferenceSelect->where('main_table.product_id in (?)', $existingProductIds);
 
         $updatedProductsSelect = $connection->select()->union(
             [

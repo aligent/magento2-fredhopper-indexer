@@ -174,7 +174,7 @@ class ProductMapper
         } else {
             $productId = reset($productIds);
             $retrievedValue = $this->retrieveFieldValue($attributeValues);
-            if ($retrievedValue) {
+            if (!empty($retrievedValue)) {
                 $combinedProductAttributes = [$attribute->getAttributeCode() => [$productId => $retrievedValue]];
 
                 // boolean attributes should always be sent as 1/0, rather than Yes/No
@@ -292,7 +292,7 @@ class ProductMapper
 
         foreach ($attributeValues as $attributeValue) {
             if (isset($options[$attributeValue])) {
-                $attributeLabels[] = $options[$attributeValue];
+                $attributeLabels[] = (string)$options[$attributeValue];
             }
         }
 

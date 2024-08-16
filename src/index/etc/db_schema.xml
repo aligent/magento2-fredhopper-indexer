@@ -24,6 +24,8 @@
                 comment="Version ID"/>
         <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" identity="false"
                 comment="Product ID"/>
+        <column xsi:type="varchar" name="product_type" length="1" nullable="false"
+                default="p" comment="Product Type (p=Product,v=Variant)"/>
         <column xsi:type="varchar" name="operation_type" length="1" nullable="false" comment="Operation Type"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="version_id"/>
