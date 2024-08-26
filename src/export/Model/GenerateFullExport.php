@@ -1,10 +1,11 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperIndexer\Model\Export;
+namespace Aligent\FredhopperExport\Model;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Data\Export;
+use Aligent\FredhopperExport\Model\Data\ExportFactory;
 use Aligent\FredhopperExport\Model\Data\Files\CreateDirectory;
 use Aligent\FredhopperExport\Model\Data\Files\CreateZipFile;
 use Aligent\FredhopperExport\Model\Data\Files\GenerateMetaFile;

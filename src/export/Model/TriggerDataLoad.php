@@ -8,6 +8,7 @@ use Aligent\FredhopperExport\Model\Api\DataIntegrationClient;
 use Aligent\FredhopperExport\Model\Data\Export;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Exception\AlreadyExistsException;
+use Psr\Log\LoggerInterface;
 
 class TriggerDataLoad
 {

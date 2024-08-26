@@ -6,6 +6,7 @@ namespace Aligent\FredhopperExport\Cron;
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Data\Export;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\Collection;
+use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\CollectionFactory;
 use Aligent\FredhopperExport\Model\UpdateExportDataStatus;
 
 class UpdateTriggeredExports

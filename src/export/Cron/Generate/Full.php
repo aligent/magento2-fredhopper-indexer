@@ -3,7 +3,7 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperExport\Cron\Generate;
 
-use Aligent\FredhopperIndexer\Model\Export\GenerateFullExport;
+use Aligent\FredhopperExport\Model\GenerateFullExport;
 
 class Full
 {
