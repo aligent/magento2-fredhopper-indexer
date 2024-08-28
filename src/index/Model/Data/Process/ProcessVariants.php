@@ -67,7 +67,7 @@ class ProcessVariants
     private function removeVariantLevelAttributesFromParent($documentData, array $productAttributeCodes): array
     {
         foreach ($documentData['product'] as $attributeCode => $productData) {
-            if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+            if (in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                 $copyOfVariants = [];
                 foreach ($documentData['variants'] as $variantId => $variantData) {
                     $variantData[$attributeCode] = $variantData[$attributeCode] ?? $productData;
@@ -94,7 +94,7 @@ class ProcessVariants
         $copyOfVariants = [];
         foreach ($documentData['variants'] as $variantId => $variantData) {
             foreach ($variantData as $attributeCode => $attributeValue) {
-                if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes())) {
+                if (!in_array($attributeCode, $this->attributeConfig->getVariantAttributeCodes(true))) {
                     unset($variantData[$attributeCode]);
                 }
             }
