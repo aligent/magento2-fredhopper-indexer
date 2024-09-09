@@ -36,12 +36,12 @@ class ApplyProductChanges
      */
     public function execute(string $scopeTableName, int $storeId): void
     {
-        $this->createTempTable();
+        $this->createTempTable($storeId);
         $connection = $this->resourceConnection->getConnection();
         $connection->beginTransaction();
         try {
             $this->applyScopeChanges($scopeTableName, $storeId, $connection);
-            $this->insertChangelogRecords($connection);
+            $this->insertChangelogRecords($connection, $storeId);
             $connection->commit();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
@@ -52,14 +52,16 @@ class ApplyProductChanges
     /**
      * Create temporary copy of index table
      *
+     * @param int $storeId
      * @return void
      */
-    private function createTempTable(): void
+    private function createTempTable(int $storeId): void
     {
         $connection = $this->resourceConnection->getConnection();
         $connection->createTemporaryTableLike(self::TEMP_TABLE_NAME, DataHandler::INDEX_TABLE_NAME);
         $copySelect = $connection->select();
         $copySelect->from(DataHandler::INDEX_TABLE_NAME);
+        $copySelect->where('store_id = ?', $storeId);
         $copyInsert = $connection->insertFromSelect(
             $copySelect,
             self::TEMP_TABLE_NAME
@@ -107,36 +109,41 @@ class ApplyProductChanges
      * Insert into changelog table based on differences
      *
      * @param AdapterInterface $connection
+     * @param int $storeId
      * @return void
      * @throws \Zend_Db_Select_Exception
      */
-    private function insertChangelogRecords(AdapterInterface $connection): void
+    private function insertChangelogRecords(AdapterInterface $connection, int $storeId): void
     {
 
         $addedProductIds = $this->getAddedOrDeletedProductsByType(
             true,
             DataHandler::TYPE_PRODUCT,
+            $storeId,
             $connection
         );
         $addedVariantIds = $this->getAddedOrDeletedProductsByType(
             true,
             DataHandler::TYPE_VARIANT,
+            $storeId,
             $connection
         );
         $this->changelogResource->insertAdditionOperations($addedProductIds, $addedVariantIds);
 
-        $updatedProductIds = $this->getUpdatedProductsByType(DataHandler::TYPE_PRODUCT, $connection);
-        $updatedVariantIds = $this->getUpdatedProductsByType(DataHandler::TYPE_VARIANT, $connection);
+        $updatedProductIds = $this->getUpdatedProductsByType(DataHandler::TYPE_PRODUCT, $storeId, $connection);
+        $updatedVariantIds = $this->getUpdatedProductsByType(DataHandler::TYPE_VARIANT, $storeId, $connection);
         $this->changelogResource->insertUpdateOperations($updatedProductIds, $updatedVariantIds);
 
         $deletedProductIds = $this->getAddedOrDeletedProductsByType(
             false,
             DataHandler::TYPE_PRODUCT,
+            $storeId,
             $connection
         );
         $deletedVariantIds = $this->getAddedOrDeletedProductsByType(
             false,
             DataHandler::TYPE_VARIANT,
+            $storeId,
             $connection
         );
         $this->changelogResource->insertDeleteOperations($deletedProductIds, $deletedVariantIds);
@@ -148,12 +155,14 @@ class ApplyProductChanges
      *
      * @param bool $isAddition
      * @param string $productType
+     * @param int $storeId
      * @param AdapterInterface $connection
      * @return array
      */
     private function getAddedOrDeletedProductsByType(
         bool $isAddition,
         string $productType,
+        int $storeId,
         AdapterInterface $connection): array
     {
         $select = $connection->select();
@@ -164,10 +173,14 @@ class ApplyProductChanges
         );
         $select->joinLeft(
             ['temp_table' => ($isAddition ? self::TEMP_TABLE_NAME : DataHandler::INDEX_TABLE_NAME)],
-            'temp_table.product_id = main_table.product_id AND temp_table.product_type = main_table.product_type',
+            'temp_table.product_id = main_table.product_id AND '.
+            'temp_table.product_type = main_table.product_type AND '.
+            'temp_table.store_id = main_table.store_id',
+            []
         );
         $select->where('temp_table.product_id is null');
         $select->where('main_table.product_type = ?', $productType);
+        $select->where('main_table.store_id = ?', $storeId);
         $select->group('main_table.product_id');
 
         return $connection->fetchCol($select);
@@ -177,11 +190,12 @@ class ApplyProductChanges
      * Determine which products have been updated between the main and temporary table
      *
      * @param string $productType
+     * @param int $storeId
      * @param AdapterInterface $connection
      * @return array
      * @throws \Zend_Db_Select_Exception
      */
-    private function getUpdatedProductsByType(string $productType, AdapterInterface $connection): array
+    private function getUpdatedProductsByType(string $productType, int $storeId, AdapterInterface $connection): array
     {
         // get all product ids and variant ids that exist in both tables
         // we do not want to consider products that are being added or deleted completely
@@ -189,10 +203,14 @@ class ApplyProductChanges
         $existingProductsSelect->from(['temp_table' => self::TEMP_TABLE_NAME], ['product_id']);
         $existingProductsSelect->joinInner(
             ['main_table' => DataHandler::INDEX_TABLE_NAME],
-            'main_table.product_id = temp_table.product_id AND main_table.product_type = temp_table.product_type'
+            'main_table.product_id = temp_table.product_id AND ' .
+            'main_table.product_type = temp_table.product_type AND ' .
+            'temp_table.store_id = main_table.store_id',
+            []
         );
         $existingProductsSelect->distinct();
-        $existingProductsSelect->where('temp_table.product_type = ?', DataHandler::TYPE_PRODUCT);
+        $existingProductsSelect->where('temp_table.product_type = ?', $productType);
+        $existingProductsSelect->where('temp_table.store_id = ?', $storeId);
         $existingProductIds = $connection->fetchCol($existingProductsSelect);
 
         // records that are in the new table, but not in the old table
@@ -205,11 +223,13 @@ class ApplyProductChanges
             ['temp_table' => self::TEMP_TABLE_NAME],
             'main_table.product_id = temp_table.product_id AND ' .
             'main_table.product_type = temp_table.product_type AND ' .
-            'main_table.store_id = temp_table.store_id'
+            'main_table.store_id = temp_table.store_id',
+            []
         );
         $existingProductsTempMissingSelect->where('temp_table.product_id IS NULL');
         $existingProductsTempMissingSelect->where('main_table.product_type = ?', $productType);
         $existingProductsTempMissingSelect->where('main_table.product_id in (?)', $existingProductIds);
+        $existingProductsTempMissingSelect->where('main_table.store_id = ?', $storeId);
 
         // records that are in the old table, but not in the new table
         $existingProductsMainMissingSelect = $connection->select();
@@ -221,11 +241,13 @@ class ApplyProductChanges
             ['main_table' => DataHandler::INDEX_TABLE_NAME],
             'main_table.product_id = temp_table.product_id AND ' .
             'main_table.product_type = temp_table.product_type AND ' .
-            'main_table.store_id = temp_table.store_id'
+            'main_table.store_id = temp_table.store_id',
+            []
         );
         $existingProductsMainMissingSelect->where('main_table.product_id IS NULL');
         $existingProductsMainMissingSelect->where('temp_table.product_type = ?', $productType);
         $existingProductsMainMissingSelect->where('temp_table.product_id in (?)', $existingProductIds);
+        $existingProductsMainMissingSelect->where('temp_table.store_id = ?', $storeId);
 
         // records that differ by parent_id or attribute_data
         $existingProductsDifferenceSelect = $connection->select();
@@ -238,10 +260,13 @@ class ApplyProductChanges
             'main_table.product_id = temp_table.product_id AND ' .
             'main_table.product_type = temp_table.product_type AND ' .
             'main_table.store_id = temp_table.store_id AND '.
-            '(main_table.parent_id <=> temp_table.parent_id OR main_table.attribute_data <=> temp_table.attribute_data)'
+            'NOT (main_table.parent_id <=> temp_table.parent_id AND ' .
+            'main_table.attribute_data <=> temp_table.attribute_data)',
+            []
         );
-        $existingProductsDifferenceSelect->where('main_table.product_type = ?', DataHandler::TYPE_PRODUCT);
+        $existingProductsDifferenceSelect->where('main_table.product_type = ?', $productType);
         $existingProductsDifferenceSelect->where('main_table.product_id in (?)', $existingProductIds);
+        $existingProductsDifferenceSelect->where('main_table.store_id = ?', $storeId);
 
         $updatedProductsSelect = $connection->select()->union(
             [
