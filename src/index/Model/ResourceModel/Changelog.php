@@ -73,6 +73,10 @@ class Changelog
      */
     private function insertRows(array $productIds, string $productType, string $operationType): void
     {
+        if (empty($productIds)) {
+            return;
+        }
+
         $connection = $this->resourceConnection->getConnection();
         $data = [];
         foreach ($productIds as $productId) {
