@@ -77,7 +77,7 @@ class GetFredhopperProductData
         $select->where('product_id IN (?)', $productIds);
         $data = $connection->fetchAll($select);
 
-        if (!$isIncremental) {
+        if ($isIncremental) {
             $data = $this->addOperationsToData($data, $productType);
         }
         return $data;

@@ -131,7 +131,9 @@ class ConvertToFredhopperFormat
                 // will return attribute code with site variant if required
                 // return false if non-site-variant attribute in non-default store
                 $attributeId = $this->appendSiteVariantIfNecessary($attributeCode, $storeId, $defaultStore);
-                $attributeId = $this->mapAttributeId($attributeId);
+                if ($attributeId) {
+                    $attributeId = $this->mapAttributeId($attributeId);
+                }
                 if ($attributeId) {
                     $attributes[] = [
                         'attribute_id' => $attributeId,

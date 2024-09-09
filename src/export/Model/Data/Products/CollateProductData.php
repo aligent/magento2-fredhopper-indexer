@@ -35,7 +35,9 @@ class CollateProductData
             $productStoreData[$row['product_id']]['stores'][$row['store_id']] =
                 $this->json->unserialize($row['attribute_data']);
             $productStoreData[$row['product_id']]['parent_id'] = $row['parent_id'];
-            $productStoreData[$row['product_id']]['operation_type'] = $row['operation_type'];
+            if (isset($row['operation_type'])) {
+                $productStoreData[$row['product_id']]['operation_type'] = $row['operation_type'];
+            }
             // handle the case where a product does not belong to the default store
             if (!isset($productStoreData[$row['product_id']]['default_store']) || $row['store_id'] === $defaultStore) {
                 $productStoreData[$row['product_id']]['default_store'] = (int)$row['store_id'];

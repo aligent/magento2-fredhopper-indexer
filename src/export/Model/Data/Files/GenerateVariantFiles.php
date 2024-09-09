@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperExport\Model\Data;
+namespace Aligent\FredhopperExport\Model\Data\Files;
 
 use Aligent\FredhopperExport\Model\Data\Products\GetFredhopperProductData;
 use Aligent\FredhopperIndexer\Model\DataHandler;

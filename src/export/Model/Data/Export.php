@@ -4,10 +4,19 @@ declare(strict_types=1);
 namespace Aligent\FredhopperExport\Model\Data;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
+use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
 use Magento\Framework\Model\AbstractModel;
 
 class Export extends AbstractModel implements ExportInterface
 {
+
+    /**
+     * @inheritDoc
+     */
+    public function _construct()
+    {
+        $this->_init(ExportResource::class);
+    }
 
     /**
      * @inheritDoc
