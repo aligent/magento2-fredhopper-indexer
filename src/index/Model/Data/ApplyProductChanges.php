@@ -85,7 +85,7 @@ class ApplyProductChanges
             ['store_id = ?' => $storeId]
         );
 
-        // insert any new records and mark as "add"
+        // insert records from the scope table
         $insertSelect = $connection->select();
         $insertSelect->from(
             ['scope_table' => $scopeTableName],
