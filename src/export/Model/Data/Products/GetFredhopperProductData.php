@@ -46,8 +46,8 @@ class GetFredhopperProductData
      */
     public function execute(array $productIds, string $productType, bool $isIncremental): array
     {
-        $rawProductData = $this->getRawProductData($productIds, $productType, $isIncremental);
-        return $this->processProductData($rawProductData, $productType);
+        $rawProductData = $this->getRawProductData($productIds, $productType);
+        return $this->processProductData($rawProductData, $productType, $isIncremental);
     }
 
     /**
@@ -55,11 +55,9 @@ class GetFredhopperProductData
      *
      * @param array $productIds
      * @param string $productType
-     * @param bool $isIncremental
      * @return array
-     * @throws LocalizedException
      */
-    private function getRawProductData(array $productIds, string $productType, bool $isIncremental): array
+    private function getRawProductData(array $productIds, string $productType): array
     {
         $connection = $this->resourceConnection->getConnection();
         $select = $connection->select();
@@ -75,12 +73,7 @@ class GetFredhopperProductData
         );
         $select->where('product_type = ?', $productType);
         $select->where('product_id IN (?)', $productIds);
-        $data = $connection->fetchAll($select);
-
-        if ($isIncremental) {
-            $data = $this->addOperationsToData($data, $productType);
-        }
-        return $data;
+        return $connection->fetchAll($select);
     }
 
     /**
@@ -90,10 +83,13 @@ class GetFredhopperProductData
      */
     private function addOperationsToData(array $productData, string $productType): array
     {
-        $changeSet = $this->getCompleteChangeList->execute($productType);
-        foreach ($productData as $key => $data) {
-            $productId = (int)$data['product_id'];
-            $productData[$key]['operation'] = self::OPERATION_TYPE_MAPPING[$changeSet[$productId]];
+        $changeSet = $this->getCompleteChangeList->getListByProductId($productType);
+        foreach ($productData as $productId => $data) {
+            if (isset($changeSet[$productId])) {
+                $productData[$productId]['operation'] = self::OPERATION_TYPE_MAPPING[$changeSet[$productId]];
+            } else {
+                unset($productData[$productId]);
+            }
         }
         return $productData;
     }
@@ -103,12 +99,16 @@ class GetFredhopperProductData
      *
      * @param array $rawProductData
      * @param string $productType
+     * @param bool $isIncremental
      * @return array
      * @throws LocalizedException
      */
-    private function processProductData(array $rawProductData, string $productType): array
+    private function processProductData(array $rawProductData, string $productType, bool $isIncremental): array
     {
         $productStoreData = $this->collateProductData->execute($rawProductData);
+        if ($isIncremental) {
+            $productStoreData = $this->addOperationsToData($productStoreData, $productType);
+        }
         return $this->convertToFredhopperFormat->execute($productStoreData, $productType);
     }
 }

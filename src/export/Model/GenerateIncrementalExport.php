@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-namespace Aligent\FredhopperIndexer\Model\Export;
+namespace Aligent\FredhopperExport\Model;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Data\Export;
@@ -57,8 +57,8 @@ class GenerateIncrementalExport
             $export->setExportType(ExportInterface::EXPORT_TYPE_INCREMENTAL);
 
             // get changelist(s) and apply
-            $changedProducts = $this->getCompleteChangeList->execute(DataHandler::TYPE_PRODUCT);
-            $changedVariants = $this->getCompleteChangeList->execute(DataHandler::TYPE_VARIANT);
+            $changedProducts = $this->getCompleteChangeList->getList(DataHandler::TYPE_PRODUCT);
+            $changedVariants = $this->getCompleteChangeList->getList(DataHandler::TYPE_VARIANT);
 
             $productAddCount = count($changedProducts[Changelog::OPERATION_TYPE_ADD] ?? []);
             $productUpdateCount = count($changedProducts[Changelog::OPERATION_TYPE_UPDATE] ?? []);

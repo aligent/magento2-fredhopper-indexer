@@ -3,7 +3,7 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperExport\Cron\Generate;
 
-use Aligent\FredhopperIndexer\Model\Export\GenerateIncrementalExport;
+use Aligent\FredhopperExport\Model\GenerateIncrementalExport;
 
 class Incremental
 {

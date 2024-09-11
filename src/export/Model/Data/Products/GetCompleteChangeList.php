@@ -11,11 +11,16 @@ use Magento\Framework\Exception\LocalizedException;
 class GetCompleteChangeList
 {
 
-    // cached result, as we don't want the changelist to change during processing
+    // cached results, as we don't want the changelist to change during processing
     /**
      * @var array
      */
     private array $changeList = [];
+
+    /**
+     * @var array
+     */
+    private array $changeListByProductId = [];
 
     /**
      * @param ResourceConnection $resourceConnection
@@ -36,14 +41,43 @@ class GetCompleteChangeList
      * @return array
      * @throws LocalizedException
      */
-    public function execute(string $productType): array
+    public function getList(string $productType): array
     {
         if (!isset($this->changeList[$productType])) {
-            $fromVersion = $this->getCurrentExportedVersion->execute();
-            $toVersion = $this->changelogResource->getLatestVersionId();
-            $this->changeList[$productType] = $this->getChangedProductIds($fromVersion, $toVersion, $productType);
+            $changListByProductId = $this->getListByProductId($productType);
+            $changeList = [
+                Changelog::OPERATION_TYPE_ADD => [],
+                Changelog::OPERATION_TYPE_UPDATE => [],
+                Changelog::OPERATION_TYPE_DELETE => []
+            ];
+
+            foreach ($changListByProductId as $productId => $operation) {
+                $changeList[$operation][] = $productId;
+            }
+            $this->changeList[$productType] = $changeList;
         }
         return $this->changeList[$productType];
+    }
+
+    /**
+     * Get all product ids with their changes since the last export
+     *
+     * @param string $productType
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getListByProductId(string $productType): array
+    {
+        if (!isset($this->changeListByProductId[$productType])) {
+            $fromVersion = $this->getCurrentExportedVersion->execute();
+            $toVersion = $this->changelogResource->getLatestVersionId();
+            $this->changeListByProductId[$productType] = $this->getChangedProductIds(
+                $fromVersion,
+                $toVersion,
+                $productType
+            );
+        }
+        return $this->changeListByProductId[$productType];
     }
 
     /**
@@ -63,30 +97,20 @@ class GetCompleteChangeList
         $select->order('version_id');
         $rows = $connection->fetchAll($select);
 
-        $data = [];
+        $changeList = [];
         foreach ($rows as $row) {
             $productId = (int)$row['product_id'];
-            if (array_key_exists($productId, $data)) {
+            if (array_key_exists($productId, $changeList)) {
                 // need to handle cases where a single product has multiple operations
-                $updatedOperation = $this->combineOperations($data[$productId], $row['operation_type']);
+                $updatedOperation = $this->combineOperations($changeList[$productId], $row['operation_type']);
                 if ($updatedOperation !== null) {
-                    $data[$productId] = $updatedOperation;
+                    $changeList[$productId] = $updatedOperation;
                 } else {
-                    unset($data[$productId]);
+                    unset($changeList[$productId]);
                 }
             } else {
-                $data[$productId] = $row['operation_type'];
+                $changeList[$productId] = $row['operation_type'];
             }
-        }
-
-        $changeList = [
-            Changelog::OPERATION_TYPE_ADD => [],
-            Changelog::OPERATION_TYPE_UPDATE => [],
-            Changelog::OPERATION_TYPE_DELETE => []
-        ];
-
-        foreach ($data as $productId => $operation) {
-            $changeList[$operation][] = $productId;
         }
 
         return $changeList;
