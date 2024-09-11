@@ -3,6 +3,8 @@
 declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model;
 
+use Aligent\FredhopperIndexer\Model\Changelog\InsertRecords;
+use Aligent\FredhopperIndexer\Model\Changelog\TempTable;
 use Aligent\FredhopperIndexer\Model\Data\FredhopperDataProvider;
 use Magento\CatalogSearch\Model\ResourceModel\Fulltext as FulltextResource;
 use Magento\Framework\App\DeploymentConfig;
@@ -14,6 +16,7 @@ use Magento\Framework\Indexer\DimensionalIndexerInterface;
 use Magento\Framework\Indexer\DimensionProviderInterface;
 use Magento\Framework\Mview\ActionInterface as MviewActionInterface;
 use Magento\Store\Model\StoreDimensionProvider;
+use Psr\Log\LoggerInterface;
 
 class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterface, MviewActionInterface
 {
@@ -26,6 +29,9 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
      * @param DataHandler $dataHandler
      * @param DeploymentConfig $deploymentConfig
      * @param FulltextResource $fulltextResource
+     * @param TempTable $tempTable
+     * @param InsertRecords $insertChangelogRecords
+     * @param LoggerInterface $logger
      * @param int $batchSize
      */
     public function __construct(
@@ -34,6 +40,9 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
         private readonly DataHandler $dataHandler,
         private readonly DeploymentConfig $deploymentConfig,
         private readonly FulltextResource $fulltextResource,
+        private readonly TempTable $tempTable,
+        private readonly InsertRecords $insertChangelogRecords,
+        private readonly LoggerInterface $logger,
         private readonly int $batchSize = 1000
     ) {
     }
@@ -65,13 +74,21 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
      */
     public function executeList(array $ids): void
     {
+        // create temporary table to handle changelogs
+        $this->tempTable->create();
         foreach ($this->dimensionProvider->getIterator() as $dimension) {
             try {
                 $this->executeByDimensions($dimension, new \ArrayIterator($ids));
-            } catch (FilesystemException|RuntimeException) {
+            } catch (FileSystemException|RuntimeException) {
                 continue;
             }
         }
+        try {
+            $this->insertChangelogRecords->execute();
+        } catch (\Exception $e) {
+            $this->logger->critical($e->getMessage(), ['exception' => $e]);
+        }
+        $this->tempTable->drop();
     }
 
     /**
@@ -139,3 +156,4 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
         }
     }
 }
+
