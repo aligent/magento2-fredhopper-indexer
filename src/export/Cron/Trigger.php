@@ -32,10 +32,14 @@ class Trigger
         $collection = $this->exportCollectionFactory->create();
         $collection->addFieldToFilter(ExportInterface::FIELD_STATUS, ExportInterface::STATUS_UPLOADED);
         $collection->addFieldToFilter(ExportInterface::FIELD_DATA_STATUS, ['null' => true]);
+        $collection->setOrder(ExportInterface::FIELD_EXPORT_ID);
 
-        foreach ($collection->getItems() as $export) {
+        // we only ever want to trigger a single upload. Trying to trigger multiple at once could prove troublesome
+        /** @var ExportInterface $firstExport */
+        $firstExport = $collection->getFirstItem();
+        if (!$firstExport->isEmpty()) {
             /** @var Export $export */
-            $this->triggerDataLoad->execute($export);
+            $this->triggerDataLoad->execute($firstExport);
         }
     }
 }
