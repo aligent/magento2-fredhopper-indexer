@@ -53,22 +53,22 @@ class GenerateFullExport
 
     public function execute(): void
     {
+        // create export entity
+        /** @var Export $export */
+        $export = $this->exportFactory->create();
+        $export->setExportType(ExportInterface::EXPORT_TYPE_FULL);
+        $export->setStatus(ExportInterface::STATUS_PENDING);
+
+        // get id information
+        $productIds = $this->getAllProductIds->execute(DataHandler::TYPE_PRODUCT);
+        $variantIds = $this->getAllProductIds->execute(DataHandler::TYPE_VARIANT);
+        $export->setProductCount(count($productIds));
+        $export->setVariantCount(count($variantIds));
+
+        $lastVersionId = $this->changelogResource->getLatestVersionId();
+        $export->setVersionId($lastVersionId);
+
         try {
-            // create export entity
-            /** @var Export $export */
-            $export = $this->exportFactory->create();
-            $export->setExportType(ExportInterface::EXPORT_TYPE_FULL);
-            $export->setStatus(ExportInterface::STATUS_PENDING);
-
-            // get id information
-            $productIds = $this->getAllProductIds->execute(DataHandler::TYPE_PRODUCT);
-            $variantIds = $this->getAllProductIds->execute(DataHandler::TYPE_VARIANT);
-            $export->setProductCount(count($productIds));
-            $export->setVariantCount(count($variantIds));
-
-            $lastVersionId = $this->changelogResource->getLatestVersionId();
-            $export->setVersionId($lastVersionId);
-
             // create replica of index table to work from
             // avoid index being updated while export is running
             $this->indexReplicaManagement->createReplicaTable();
