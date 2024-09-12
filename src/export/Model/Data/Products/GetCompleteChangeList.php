@@ -6,7 +6,7 @@ namespace Aligent\FredhopperExport\Model\Data\Products;
 use Aligent\FredhopperExport\Model\Data\GetCurrentExportedVersion;
 use Aligent\FredhopperIndexer\Model\ResourceModel\Changelog;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 class GetCompleteChangeList
 {
@@ -26,11 +26,13 @@ class GetCompleteChangeList
      * @param ResourceConnection $resourceConnection
      * @param GetCurrentExportedVersion $getCurrentExportedVersion
      * @param Changelog $changelogResource
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly GetCurrentExportedVersion $getCurrentExportedVersion,
-        private readonly Changelog $changelogResource
+        private readonly Changelog $changelogResource,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -39,7 +41,6 @@ class GetCompleteChangeList
      *
      * @param string $productType
      * @return array
-     * @throws LocalizedException
      */
     public function getList(string $productType): array
     {
@@ -64,7 +65,6 @@ class GetCompleteChangeList
      *
      * @param string $productType
      * @return array
-     * @throws LocalizedException
      */
     public function getListByProductId(string $productType): array
     {
@@ -83,7 +83,10 @@ class GetCompleteChangeList
     /**
      * Get all added, updated or deleted products between the given versions
      *
-     * @throws LocalizedException
+     * @param int $fromVersionId
+     * @param int $toVersionId
+     * @param string $productType
+     * @return array
      */
     private function getChangedProductIds(int $fromVersionId, int $toVersionId, string $productType): array
     {
@@ -121,20 +124,22 @@ class GetCompleteChangeList
      *
      * For example, an add followed by an update is the same as an "add".
      * An "add" followed by a "delete" is the same as nothing happening.
-     * An "add" followed by another "add" is invalid
+     * An "add" followed by another "add" should not happen, but is treated as an "add"
      *
-     * @throws LocalizedException
+     * @param string $operationOne
+     * @param string $operationTwo
+     * @return string|null
      */
     private function combineOperations(string $operationOne, string $operationTwo): ?string
     {
         $operationResultMap = [
             Changelog::OPERATION_TYPE_ADD => [
-                Changelog::OPERATION_TYPE_ADD => false,
+                Changelog::OPERATION_TYPE_ADD => false, // should not happen
                 Changelog::OPERATION_TYPE_UPDATE => Changelog::OPERATION_TYPE_ADD,
                 Changelog::OPERATION_TYPE_DELETE => null
             ],
             Changelog::OPERATION_TYPE_UPDATE => [
-                Changelog::OPERATION_TYPE_ADD => false,
+                Changelog::OPERATION_TYPE_ADD => false, // should not happen
                 Changelog::OPERATION_TYPE_UPDATE => Changelog::OPERATION_TYPE_UPDATE,
                 Changelog::OPERATION_TYPE_DELETE => Changelog::OPERATION_TYPE_DELETE
             ],
@@ -145,11 +150,14 @@ class GetCompleteChangeList
             ]
         ];
         if (!isset($operationResultMap[$operationOne][$operationTwo])) {
-            throw new LocalizedException(__('Invalid operation'));
+            return null;
         }
         $result = $operationResultMap[$operationOne][$operationTwo];
         if ($result === false) {
-            throw new LocalizedException(__('Invalid operation sequence'));
+            // invalid sequence - treat first operation as correct
+            $message = sprintf('Encountered invalid operation sequence: %s, %s', $operationOne, $operationTwo);
+            $this->logger->error($message);
+            return $operationOne;
         }
         return $result;
     }
