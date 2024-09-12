@@ -10,6 +10,7 @@ use Aligent\FredhopperExport\Model\Data\Files\CreateDirectory;
 use Aligent\FredhopperExport\Model\Data\Files\CreateZipFile;
 use Aligent\FredhopperExport\Model\Data\Files\GenerateProductFiles;
 use Aligent\FredhopperExport\Model\Data\Files\GenerateVariantFiles;
+use Aligent\FredhopperExport\Model\Data\GetCurrentExportedVersion;
 use Aligent\FredhopperExport\Model\Data\IndexReplicaManagement;
 use Aligent\FredhopperExport\Model\Data\Products\GetCompleteChangeList;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export as ExportResource;
@@ -25,6 +26,7 @@ class GenerateIncrementalExport
     /**
      * @param ExportFactory $exportFactory
      * @param ExportResource $exportResource
+     * @param GetCurrentExportedVersion $getCurrentExportedVersion
      * @param GetCompleteChangeList $getCompleteChangeList
      * @param IndexReplicaManagement $indexReplicaManagement
      * @param Changelog $changelogResource
@@ -37,6 +39,7 @@ class GenerateIncrementalExport
     public function __construct(
         private readonly ExportFactory $exportFactory,
         private readonly ExportResource $exportResource,
+        private readonly GetCurrentExportedVersion $getCurrentExportedVersion,
         private readonly GetCompleteChangeList $getCompleteChangeList,
         private readonly IndexReplicaManagement $indexReplicaManagement,
         private readonly Changelog $changelogResource,
@@ -50,44 +53,51 @@ class GenerateIncrementalExport
 
     public function execute(): void
     {
+
+        $currentVersion = $this->getCurrentExportedVersion->execute();
+        if ($currentVersion === 0) {
+            // there is no recorded current version, so we cannot safely export a partial update
+            return;
+        }
+
+        // create export entity
+        /** @var Export $export */
+        $export = $this->exportFactory->create();
+        $export->setExportType(ExportInterface::EXPORT_TYPE_INCREMENTAL);
+
+        // get changelist(s) and apply
+        $changedProducts = $this->getCompleteChangeList->getList(DataHandler::TYPE_PRODUCT);
+        $changedVariants = $this->getCompleteChangeList->getList(DataHandler::TYPE_VARIANT);
+
+        $productAddCount = count($changedProducts[Changelog::OPERATION_TYPE_ADD] ?? []);
+        $productUpdateCount = count($changedProducts[Changelog::OPERATION_TYPE_UPDATE] ?? []);
+        $productDeleteCount = count($changedProducts[Changelog::OPERATION_TYPE_DELETE] ?? []);
+        $productCount = $productAddCount + $productUpdateCount + $productDeleteCount;
+
+        $variantAddCount = count($changedVariants[Changelog::OPERATION_TYPE_ADD] ?? []);
+        $variantUpdateCount = count($changedVariants[Changelog::OPERATION_TYPE_UPDATE] ?? []);
+        $variantDeleteCount = count($changedVariants[Changelog::OPERATION_TYPE_DELETE] ?? []);
+        $variantCount = $variantAddCount + $variantUpdateCount + $variantDeleteCount;
+
+        // if there are no changes, just exit
+        if ($productCount === 0 && $variantCount === 0) {
+            $this->logger->info(__('No incremental changes. Skipping export'));
+            return;
+        }
+
+        $export->setProductCount($productCount);
+        $export->setVariantCount($variantCount);
+        $export->setProductAddCount($productAddCount);
+        $export->setProductUpdateCount($productUpdateCount);
+        $export->setProductDeleteCount($productDeleteCount);
+        $export->setVariantAddCount($variantAddCount);
+        $export->setVariantUpdateCount($variantUpdateCount);
+        $export->setVariantDeleteCount($variantDeleteCount);
+
+        $lastVersionId = $this->changelogResource->getLatestVersionId();
+        $export->setVersionId($lastVersionId);
+
         try {
-            // create export entity
-            /** @var Export $export */
-            $export = $this->exportFactory->create();
-            $export->setExportType(ExportInterface::EXPORT_TYPE_INCREMENTAL);
-
-            // get changelist(s) and apply
-            $changedProducts = $this->getCompleteChangeList->getList(DataHandler::TYPE_PRODUCT);
-            $changedVariants = $this->getCompleteChangeList->getList(DataHandler::TYPE_VARIANT);
-
-            $productAddCount = count($changedProducts[Changelog::OPERATION_TYPE_ADD] ?? []);
-            $productUpdateCount = count($changedProducts[Changelog::OPERATION_TYPE_UPDATE] ?? []);
-            $productDeleteCount = count($changedProducts[Changelog::OPERATION_TYPE_DELETE] ?? []);
-            $productCount = $productAddCount + $productUpdateCount + $productDeleteCount;
-
-            $variantAddCount = count($changedVariants[Changelog::OPERATION_TYPE_ADD] ?? []);
-            $variantUpdateCount = count($changedVariants[Changelog::OPERATION_TYPE_UPDATE] ?? []);
-            $variantDeleteCount = count($changedVariants[Changelog::OPERATION_TYPE_DELETE] ?? []);
-            $variantCount = $variantAddCount + $variantUpdateCount + $variantDeleteCount;
-
-            // if there are no changes, just exit
-            if ($productCount === 0 && $variantCount === 0) {
-                $this->logger->info(__('No incremental changes. Skipping export'));
-                return;
-            }
-
-            $export->setProductCount($productCount);
-            $export->setVariantCount($variantCount);
-            $export->setProductAddCount($productAddCount);
-            $export->setProductUpdateCount($productUpdateCount);
-            $export->setProductDeleteCount($productDeleteCount);
-            $export->setVariantAddCount($variantAddCount);
-            $export->setVariantUpdateCount($variantUpdateCount);
-            $export->setVariantDeleteCount($variantDeleteCount);
-
-            $lastVersionId = $this->changelogResource->getLatestVersionId();
-            $export->setVersionId($lastVersionId);
-
             // create replica of index table to work from
             // avoid index being updated while export is running
             $this->indexReplicaManagement->createReplicaTable();
@@ -117,6 +127,7 @@ class GenerateIncrementalExport
             $this->createZipFile->execute($zipFilePath, array_merge($productFiles, $variantFiles));
 
             $export->setStatus(ExportInterface::STATUS_PENDING);
+
             // save export
             $this->exportResource->save($export);
         } catch (\Exception $e) {
