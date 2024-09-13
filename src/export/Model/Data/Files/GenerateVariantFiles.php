@@ -6,7 +6,6 @@ namespace Aligent\FredhopperExport\Model\Data\Files;
 use Aligent\FredhopperExport\Model\Data\Products\GetFredhopperProductData;
 use Aligent\FredhopperIndexer\Model\DataHandler;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json;
 
@@ -36,7 +35,6 @@ class GenerateVariantFiles
      * @param bool $isIncremental
      * @return array
      * @throws FileSystemException
-     * @throws LocalizedException
      */
     public function execute(string $directory, array $allProductIds, bool $isIncremental): array
     {
@@ -58,7 +56,6 @@ class GenerateVariantFiles
      * @param int $fileNumber
      * @return string
      * @throws FileSystemException
-     * @throws LocalizedException
      */
     private function generateFile(string $directory, array $productIds, bool $isIncremental, int $fileNumber): string
     {

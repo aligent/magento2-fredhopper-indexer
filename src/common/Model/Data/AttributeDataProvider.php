@@ -36,7 +36,6 @@ class AttributeDataProvider
      *
      * @param $backendType
      * @return array
-     * @throws LocalizedException
      */
     public function getIndexableAttributes($backendType = null): array
     {
@@ -49,7 +48,12 @@ class AttributeDataProvider
             $attributes = $productAttributes->getItems();
 
             /** @var AbstractEntity $entity */
-            $entity = $this->eavConfig->getEntityType(Product::ENTITY)->getEntity();
+            try {
+                $entity = $this->eavConfig->getEntityType(Product::ENTITY)->getEntity();
+            } catch (LocalizedException) {
+                // this should never happen
+                return [];
+            }
 
             foreach ($attributes as $attribute) {
                 $attribute->setEntity($entity);

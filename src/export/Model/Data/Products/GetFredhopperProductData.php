@@ -6,7 +6,6 @@ namespace Aligent\FredhopperExport\Model\Data\Products;
 use Aligent\FredhopperIndexer\Model\DataHandler;
 use Aligent\FredhopperIndexer\Model\ResourceModel\Changelog;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Exception\LocalizedException;
 
 class GetFredhopperProductData
 {
@@ -42,7 +41,6 @@ class GetFredhopperProductData
      * @param string $productType
      * @param bool $isIncremental
      * @return array
-     * @throws LocalizedException
      */
     public function execute(array $productIds, string $productType, bool $isIncremental): array
     {
@@ -79,7 +77,9 @@ class GetFredhopperProductData
     /**
      * Add operations to raw product data
      *
-     * @throws LocalizedException
+     * @param array $productData
+     * @param string $productType
+     * @return array
      */
     private function addOperationsToData(array $productData, string $productType): array
     {
@@ -101,7 +101,6 @@ class GetFredhopperProductData
      * @param string $productType
      * @param bool $isIncremental
      * @return array
-     * @throws LocalizedException
      */
     private function processProductData(array $rawProductData, string $productType, bool $isIncremental): array
     {

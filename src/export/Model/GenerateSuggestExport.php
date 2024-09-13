@@ -35,6 +35,11 @@ class GenerateSuggestExport
     ) {
     }
 
+    /**
+     * Generate a "suggest" export
+     *
+     * @return void
+     */
     public function execute(): void
     {
         try {

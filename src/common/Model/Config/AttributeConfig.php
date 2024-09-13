@@ -6,7 +6,6 @@ namespace Aligent\FredhopperCommon\Model\Config;
 
 use Aligent\FredhopperCommon\Model\Data\AttributeDataProvider;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
 
 class AttributeConfig
@@ -93,7 +92,6 @@ class AttributeConfig
      * Get all configured product attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getProductAttributes(): array
     {
@@ -110,7 +108,6 @@ class AttributeConfig
      * Get all configured variant attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getVariantAttributes(): array
     {
@@ -128,7 +125,6 @@ class AttributeConfig
      * Get all configured attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getAllAttributes(): array
     {
@@ -142,7 +138,6 @@ class AttributeConfig
      * Get all boolean attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getBooleanAttributes(): array
     {
@@ -162,7 +157,6 @@ class AttributeConfig
      *
      * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
-     * @throws LocalizedException
      */
     public function getProductAttributeCodes(bool $includeCustom = false): array
     {
@@ -187,7 +181,6 @@ class AttributeConfig
      *
      * @param bool $includeCustom Include custom-defined attributes in array
      * @return string[]
-     * @throws LocalizedException
      */
     public function getVariantAttributeCodes(bool $includeCustom = false): array
     {
@@ -212,7 +205,6 @@ class AttributeConfig
      *
      * @param array $attributesConfig
      * @return array
-     * @throws LocalizedException
      */
     private function addMagentoAttributeData(array $attributesConfig): array
     {
@@ -236,7 +228,6 @@ class AttributeConfig
      * Get all static attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getStaticAttributes(): array
     {
@@ -256,7 +247,6 @@ class AttributeConfig
      * Get all attributes along with their FH attribute type
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getAttributesWithFredhopperType(): array
     {
@@ -275,7 +265,6 @@ class AttributeConfig
      * Get all EAV attributes with grouped by backend type
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getEavAttributesByType(): array
     {
@@ -301,7 +290,6 @@ class AttributeConfig
      * Get all configured site variant attributes
      *
      * @return array
-     * @throws LocalizedException
      */
     public function getSiteVariantAttributes(): array
     {

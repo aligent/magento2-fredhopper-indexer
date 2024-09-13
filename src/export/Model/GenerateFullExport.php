@@ -51,6 +51,11 @@ class GenerateFullExport
     ) {
     }
 
+    /**
+     * Generate a full product export
+     *
+     * @return void
+     */
     public function execute(): void
     {
         // create export entity

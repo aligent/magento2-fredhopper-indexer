@@ -8,7 +8,6 @@ use Aligent\FredhopperCommon\Model\Config\AttributeConfig;
 use Aligent\FredhopperCommon\Model\Config\CustomAttributeConfig;
 use Aligent\FredhopperCommon\Model\Config\GeneralConfig;
 use Aligent\FredhopperIndexer\Model\DataHandler;
-use Magento\Framework\Exception\LocalizedException;
 
 class ConvertToFredhopperFormat
 {
@@ -30,7 +29,6 @@ class ConvertToFredhopperFormat
      * @param array $productStoreData
      * @param string $productType
      * @return array
-     * @throws LocalizedException
      */
     public function execute(array $productStoreData, string $productType): array
     {
@@ -74,7 +72,6 @@ class ConvertToFredhopperFormat
      * @param string $defaultLocale
      * @param string $productType
      * @return array
-     * @throws LocalizedException
      */
     private function convertAttributeDataToFredhopperFormat(
         array $productData,
@@ -166,7 +163,6 @@ class ConvertToFredhopperFormat
      * Returns false is the type cannot be found
      * @param string $attributeCode
      * @return bool|string
-     * @throws LocalizedException
      */
     private function getAttributeFredhopperTypeByCode(string $attributeCode): bool|string
     {
@@ -193,7 +189,6 @@ class ConvertToFredhopperFormat
      * @param int $storeId
      * @param int $defaultStoreId
      * @return bool|string
-     * @throws LocalizedException
      */
     private function appendSiteVariantIfNecessary(string $attributeCode, int $storeId, int $defaultStoreId): bool|string
     {

@@ -51,6 +51,11 @@ class GenerateIncrementalExport
     ) {
     }
 
+    /**
+     * Generate a partial product export
+     *
+     * @return void
+     */
     public function execute(): void
     {
 
