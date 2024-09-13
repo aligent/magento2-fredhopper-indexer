@@ -10,6 +10,8 @@ use Magento\Framework\Validation\ValidationException;
 interface PreExportValidatorInterface
 {
     /**
+     * Validate export state
+     *
      * @param ExportInterface $export
      * @throws ValidationException
      */

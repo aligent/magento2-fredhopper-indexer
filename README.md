@@ -1,7 +1,7 @@
 # Aligent Fredhopper Indexer
 
 ## Overview
-This package is provide indexing of product data, as well as the subsequent exporting of that data to Fredhopper, a merchandising platform.
+This package provides indexing of product data, as well as the subsequent exporting of that data to Fredhopper, a merchandising platform.
 
 ## Installation
 This package provides 3 related modules, and can be installed via composer:

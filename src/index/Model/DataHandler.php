@@ -62,6 +62,7 @@ class DataHandler implements IndexerInterface
 
     /**
      * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function saveIndex($dimensions, \Traversable $documents): void

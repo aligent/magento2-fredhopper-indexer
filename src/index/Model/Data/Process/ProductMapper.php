@@ -14,7 +14,13 @@ use Magento\Store\Model\App\Emulation;
 class ProductMapper
 {
 
+    /**
+     * @var string[]
+     */
     private array $excludedAttributes;
+    /**
+     * @var array
+     */
     private array $attributeOptionsCache;
 
     /**
@@ -56,6 +62,8 @@ class ProductMapper
     }
 
     /**
+     * Map product data
+     *
      * @param array $indexData
      * @param int $productId
      * @param int $storeId

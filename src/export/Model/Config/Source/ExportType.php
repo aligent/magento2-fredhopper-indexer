@@ -12,7 +12,7 @@ class ExportType implements OptionSourceInterface
     /**
      * @inheritDoc
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

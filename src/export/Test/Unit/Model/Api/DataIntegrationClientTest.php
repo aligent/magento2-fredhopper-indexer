@@ -21,11 +21,26 @@ use Psr\Log\LoggerInterface;
  */
 class DataIntegrationClientTest extends TestCase
 {
+    /**
+     * @var FilesystemDriver|MockObject
+     */
     private FilesystemDriver|MockObject $filesystemDriverMock;
+    /**
+     * @var File|MockObject
+     */
     private File|MockObject $fileMock;
+    /**
+     * @var Client|MockObject
+     */
     private Client|MockObject $httpClientMock;
+    /**
+     * @var DataIntegrationClient|null
+     */
     private ?DataIntegrationClient $dataIntegrationClient = null;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp(): void
     {
         $generalConfigMock = $this->createMock(GeneralConfig::class);
@@ -45,6 +60,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test uploading FAS data
+     *
      * @dataProvider uploadDataProvider
      *
      * @param \Throwable|null $fileGetContentsException
@@ -65,6 +82,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test uploading Suggest Data
+     *
      * @dataProvider uploadDataProvider
      *
      * @param \Throwable|null $fileGetContentsException
@@ -85,6 +104,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test triggering FAS data load
+     *
      * @dataProvider dataLoadProvider
      *
      * @param int $httpStatus
@@ -99,6 +120,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test triggering of Suggest data load
+     *
      * @dataProvider dataLoadProvider
      *
      * @param int $httpStatus
@@ -114,6 +137,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test getting FAS data status
+     *
      * @dataProvider statusProvider
      *
      * @param int $httpStatus
@@ -129,6 +154,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test getting suggest data status
+     *
      * @dataProvider statusProvider
      *
      * @param int $httpStatus
@@ -144,6 +171,8 @@ class DataIntegrationClientTest extends TestCase
     }
 
     /**
+     * Test getting data quality report
+     *
      * @dataProvider qualityReportProvider
      *
      * @param int $httpStatus
@@ -158,6 +187,15 @@ class DataIntegrationClientTest extends TestCase
         $this->assertSame($expectedResult, $actualResult);
     }
 
+    /**
+     * Setup mock objects
+     *
+     * @param \Throwable|null $fileGetContentsException
+     * @param int $httpStatus
+     * @param string $zipFilePath
+     * @param string|null $expectedResult
+     * @return void
+     */
     private function setupMocksForUpload(
         ?\Throwable $fileGetContentsException,
         int $httpStatus,
@@ -179,6 +217,13 @@ class DataIntegrationClientTest extends TestCase
         $this->setupClientMock($httpStatus, $expectedResult);
     }
 
+    /**
+     * Setup mock objects
+     *
+     * @param int $httpStatus
+     * @param string|null $triggerId
+     * @return void
+     */
     private function setupMocksForTriggerDataLoad(int $httpStatus, ?string $triggerId): void
     {
         $response = $this->createMock(Response::class);
@@ -192,17 +237,33 @@ class DataIntegrationClientTest extends TestCase
         $this->httpClientMock->expects($this->once())->method('send')->willReturn($response);
     }
 
+    /**
+     * Setup mock objects
+     *
+     * @param int $httpStatus
+     * @param string|null $expectedResult
+     * @return void
+     */
     private function setupMocksForStatus(int $httpStatus, ?string $expectedResult): void
     {
         $this->setupClientMock($httpStatus, $expectedResult);
     }
 
+    /**
+     * Setup mock objects
+     *
+     * @param int $httpStatus
+     * @param string|null $expectedResult
+     * @return void
+     */
     private function setupMocksForDataQualityReport(int $httpStatus, ?string $expectedResult): void
     {
         $this->setupClientMock($httpStatus, $expectedResult);
     }
 
     /**
+     * Setup client mock object
+     *
      * @param int $httpStatus
      * @param string|null $expectedResult
      * @return void
@@ -219,6 +280,11 @@ class DataIntegrationClientTest extends TestCase
         $this->httpClientMock->expects($this->any())->method('send')->willReturn($response);
     }
 
+    /**
+     * Get mock object for Request
+     *
+     * @return Request|MockObject
+     */
     private function getRequestMock(): Request|MockObject
     {
         $requestMock = $this->createMock(Request::class);
@@ -230,6 +296,11 @@ class DataIntegrationClientTest extends TestCase
         return $requestMock;
     }
 
+    /**
+     * Data provider for upload
+     *
+     * @return array[]
+     */
     public function uploadDataProvider(): array
     {
         return [
@@ -239,6 +310,11 @@ class DataIntegrationClientTest extends TestCase
         ];
     }
 
+    /**
+     * Data provider for data load trigger
+     *
+     * @return array[]
+     */
     public function dataLoadProvider(): array
     {
         return [
@@ -247,6 +323,11 @@ class DataIntegrationClientTest extends TestCase
         ];
     }
 
+    /**
+     * Data provider for status check
+     *
+     * @return array[]
+     */
     public function statusProvider(): array
     {
         return [
@@ -255,6 +336,11 @@ class DataIntegrationClientTest extends TestCase
         ];
     }
 
+    /**
+     * Data provider for fetching quality report
+     *
+     * @return array[]
+     */
     public function qualityReportProvider(): array
     {
         return [

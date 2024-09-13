@@ -139,6 +139,9 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     /**
      * Process next batch of products
      *
+     * @param array $dimensions
+     * @param array $entityIds
+     * @return void
      * @throws LocalizedException
      */
     private function processBatch(array $dimensions, array $entityIds): void
@@ -156,4 +159,3 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
         }
     }
 }
-

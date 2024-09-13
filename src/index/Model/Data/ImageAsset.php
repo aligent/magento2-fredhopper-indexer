@@ -8,6 +8,7 @@ use Magento\AdvancedSearch\Model\Adapter\DataMapper\AdditionalFieldsProviderInte
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Image\ParamsBuilder;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Catalog\Model\View\Asset\Image as ImageAsset;
 use Magento\Catalog\Model\View\Asset\ImageFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
@@ -44,6 +45,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 
     /**
      * @inheritDoc
+     *
      * @throws LocalizedException
      */
     public function getFields(array $productIds, $storeId): array
@@ -62,8 +64,8 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         $result = [];
         foreach ($products as $productId => $product) {
             foreach ($this->imageAttributeConfig as $fredhopperAttribute => $imageConfig) {
-                $imageParams = $this->getImageParamsForStore($imageConfig['display_area'], $storeId);
-                /** @var \Magento\Catalog\Model\View\Asset\Image $asset */
+                $imageParams = $this->getImageParamsForStore($imageConfig['display_area'], (int)$storeId);
+                /** @var ImageAsset $asset */
                 $asset = $this->imageAssetFactory->create([
                         'miscParams' => $imageParams,
                         'filePath' => $product->getData($imageConfig['attribute_code']),
@@ -75,11 +77,13 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
     }
 
     /**
-     * @param $imageDisplayArea
-     * @param $storeId
+     * Get image parameters for a given store
+     *
+     * @param string $imageDisplayArea
+     * @param int $storeId
      * @return array
      */
-    private function getImageParamsForStore($imageDisplayArea, $storeId): array
+    private function getImageParamsForStore(string $imageDisplayArea, int $storeId): array
     {
         if (!isset($this->imageParams[$imageDisplayArea][$storeId])) {
             try {
@@ -106,10 +110,12 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
     }
 
     /**
-     * @param $imageDisplayArea
+     * Get image parameters
+     *
+     * @param string $imageDisplayArea
      * @return array
      */
-    public function getImageParams($imageDisplayArea): array
+    public function getImageParams(string $imageDisplayArea): array
     {
         return $this->presentationConfig->getViewConfig()->getMediaAttributes(
             'Magento_Catalog',

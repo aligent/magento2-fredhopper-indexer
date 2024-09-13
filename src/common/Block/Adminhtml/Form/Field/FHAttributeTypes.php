@@ -30,6 +30,8 @@ class FHAttributeTypes extends Select
     ];
 
     /**
+     * Set input name of field
+     *
      * @param $value
      * @return $this
      */
@@ -39,7 +41,7 @@ class FHAttributeTypes extends Select
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function _toHtml(): string
     {

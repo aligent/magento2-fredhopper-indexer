@@ -21,7 +21,8 @@ class DataIntegrationClient
     private const string UPLOAD_ENDPOINT = 'data/input/%s?';
     private const string FAS_TRIGGER_ENDPOINT = 'trigger/load-data';
     private const string FAS_MONITOR_ENDPOINT = 'trigger/load-data/%s/status';
-    private const string FAS_DATA_QUALITY_ENDPOINT = 'trigger/analyze/%s-fas_load-data/logs/data-quality-summary-report.txt';
+    private const string FAS_DATA_QUALITY_ENDPOINT =
+        'trigger/analyze/%s-fas_load-data/logs/data-quality-summary-report.txt';
     private const string SUGGEST_TRIGGER_ENDPOINT = 'trigger/generate';
     private const string SUGGEST_MONITOR_ENDPOINT = 'trigger/generate/%s/status';
 
@@ -331,7 +332,6 @@ class DataIntegrationClient
     {
         return 'https://my.' . $this->generalConfig->getEndpointName() . '.fredhopperservices.com/'.
             $endpoint . ':' . $this->generalConfig->getEnvironmentName() . '/';
-
     }
 
     /**

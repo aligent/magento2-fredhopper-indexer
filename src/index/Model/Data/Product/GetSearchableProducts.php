@@ -8,7 +8,6 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
-use Magento\Framework\Exception\NoSuchEntityException;
 
 class GetSearchableProducts
 {
@@ -24,14 +23,19 @@ class GetSearchableProducts
     /**
      * Get all visible and enabled products
      *
-     * @throws NoSuchEntityException
+     * @param int $storeId
+     * @param array $staticFields
+     * @param array $productIds
+     * @param int $lastProductId
+     * @param int $batchSize
+     * @return array
      */
     public function execute(
         int $storeId,
         array $staticFields,
         array $productIds,
         int $lastProductId = 0,
-        $batchSize = 100
+        int $batchSize = 100
     ): array {
         /** @var ProductCollection $collection */
         $collection = $this->productCollectionFactory->create();

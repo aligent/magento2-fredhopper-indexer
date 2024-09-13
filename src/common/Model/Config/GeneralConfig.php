@@ -31,6 +31,11 @@ class GeneralConfig
     /** @var string[] */
     private array $allSiteVariantSuffixes;
 
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Resolver $localeResolver
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly Resolver $localeResolver,
@@ -39,6 +44,8 @@ class GeneralConfig
     }
 
     /**
+     * Get username
+     *
      * @return string
      */
     public function getUsername(): string
@@ -47,6 +54,8 @@ class GeneralConfig
     }
 
     /**
+     * Get password
+     *
      * @return string
      */
     public function getPassword(): string
@@ -55,6 +64,8 @@ class GeneralConfig
     }
 
     /**
+     * Get environment name
+     *
      * @return string
      */
     public function getEnvironmentName(): string
@@ -63,6 +74,8 @@ class GeneralConfig
     }
 
     /**
+     * Get endpoint name
+     *
      * @return string
      */
     public function getEndpointName(): string
@@ -71,6 +84,8 @@ class GeneralConfig
     }
 
     /**
+     * Get product prefix
+     *
      * @return string
      */
     public function getProductPrefix(): string
@@ -79,6 +94,8 @@ class GeneralConfig
     }
 
     /**
+     * Get variant prefix
+     *
      * @return string
      */
     public function getVariantPrefix(): string
@@ -87,6 +104,8 @@ class GeneralConfig
     }
 
     /**
+     * Get site variant flag
+     *
      * @return bool
      */
     public function getUseSiteVariant(): bool
@@ -95,6 +114,8 @@ class GeneralConfig
     }
 
     /**
+     * Get default store
+     *
      * @return int
      */
     public function getDefaultStore(): int
@@ -103,6 +124,8 @@ class GeneralConfig
     }
 
     /**
+     * Get all excluded stores
+     *
      * @return array
      */
     public function getExcludedStores(): array
@@ -112,6 +135,8 @@ class GeneralConfig
     }
 
     /**
+     * Get default locale
+     *
      * @return string
      */
     public function getDefaultLocale(): string
@@ -123,6 +148,8 @@ class GeneralConfig
     }
 
     /**
+     * Get the site variant for a store
+     *
      * @param int|null $storeId
      * @return string|null
      */
@@ -136,6 +163,8 @@ class GeneralConfig
     }
 
     /**
+     * Get all site variant suffixes
+     *
      * @return string[]
      */
     public function getAllSiteVariantSuffixes(): array
@@ -158,6 +187,8 @@ class GeneralConfig
     }
 
     /**
+     * Get root category ID
+     *
      * @return int
      */
     public function getRootCategoryId(): int
@@ -170,6 +201,8 @@ class GeneralConfig
     }
 
     /**
+     * Get debug logging setting
+     *
      * @return bool
      */
     public function getDebugLogging(): bool

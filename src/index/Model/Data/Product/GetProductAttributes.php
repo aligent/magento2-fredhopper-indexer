@@ -11,6 +11,10 @@ use Zend_Db_Expr;
 
 class GetProductAttributes
 {
+    /**
+     * @param ResourceConnection $resourceConnection
+     * @param MetadataPool $metadataPool
+     */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly MetadataPool $metadataPool

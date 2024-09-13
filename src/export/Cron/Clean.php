@@ -52,6 +52,12 @@ class Clean
         }
     }
 
+    /**
+     * Remove export and related files
+     *
+     * @param Export $export
+     * @return void
+     */
     private function removeExport(Export $export): void
     {
         try {

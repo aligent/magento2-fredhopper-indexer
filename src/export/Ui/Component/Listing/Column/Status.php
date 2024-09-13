@@ -8,6 +8,9 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class Status extends Column
 {
+    /**
+     * @inheritDoc
+     */
     public function prepareDataSource(array $dataSource): array
     {
         if (isset($dataSource['data']['items'])) {

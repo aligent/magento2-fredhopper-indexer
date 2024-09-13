@@ -17,6 +17,13 @@ class Report extends Action
 
     public const string ADMIN_RESOURCE = 'Aligent_FredhopperExport::manage';
 
+    /**
+     * @param Context $context
+     * @param ExportFactory $exportFactory
+     * @param ExportResource $exportResource
+     * @param DownloadQualityReport $downloadQualityReport
+     * @param FileInterface $response
+     */
     public function __construct(
         readonly Context $context,
         private readonly ExportFactory $exportFactory,

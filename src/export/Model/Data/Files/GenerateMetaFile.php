@@ -77,7 +77,7 @@ class GenerateMetaFile
     /**
      * Get attribute meta information
      *
-     * @throws LocalizedException
+     * @return array
      */
     private function getAttributesArray() : array
     {
@@ -194,6 +194,8 @@ class GenerateMetaFile
     }
 
     /**
+     * Get category data with all children
+     *
      * @param Category $category
      * @param array $allCategories
      * @return string[]

@@ -91,6 +91,4 @@ class InsertProductData
         }
         return $array;
     }
-
-
 }

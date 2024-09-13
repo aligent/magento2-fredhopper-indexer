@@ -18,7 +18,7 @@ class UpdateTriggeredExports
     public function __construct(
         private readonly CollectionFactory $collectionFactory,
         private readonly UpdateExportDataStatus $updateExportDataStatus
-    )  {
+    ) {
     }
 
     /**

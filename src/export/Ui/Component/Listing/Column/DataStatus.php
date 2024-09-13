@@ -13,10 +13,6 @@ class DataStatus extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as &$item) {
                 switch ($item[$this->getData('name')]) {
-                    case ExportInterface::DATA_STATUS_UNKNOWN:
-                        $class = 'grid-fh-data-status-unknown';
-                        $text = __('Unknown');
-                        break;
                     case ExportInterface::DATA_STATUS_SCHEDULED:
                         $class = 'grid-fh-data-status-scheduled';
                         $text = __('Scheduled');
@@ -37,6 +33,7 @@ class DataStatus extends Column
                         $class = 'grid-fh-data-status-failure';
                         $text = __('Failure');
                         break;
+                    case ExportInterface::DATA_STATUS_UNKNOWN:
                     default:
                         $class = 'grid-fh-data-status-unknown';
                         $text = __('Unknown');

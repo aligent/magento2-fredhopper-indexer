@@ -13,7 +13,7 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * @inheritDoc
      */
-    public function _construct()
+    public function _construct(): void
     {
         $this->_init(ExportResource::class);
     }

@@ -13,20 +13,20 @@ use Magento\Framework\Indexer\ScopeResolver\IndexScopeResolver;
 class StructureHandler implements IndexStructureInterface
 {
 
-    private ResourceConnection $resource;
-    private IndexScopeResolver $indexScopeResolver;
-
+    /**
+     * @param ResourceConnection $resource
+     * @param IndexScopeResolver $indexScopeResolver
+     */
     public function __construct(
-        ResourceConnection $resource,
-        IndexScopeResolver $indexScopeResolver
+        private readonly ResourceConnection $resource,
+        private readonly IndexScopeResolver $indexScopeResolver
     ) {
-        $this->resource = $resource;
-        $this->indexScopeResolver = $indexScopeResolver;
     }
 
     /**
-     * This is not a filesystem delete function - phpcs false positive
      * @inheritDoc
+     *
+     * This is not a filesystem delete function - phpcs false positive
      */
     // phpcs:ignore PHPCS_SecurityAudit.BadFunctions.FilesystemFunctions.WarnFilesystem
     public function delete($index, array $dimensions = []): void
@@ -39,6 +39,7 @@ class StructureHandler implements IndexStructureInterface
 
     /**
      * @inheritDoc
+     *
      * @throws \Zend_Db_Exception
      */
     public function create($index, array $fields, array $dimensions = []): void
@@ -47,6 +48,8 @@ class StructureHandler implements IndexStructureInterface
     }
 
     /**
+     * Create working index table
+     *
      * @param $tableName
      * @throws \Zend_Db_Exception
      */

@@ -85,7 +85,6 @@ class AttributeConfig
     public function getUseVariantProducts(): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_USE_VARIANT_PRODUCTS);
-
     }
 
     /**

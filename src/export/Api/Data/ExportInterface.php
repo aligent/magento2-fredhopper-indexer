@@ -357,5 +357,4 @@ interface ExportInterface
      * @return void
      */
     public function setIsCurrent(bool $isCurrent): void;
-
 }

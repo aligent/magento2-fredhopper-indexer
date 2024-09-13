@@ -16,8 +16,14 @@ use PHPUnit\Framework\TestCase;
  */
 class MinimumProductsValidatorTest extends TestCase
 {
+    /**
+     * @var MinimumProductsValidator
+     */
     private MinimumProductsValidator $minimumProductsValidator;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp(): void
     {
         $sanityCheckConfig = $this->createMock(SanityCheckConfig::class);
@@ -26,6 +32,8 @@ class MinimumProductsValidatorTest extends TestCase
     }
 
     /**
+     * Test state validation
+     *
      * @dataProvider exportProvider
      *
      * @param ExportInterface $export
@@ -52,6 +60,11 @@ class MinimumProductsValidatorTest extends TestCase
         }
     }
 
+    /**
+     * Data provider for export validation
+     *
+     * @return array[]
+     */
     public function exportProvider(): array
     {
         return [
@@ -74,6 +87,13 @@ class MinimumProductsValidatorTest extends TestCase
         ];
     }
 
+    /**
+     * Get mock object for Export
+     *
+     * @param int $totalProductCount
+     * @param string $exportType
+     * @return Export|MockObject
+     */
     private function getExportMock(int $totalProductCount, string $exportType): Export|MockObject
     {
         $export = $this->createMock(Export::class);

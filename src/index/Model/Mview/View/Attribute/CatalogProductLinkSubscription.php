@@ -222,7 +222,7 @@ class CatalogProductLinkSubscription extends Subscription
      *
      * @throws \Exception
      */
-    private function getEntityMetaData(): EntityMetadataInterface
+    private function getEntityMetadata(): EntityMetadataInterface
     {
         if (!isset($this->entityMetadata)) {
             $this->entityMetadata = $this->metadataPool->getMetadata(ProductInterface::class);

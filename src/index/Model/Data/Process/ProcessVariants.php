@@ -62,7 +62,6 @@ class ProcessVariants
      * @param $documentData
      * @param array $productAttributeCodes
      * @return array
-     * @throws LocalizedException
      */
     private function removeVariantLevelAttributesFromParent($documentData, array $productAttributeCodes): array
     {
@@ -87,7 +86,6 @@ class ProcessVariants
      *
      * @param $documentData
      * @return array
-     * @throws LocalizedException
      */
     private function removeProductLevelAttributesFromVariants($documentData): array
     {

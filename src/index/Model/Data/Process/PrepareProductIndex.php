@@ -34,6 +34,11 @@ class PrepareProductIndex
     /**
      * Prepare the product index
      *
+     * @param array $productIndex
+     * @param array $productData
+     * @param int $storeId
+     * @param array $additionalFields
+     * @return array
      * @throws LocalizedException
      */
     public function execute(array $productIndex, array $productData, int $storeId, array $additionalFields): array
@@ -85,7 +90,8 @@ class PrepareProductIndex
     /**
      * Ensure boolean attributes are not ignored when false
      *
-     * @throws LocalizedException
+     * @param array $indexData
+     * @return array
      */
     private function populateBooleanAttributes(array $indexData): array
     {
@@ -95,7 +101,7 @@ class PrepareProductIndex
             if (!isset($indexData['product'][$attribute['attribute']])) {
                 $indexData['product'][$attribute['attribute']] = '0';
             }
-            foreach ($indexData['variants'] as  $variantId => $variantData) {
+            foreach ($indexData['variants'] as $variantId => $variantData) {
                 if (!isset($variantData[$attribute['attribute']])) {
                     $indexData['variants'][$variantId][$attribute['attribute']] = '0';
                 }

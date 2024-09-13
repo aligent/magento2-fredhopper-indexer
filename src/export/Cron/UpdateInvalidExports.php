@@ -24,7 +24,7 @@ class UpdateInvalidExports
         private readonly GetCurrentExportedVersion $getCurrentExportedVersion,
         private readonly ExportResource $exportResource,
         private readonly LoggerInterface $logger
-    )  {
+    ) {
     }
 
     /**

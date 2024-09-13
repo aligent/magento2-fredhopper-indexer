@@ -17,12 +17,19 @@ class CustomAttributeConfig
     ) {
     }
 
+    /**
+     * Get custom attribute data
+     *
+     * @return array
+     */
     public function getCustomAttributeData(): array
     {
         return $this->customAttributeData;
     }
 
     /**
+     * Get all site-variant custom attributes
+     *
      * @return array
      */
     public function getSiteVariantCustomAttributes(): array
@@ -37,6 +44,8 @@ class CustomAttributeConfig
     }
 
     /**
+     * Get product-level custom attributes
+     *
      * @return array
      */
     public function getProductLevelCustomAttributes(): array
@@ -52,6 +61,8 @@ class CustomAttributeConfig
     }
 
     /**
+     * Get variant-level custom attributes
+     *
      * @return array
      */
     public function getVariantLevelCustomAttributes(): array

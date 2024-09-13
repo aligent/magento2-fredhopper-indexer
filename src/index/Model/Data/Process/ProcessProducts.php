@@ -22,7 +22,6 @@ class ProcessProducts
      *
      * @param array $documents
      * @return array
-     * @throws LocalizedException
      */
     public function execute(array $documents): array
     {
