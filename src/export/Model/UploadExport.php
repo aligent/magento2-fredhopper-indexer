@@ -60,7 +60,7 @@ class UploadExport
             if ($filename === null) {
                 throw new LocalizedException(__('Invalid export type'));
             }
-            $zipFileName = $export->getDirectory() . $filename;
+            $zipFileName = $export->getDirectory() . DIRECTORY_SEPARATOR . $filename;
             if ($exportType === ExportInterface::EXPORT_TYPE_SUGGEST) {
                 $dataId = $this->dataIntegrationClient->uploadSuggestData($zipFileName);
             } else {

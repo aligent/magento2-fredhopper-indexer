@@ -8,7 +8,6 @@ use Aligent\FredhopperExport\Model\Data\Export;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\Collection;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\CollectionFactory;
 use Aligent\FredhopperExport\Model\UploadExport;
-use Magento\Framework\Exception\AlreadyExistsException;
 
 class Upload
 {
