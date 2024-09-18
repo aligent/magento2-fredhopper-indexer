@@ -30,7 +30,7 @@
                 comment="Export created at"/>
         <column xsi:type="varchar" name="status" length="1" nullable="false"
                 comment="Export status"/>
-        <column xsi:type="varchar" name="data_status" length="10" nullable="false"
+        <column xsi:type="varchar" name="data_status" length="10" nullable="true"
                 comment="Fredhopper data status"/>
         <column xsi:type="varchar" name="data_id" length="20" nullable="true"
                 comment="Fredhopper Data ID associated with the export"/>
