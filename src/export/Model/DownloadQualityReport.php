@@ -27,12 +27,30 @@ class DownloadQualityReport
      *
      * @param string $directory
      * @param string $triggerId
+     * @param bool $isSummary
      * @return string|null
      */
-    public function execute(string $directory, string $triggerId): ?string
+    public function execute(string $directory, string $triggerId, bool $isSummary): ?string
     {
-        $filename = $directory . DIRECTORY_SEPARATOR . 'quality_report.txt';
-        $qualityReportData = $this->dataIntegrationClient->getDataQualityReport($triggerId);
+        $summaryFilename = $directory . DIRECTORY_SEPARATOR . 'quality_report.txt';
+        $zipFilename = $directory . DIRECTORY_SEPARATOR . 'quality_report.gz';
+        if ($isSummary) {
+            $filename = $summaryFilename;
+        } else {
+            $filename = $zipFilename;
+        }
+        try {
+            if ($this->file->isFile($filename)) {
+                return $filename;
+            }
+        } catch (FileSystemException $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+        }
+
+        $qualityReportData = $this->dataIntegrationClient->getDataQualityReport($triggerId, $isSummary);
+        if ($qualityReportData === null) {
+            return null;
+        }
         try {
             $this->file->filePutContents($filename, $qualityReportData);
             return $filename;

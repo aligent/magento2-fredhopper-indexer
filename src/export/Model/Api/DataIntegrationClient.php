@@ -17,12 +17,15 @@ class DataIntegrationClient
 
     private const string ENDPOINT_FAS = 'fas';
     private const string ENDPOINT_SUGGEST = 'suggest';
+    private const string ENDPOINT_DQ = 'dq';
 
     private const string UPLOAD_ENDPOINT = 'data/input/%s?';
     private const string FAS_TRIGGER_ENDPOINT = 'trigger/load-data';
     private const string FAS_MONITOR_ENDPOINT = 'trigger/load-data/%s/status';
     private const string FAS_DATA_QUALITY_ENDPOINT =
         'trigger/analyze/%s-fas_load-data/logs/data-quality-summary-report.txt';
+    private const string FAS_DATA_QUALITY_ZIP_ENDPOINT =
+        'trigger/analyze/%s-fas_load-data/logs/data-quality-report.txt.gz';
     private const string SUGGEST_TRIGGER_ENDPOINT = 'trigger/generate';
     private const string SUGGEST_MONITOR_ENDPOINT = 'trigger/generate/%s/status';
 
@@ -112,8 +115,10 @@ class DataIntegrationClient
             return null;
         }
 
-        // data id will be the response body
-        return $response['body'] ?? null;
+        // response body will be in the form "data-id=<data id>\n"
+        $body = $response['body'] ?? '';
+        $tokens = explode('=', trim($body));
+        return end($tokens);
     }
 
     /**
@@ -154,7 +159,7 @@ class DataIntegrationClient
             'headers' => [
                 'Content-Type: text/plain'
             ],
-            'body' => $dataIdString
+            'body' => 'data-id=' . $dataIdString
         ];
         $triggerUrl = $this->getBaseUrl($endpoint);
         if ($endpoint === self::ENDPOINT_FAS) {
@@ -170,7 +175,7 @@ class DataIntegrationClient
         }
 
         // check that the data load was triggered correctly
-        $location = $response['headers']['location'] ?? null;
+        $location = $response['headers']['Location'] ?? null;
         if ($location === null) {
             return null;
         }
@@ -226,19 +231,26 @@ class DataIntegrationClient
             return null;
         }
 
-        // status will be the response body
-        return $response['body'] ?? null;
+        // status will be the first line in the response body
+        $body = $response['body'] ?? null;
+        if ($body !== null) {
+            $bodyParts = explode("\n", $body);
+            $body = trim(reset($bodyParts));
+        }
+        return $body;
     }
 
     /**
      * Get the data quality summary report content from Fredhopper
      *
      * @param string $triggerId
+     * @param bool $isSummary
      * @return string|null
      */
-    public function getDataQualityReport(string $triggerId): ?string
+    public function getDataQualityReport(string $triggerId, bool $isSummary): ?string
     {
-        $dataQualityUrl = sprintf(self::FAS_DATA_QUALITY_ENDPOINT, $triggerId);
+        $dataQualityUrl = $this->getBaseUrl(self::ENDPOINT_DQ) .
+            sprintf(($isSummary ? self::FAS_DATA_QUALITY_ENDPOINT : self::FAS_DATA_QUALITY_ZIP_ENDPOINT), $triggerId);
         $request = $this->generateRequest($dataQualityUrl, [], Request::METHOD_GET);
         $response = $this->sendRequest($request);
 
@@ -300,7 +312,7 @@ class DataIntegrationClient
         $this->httpClient->reset();
         return [
             'status_code' => $response->getStatusCode(),
-            'headers' => $response->getHeaders(),
+            'headers' => $response->getHeaders()->toArray(),
             'body' => $response->getBody()
         ];
     }

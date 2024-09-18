@@ -105,5 +105,13 @@
                 </item>
             </argument>
         </column>
+        <actionsColumn name="actions" class="Aligent\FredhopperExport\Ui\Component\Listing\Column\Actions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="resizeDefaultWidth" xsi:type="string">110</item>
+                    <item name="indexField" xsi:type="string">export_id</item>
+                </item>
+            </argument>
+        </actionsColumn>
     </columns>
 </listing>
