@@ -42,12 +42,12 @@ interface ExportInterface
     public const string STATUS_ERROR = 'e';
     public const string STATUS_INVALID = 'i';
 
-    public const string DATA_STATUS_UNKNOWN = 'unknown';
-    public const string DATA_STATUS_SCHEDULED = 'scheduled';
-    public const string DATA_STATUS_RUNNING = 'running';
-    public const string DATA_STATUS_DELAYED = 'delayed';
-    public const string DATA_STATUS_SUCCESS = 'success';
-    public const string DATA_STATUS_FAILURE = 'failure';
+    public const string DATA_STATUS_UNKNOWN = 'UNKNOWN';
+    public const string DATA_STATUS_SCHEDULED = 'SCHEDULED';
+    public const string DATA_STATUS_RUNNING = 'RUNNING';
+    public const string DATA_STATUS_DELAYED = 'DELAYED';
+    public const string DATA_STATUS_SUCCESS = 'SUCCESS';
+    public const string DATA_STATUS_FAILURE = 'FAILURE';
 
     public const array VALID_DATA_STATUSES = [
         self::DATA_STATUS_UNKNOWN,
