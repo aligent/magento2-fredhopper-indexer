@@ -58,6 +58,7 @@ class TriggerDataLoad
             return;
         }
         $export->setTriggerId($triggerId);
+        $export->setStatus(ExportInterface::STATUS_TRIGGERED);
         $export->setDataStatus(ExportInterface::DATA_STATUS_UNKNOWN);
         try {
             $this->exportResource->save($export);
