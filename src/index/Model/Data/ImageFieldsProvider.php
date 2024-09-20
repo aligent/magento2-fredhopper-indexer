@@ -11,7 +11,6 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Catalog\Model\View\Asset\Image as ImageAsset;
 use Magento\Catalog\Model\View\Asset\ImageFactory;
 use Magento\Framework\App\Area;
-use Magento\Framework\App\State;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\ConfigInterface;
 use Magento\Store\Model\App\Emulation;
@@ -28,7 +27,6 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
      * @param ParamsBuilder $paramsBuilder
      * @param ImageFactory $imageAssetFactory
      * @param ConfigInterface $presentationConfig
-     * @param State $appState
      * @param Emulation $emulation
      * @param array $imageAttributeConfig
      */
@@ -37,7 +35,6 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         private readonly ParamsBuilder $paramsBuilder,
         private readonly ImageFactory $imageAssetFactory,
         private readonly ConfigInterface $presentationConfig,
-        private readonly State $appState,
         private readonly Emulation $emulation,
         private readonly array $imageAttributeConfig = []
     ) {
@@ -92,11 +89,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
                     Area::AREA_FRONTEND,
                     true
                 );
-                $imageArguments = $this->appState->emulateAreaCode(
-                    Area::AREA_FRONTEND,
-                    [$this, 'getImageParams'],
-                    ['imageDisplayArea' => $imageDisplayArea]
-                );
+                $imageArguments = $this->getImageParams($imageDisplayArea);
                 $this->imageParams[$imageDisplayArea][$storeId] = $this->paramsBuilder->build($imageArguments);
             } catch (\Exception) {
                 // unexpected error
