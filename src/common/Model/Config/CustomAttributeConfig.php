@@ -9,6 +9,13 @@ class CustomAttributeConfig
     private const string ATTRIBUTE_LEVEL_PRODUCT = 'product';
     private const string ATTRIBUTE_LEVEL_VARIANT = 'variant';
 
+    /** @var array */
+    private array $siteVariantCustomAttributes;
+    /** @var array */
+    private array $productLevelCustomAttributes;
+    /** @var array */
+    private array $variantLevelCustomAttributes;
+
     /**
      * @param array $customAttributeData
      */
@@ -34,13 +41,15 @@ class CustomAttributeConfig
      */
     public function getSiteVariantCustomAttributes(): array
     {
-        $siteVariantCustomAttributes = [];
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-            if ($attributeData['is_site_variant'] ?? false) {
-                $siteVariantCustomAttributes[] = $attributeCode;
+        if (!isset($this->siteVariantCustomAttributes)) {
+            $this->siteVariantCustomAttributes = [];
+            foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+                if ($attributeData['is_site_variant'] ?? false) {
+                    $this->siteVariantCustomAttributes[] = $attributeCode;
+                }
             }
         }
-        return $siteVariantCustomAttributes;
+        return $this->siteVariantCustomAttributes;
     }
 
     /**
@@ -50,14 +59,16 @@ class CustomAttributeConfig
      */
     public function getProductLevelCustomAttributes(): array
     {
-        $productLevelCustomAttributeCodes = [];
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-            $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
-            if ($attributeLevel === self::ATTRIBUTE_LEVEL_PRODUCT) {
-                $productLevelCustomAttributeCodes[] = $attributeCode;
+        if (!isset($this->productLevelCustomAttributes)) {
+            $this->productLevelCustomAttributes = [];
+            foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+                $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
+                if ($attributeLevel === self::ATTRIBUTE_LEVEL_PRODUCT) {
+                    $this->productLevelCustomAttributes[] = $attributeCode;
+                }
             }
         }
-        return $productLevelCustomAttributeCodes;
+        return $this->productLevelCustomAttributes;
     }
 
     /**
@@ -67,13 +78,15 @@ class CustomAttributeConfig
      */
     public function getVariantLevelCustomAttributes(): array
     {
-        $variantLevelCustomAttributeCodes = [];
-        foreach ($this->customAttributeData as $attributeCode => $attributeData) {
-            $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
-            if ($attributeLevel === self::ATTRIBUTE_LEVEL_VARIANT) {
-                $variantLevelCustomAttributeCodes[] = $attributeCode;
+        if (!isset($this->variantLevelCustomAttributes)) {
+            $this->variantLevelCustomAttributes = [];
+            foreach ($this->customAttributeData as $attributeCode => $attributeData) {
+                $attributeLevel = $attributeData['level'] ?? self::ATTRIBUTE_LEVEL_PRODUCT;
+                if ($attributeLevel === self::ATTRIBUTE_LEVEL_VARIANT) {
+                    $this->variantLevelCustomAttributes[] = $attributeCode;
+                }
             }
         }
-        return $variantLevelCustomAttributeCodes;
+        return $this->variantLevelCustomAttributes;
     }
 }
