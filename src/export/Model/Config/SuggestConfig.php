@@ -32,7 +32,9 @@ class SuggestConfig
     {
         if (!isset($this->blacklistSearchTerms)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_BLACKLIST_TERMS);
-            $this->blacklistSearchTerms = $this->json->unserialize($configValue ?? '[]');
+            $unserializedValue = $this->json->unserialize($configValue ?? '[]');
+            // it's possible (though very unlikely) that this will not be an array
+            $this->blacklistSearchTerms = is_array($unserializedValue) ? $unserializedValue : [];
         }
         return $this->blacklistSearchTerms;
     }
@@ -44,7 +46,9 @@ class SuggestConfig
     {
         if (!isset($this->whitelistSearchTerms)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_WHITELIST_TERMS);
-            $this->whitelistSearchTerms = $this->json->unserialize($configValue ?? '[]');
+            $unserializedValue = $this->json->unserialize($configValue ?? '[]');
+            // it's possible (though very unlikely) that this will not be an array
+            $this->whitelistSearchTerms = is_array($unserializedValue) ? $unserializedValue : [];
         }
         return $this->whitelistSearchTerms;
     }

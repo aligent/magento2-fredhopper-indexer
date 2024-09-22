@@ -97,6 +97,8 @@ class AttributeConfig
         if (!isset($this->productAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_ATTRIBUTES);
             $productAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
+            // it's possible (though very unlikely) that this will not be an array
+            $productAttributes = is_array($productAttributes) ? $productAttributes : [];
             $productAttributes = $this->addMagentoAttributeData($productAttributes);
             $this->productAttributes = $productAttributes;
         }
@@ -112,7 +114,9 @@ class AttributeConfig
     {
         if (!isset($this->variantAttributes)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_VARIANT_ATTRIBUTES);
-            $variantAttributes = $this->json->unserialize($configValue ?? '[]') ?? [];
+            $variantAttributes = $this->json->unserialize($configValue ?? '[]');
+            // it's possible (though very unlikely) that this will not be an array
+            $variantAttributes = is_array($variantAttributes) ? $variantAttributes : [];
             $variantAttributes = $this->addMagentoAttributeData($variantAttributes);
             $this->variantAttributes = $variantAttributes;
         }
