@@ -12,6 +12,8 @@ use Magento\Framework\Filesystem\Driver\File as FilesystemDriver;
 use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
 
+use function PHPUnit\Framework\stringStartsWith;
+
 class DataIntegrationClient
 {
 
@@ -327,7 +329,7 @@ class DataIntegrationClient
     {
         // Treat any response code other than 2xx as an error
         $statusString = (string)$response['status_code'];
-        if (strlen($statusString) < 1 || $statusString[0] !== '2') {
+        if (empty($statusString) || !str_starts_with($statusString, '2')) {
             $this->logger->error("HTTP error: $statusString");
             return false;
         }
