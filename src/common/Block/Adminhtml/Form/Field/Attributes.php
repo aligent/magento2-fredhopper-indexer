@@ -49,7 +49,7 @@ class Attributes extends Select
                 if (is_numeric($attributeCode)) {
                     continue;
                 }
-                $this->addOption($attributeCode, implode(' - ', [$attributeCode, $attribute->getStoreLabel()]));
+                $this->addOption($attributeCode, $attributeCode . ' - ' . $attribute->getStoreLabel());
             }
         }
 
