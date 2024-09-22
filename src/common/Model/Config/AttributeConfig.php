@@ -313,7 +313,9 @@ class AttributeConfig
     {
         if (!isset($this->attributeNameMapping)) {
             $configValue = $this->scopeConfig->getValue(self::XML_PATH_ATTRIBUTE_MAPPING);
-            $this->attributeNameMapping = $this->json->unserialize($configValue ?? '[]') ?? [];
+            $unserializedValue = $this->json->unserialize($configValue ?? '[]');
+            // it's possible (though very unlikely) that this will not be an array
+            $this->attributeNameMapping = is_array($unserializedValue) ? $unserializedValue : [];
         }
         return $this->attributeNameMapping;
     }
