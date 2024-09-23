@@ -11,7 +11,6 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Catalog\Model\View\Asset\Image as ImageAsset;
 use Magento\Catalog\Model\View\Asset\ImageFactory;
 use Magento\Framework\App\Area;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\ConfigInterface;
 use Magento\Store\Model\App\Emulation;
 
@@ -42,8 +41,6 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 
     /**
      * @inheritDoc
-     *
-     * @throws LocalizedException
      */
     public function getFields(array $productIds, $storeId): array
     {
