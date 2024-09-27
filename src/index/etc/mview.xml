@@ -6,6 +6,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Mview/etc/mview.xsd">
     <view id="fredhopper" class="Aligent\Fredhopper\Model\Indexer\ProductIndexer" group="indexer">
         <subscriptions>
+            <table name="catalog_category_product" entity_column="product_id" />
             <table name="catalog_product_entity" entity_column="entity_id" />
             <table name="catalog_product_entity_datetime" entity_column="entity_id" />
             <table name="catalog_product_entity_decimal" entity_column="entity_id" />
@@ -17,6 +18,7 @@
             <table name="catalog_product_entity_varchar" entity_column="entity_id" />
             <table name="catalog_product_link" entity_column="product_id"
                    subscription_model="Aligent\FredhopperIndexer\Model\Mview\View\Attribute\CatalogProductLinkSubscription"/>
+            <table name="catalog_product_website" entity_column="product_id" />
             <table name="catalogrule_product_price" entity_column="product_id" />
             <table name="cataloginventory_stock_item" entity_column="product_id" />
         </subscriptions>
