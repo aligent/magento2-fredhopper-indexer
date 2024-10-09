@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <fredhopper_indexer>
+            <general>
+                <password backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <endpoint_name>ap2</endpoint_name>
+                <product_prefix>p_</product_prefix>
+                <variant_prefix>v_</variant_prefix>
+                <debug_logging>0</debug_logging>
+            </general>
+        </fredhopper_indexer>
+    </default>
+</config>

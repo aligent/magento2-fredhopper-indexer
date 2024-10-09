@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="fredhopper_export" resource="default" engine="innodb" comment="Export information for Fredhopper">
+        <column xsi:type="int" name="export_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Export ID"/>
+        <column xsi:type="varchar" name="export_type" length="1" nullable="false"
+                comment="Export Type ('f'ull, 'i'ncremental, or 's'uggest)"/>
+        <column xsi:type="int" name="product_count" padding="10" unsigned="true" identity="false" nullable="false"
+                comment="Total number of products in export"/>
+        <column xsi:type="int" name="variant_count" padding="10" unsigned="true" identity="false" nullable="false"
+                comment="Total number of variants in export"/>
+        <column xsi:type="int" name="product_add_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of products added in incremental export"/>
+        <column xsi:type="int" name="variant_add_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of variants added in incremental export"/>
+        <column xsi:type="int" name="product_update_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of products updated in incremental export"/>
+        <column xsi:type="int" name="variant_update_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of variants updated in incremental export"/>
+        <column xsi:type="int" name="product_delete_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of products deleted in incremental export"/>
+        <column xsi:type="int" name="variant_delete_count" padding="10" unsigned="true" identity="false" nullable="true"
+                comment="Total number of variants deleted in incremental export"/>
+        <column xsi:type="varchar" name="directory" length="255" nullable="false"
+                comment="Directory containing export files"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Export created at"/>
+        <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Export created at"/>
+        <column xsi:type="varchar" name="status" length="1" nullable="false"
+                comment="Export status"/>
+        <column xsi:type="varchar" name="data_status" length="10" nullable="true"
+                comment="Fredhopper data status"/>
+        <column xsi:type="varchar" name="data_id" length="20" nullable="true"
+                comment="Fredhopper Data ID associated with the export"/>
+        <column xsi:type="varchar" name="trigger_id" length="20" nullable="true"
+                comment="Fredhopper Trigger ID for checking export status within Fredhopper"/>
+        <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Latest Version ID included in the export"/>
+        <column xsi:type="tinyint" name="is_current" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Indicates if the export's data is currently used within Fredhopper"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="export_id"/>
+        </constraint>
+    </table>
+</schema>

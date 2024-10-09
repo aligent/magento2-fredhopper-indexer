@@ -1,0 +1,28 @@
+{
+    "fredhopper_export": {
+        "column": {
+            "export_id": true,
+            "export_type": true,
+            "product_count": true,
+            "variant_count": true,
+            "product_add_count": true,
+            "variant_add_count": true,
+            "product_update_count": true,
+            "variant_update_count": true,
+            "product_delete_count": true,
+            "variant_delete_count": true,
+            "directory": true,
+            "created_at": true,
+            "updated_at": true,
+            "status": true,
+            "data_status": true,
+            "data_id": true,
+            "trigger_id": true,
+            "version_id": true,
+            "is_current": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

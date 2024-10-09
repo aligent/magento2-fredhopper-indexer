@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <fredhopper_indexer>
+            <general>
+                <export_directory>var/fh_exports</export_directory>
+                <export_retention>3</export_retention>
+            </general>
+            <sanity_check>
+                <delete_products>10</delete_products>
+            </sanity_check>
+            <cron>
+                <incremental_schedule>*/15 * * * *</incremental_schedule>
+                <full_schedule>20 */6 * * *</full_schedule>
+                <suggest_schedule>40 */12 * * *</suggest_schedule>
+            </cron>
+        </fredhopper_indexer>
+    </default>
+</config>

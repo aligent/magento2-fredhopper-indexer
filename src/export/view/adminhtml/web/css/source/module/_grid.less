@@ -1,0 +1,161 @@
+//
+//  Grid - status and data status
+//  --------------------------------------
+
+@grid-fh-border: #d8d8d8;
+
+@grid-fh-status-pending-color: #007AA3;
+@grid-fh-status-pending-background-color: #D6F5FF;
+@grid-fh-status-pending-border-color: #007AA3;
+
+@grid-fh-status-uploaded-color: #CAB902;
+@grid-fh-status-uploaded-background-color: #FFFBD7;
+@grid-fh-status-uploaded-border-color: #CAB902;
+
+@grid-fh-status-triggered-color: #E47311;
+@grid-fh-status-triggered-background-color: #FBDFC6;
+@grid-fh-status-triggered-border-color: #E47311;
+
+@grid-fh-status-complete-color: #185B00;
+@grid-fh-status-complete-background-color: #D0E5A9;
+@grid-fh-status-complete-border-color: #5B8116;
+
+@grid-fh-status-error-color: #E22626;
+@grid-fh-status-error-background-color: #F9D4D4;
+@grid-fh-status-error-border-color: #E22626;
+
+@grid-fh-status-invalid-color: #808080;
+@grid-fh-status-invalid-background-color: #CCCCCC;
+@grid-fh-status-invalid-border-color: #808080;
+
+@grid-fh-status-unknown-color: #E22626;
+@grid-fh-status-unknown-background-color: #F9D4D4;
+@grid-fh-status-unknown-border-color: #E22626;
+
+@grid-fh-data-status-scheduled-color: #007AA3;
+@grid-fh-data-status-scheduled-background-color: #D6F5FF;
+@grid-fh-data-status-scheduled-border-color: #007AA3;
+
+@grid-fh-data-status-delayed-color: #CAB902;
+@grid-fh-data-status-delayed-background-color: #FFFBD7;
+@grid-fh-data-status-delayed-border-color: #CAB902;
+
+@grid-fh-data-status-running-color: #E47311;
+@grid-fh-data-status-running-background-color: #FBDFC6;
+@grid-fh-data-status-running-border-color: #E47311;
+
+@grid-fh-data-status-success-color: #185B00;
+@grid-fh-data-status-success-background-color: #D0E5A9;
+@grid-fh-data-status-success-border-color: #5B8116;
+
+@grid-fh-data-status-failure-color: #E22626;
+@grid-fh-data-status-failure-background-color: #F9D4D4;
+@grid-fh-data-status-failure-border-color: #E22626;
+
+@grid-fh-data-status-unknown-color: #808080;
+@grid-fh-data-status-unknown-background-color: #CCCCCC;
+@grid-fh-data-status-unknown-border-color: #808080;
+
+@grid-fh-status-unknown-color: #E22626;
+@grid-fh-status-unknown-background-color: #F9D4D4;
+@grid-fh-status-unknown-border-color: #E22626;
+
+.grid-fh-status-pending,
+.grid-fh-status-uploaded,
+.grid-fh-status-triggered,
+.grid-fh-status-complete,
+.grid-fh-status-error,
+.grid-fh-status-invalid,
+.grid-fh-status-unknown,
+.grid-fh-data-status-scheduled,
+.grid-fh-data-status-delayed,
+.grid-fh-data-status-running,
+.grid-fh-data-status-success,
+.grid-fh-data-status-failure,
+.grid-fh-data-status-unknown {
+    border: 1px solid @grid-fh-border;
+    display: block;
+    font-weight: bold;
+    line-height: 17px;
+    padding: 0 3px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.grid-fh-status-pending {
+    color: @grid-fh-status-pending-color;
+    background-color: @grid-fh-status-pending-background-color;
+    border-color: @grid-fh-status-pending-border-color;
+}
+
+.grid-fh-status-uploaded {
+    color: @grid-fh-status-uploaded-color;
+    background-color: @grid-fh-status-uploaded-background-color;
+    border-color: @grid-fh-status-uploaded-border-color;
+}
+
+.grid-fh-status-triggered {
+    color: @grid-fh-status-triggered-color;
+    background-color: @grid-fh-status-triggered-background-color;
+    border-color: @grid-fh-status-triggered-border-color;
+}
+
+.grid-fh-status-complete {
+    color: @grid-fh-status-complete-color;
+    background-color: @grid-fh-status-complete-background-color;
+    border-color: @grid-fh-status-complete-border-color;
+}
+
+.grid-fh-status-error {
+    color: @grid-fh-status-error-color;
+    background-color: @grid-fh-status-error-background-color;
+    border-color: @grid-fh-status-error-border-color;
+}
+
+.grid-fh-status-invalid {
+    color: @grid-fh-status-invalid-color;
+    background-color: @grid-fh-status-invalid-background-color;
+    border-color: @grid-fh-status-invalid-border-color;
+}
+
+.grid-fh-status-unknown {
+    color: @grid-fh-status-unknown-color;
+    background-color: @grid-fh-status-unknown-background-color;
+    border-color: @grid-fh-status-unknown-border-color;
+}
+
+.grid-fh-data-status-scheduled {
+    color: @grid-fh-data-status-scheduled-color;
+    background-color: @grid-fh-data-status-scheduled-background-color;
+    border-color: @grid-fh-data-status-scheduled-border-color;
+}
+
+.grid-fh-data-status-delayed {
+    color: @grid-fh-data-status-delayed-color;
+    background-color: @grid-fh-data-status-delayed-background-color;
+    border-color: @grid-fh-data-status-delayed-border-color;
+}
+
+.grid-fh-data-status-running {
+    color: @grid-fh-data-status-running-color;
+    background-color: @grid-fh-data-status-running-background-color;
+    border-color: @grid-fh-data-status-running-border-color;
+}
+
+.grid-fh-data-status-success {
+    color: @grid-fh-data-status-success-color;
+    background-color: @grid-fh-data-status-success-background-color;
+    border-color: @grid-fh-data-status-success-border-color;
+}
+
+.grid-fh-data-status-failure {
+    color: @grid-fh-data-status-failure-color;
+    background-color: @grid-fh-data-status-failure-background-color;
+    border-color: @grid-fh-data-status-failure-border-color;
+}
+
+.grid-fh-data-status-unknown {
+    color: @grid-fh-data-status-unknown-color;
+    background-color: @grid-fh-data-status-unknown-background-color;
+    border-color: @grid-fh-data-status-unknown-border-color;
+}

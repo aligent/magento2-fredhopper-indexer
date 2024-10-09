@@ -1,0 +1,56 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="fredhopper_indexer">
+            <group id="general">
+                <field id="export_directory" translate="label comment" sortOrder="120" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Export Directory</label>
+                    <comment>Base directory into which export files will be saved (in subdirectories)</comment>
+                </field>
+                <field id="export_retention" translate="label comment" sortOrder="130" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Export Retention (Days)</label>
+                    <comment>How long export files are kept on the server for (in days)</comment>
+                </field>
+            </group>
+            <group id="sanity_check" translate="label" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Sanity checks</label>
+                <field id="total_products" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Minimum total products</label>
+                </field>
+                <field id="delete_products" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Maximum products to delete</label>
+                    <comment>Applies to both full and incremental exports</comment>
+                </field>
+            </group>
+            <group id="suggest" translate="label" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Suggest Export</label>
+                <field id="blacklist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Blacklist Search Terms</label>
+                    <comment>Used to remove suggestions which are found in the historic search data.</comment>
+                    <frontend_model>Aligent\FredhopperExport\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="whitelist_terms" translate="label comment" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Whitelist Search Terms</label>
+                    <comment>Used to add any additional suggestions which are not found in the historic search data.</comment>
+                    <frontend_model>Aligent\FredhopperExport\Block\Adminhtml\Form\Field\SearchTerm</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+            </group>
+            <group id="cron" translate="label" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Cron Schedules</label>
+                <field id="incremental_schedule" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Incremental Update</label>
+                    <comment>Cron expression for incremental product update schedule</comment>
+                </field>
+                <field id="full_schedule" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Full Update</label>
+                    <comment>Cron expression for full product update schedule</comment>
+                </field>
+                <field id="suggest_schedule" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Suggest Update</label>
+                    <comment>Cron expression for suggest update schedule</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
