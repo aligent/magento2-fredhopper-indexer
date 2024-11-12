@@ -317,7 +317,7 @@ class Export extends AbstractModel implements ExportInterface
      */
     public function getVersionId(): int
     {
-        return $this->getData(self::FIELD_VERSION_ID);
+        return (int)$this->getData(self::FIELD_VERSION_ID);
     }
 
     /**
