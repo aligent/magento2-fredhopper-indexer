@@ -65,7 +65,7 @@ class GenerateVariantFiles
             $isIncremental
         );
         $filename = $directory . DIRECTORY_SEPARATOR . self::VARIANT_FILE_PREFIX . $fileNumber . '.json';
-        $content = ['products' => $productData];
+        $content = ['variants' => $productData];
         $this->file->filePutContents($filename, $this->json->serialize($content));
         return $filename;
     }
