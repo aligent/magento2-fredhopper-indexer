@@ -11,8 +11,10 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Catalog\Model\View\Asset\Image as ImageAsset;
 use Magento\Catalog\Model\View\Asset\ImageFactory;
 use Magento\Framework\App\Area;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\ConfigInterface;
 use Magento\Store\Model\App\Emulation;
+use Psr\Log\LoggerInterface;
 
 class ImageFieldsProvider implements AdditionalFieldsProviderInterface
 {
@@ -27,6 +29,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
      * @param ImageFactory $imageAssetFactory
      * @param ConfigInterface $presentationConfig
      * @param Emulation $emulation
+     * @param LoggerInterface $logger
      * @param array $imageAttributeConfig
      */
     public function __construct(
@@ -35,6 +38,7 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         private readonly ImageFactory $imageAssetFactory,
         private readonly ConfigInterface $presentationConfig,
         private readonly Emulation $emulation,
+        private readonly LoggerInterface $logger,
         private readonly array $imageAttributeConfig = []
     ) {
     }
@@ -58,34 +62,39 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         $result = [];
         foreach ($products as $productId => $product) {
             foreach ($this->imageAttributeConfig as $fredhopperAttribute => $imageConfig) {
-                $imageParams = $this->getImageParamsForStore($imageConfig['display_area'], (int)$storeId);
-                /** @var ImageAsset $asset */
-                $asset = $this->imageAssetFactory->create([
-                        'miscParams' => $imageParams,
-                        'filePath' => $product->getData($imageConfig['attribute_code']),
-                ]);
-                $result[$productId][$fredhopperAttribute] = $asset->getUrl();
+                $path = $product->getData($imageConfig['attribute_code']);
+                try {
+                    $imageUrl = $this->getImageUrlForStore($imageConfig['display_area'], (int)$storeId, $path);
+                } catch (LocalizedException $e) {
+                    $this->logger->error($e->getMessage(), ['exception' => $e]);
+                    continue;
+                }
+
+                $result[$productId][$fredhopperAttribute] = $imageUrl;
             }
         }
         return $result;
     }
 
     /**
-     * Get image parameters for a given store
+     * Get image url for a given store and path
      *
      * @param string $imageDisplayArea
      * @param int $storeId
-     * @return array
+     * @param string $path
+     * @return string
+     * @throws LocalizedException
      */
-    private function getImageParamsForStore(string $imageDisplayArea, int $storeId): array
+    private function getImageUrlForStore(string $imageDisplayArea, int $storeId, string $path): string
     {
+        $this->emulation->startEnvironmentEmulation(
+            $storeId,
+            Area::AREA_FRONTEND,
+            true
+        );
+
         if (!isset($this->imageParams[$imageDisplayArea][$storeId])) {
             try {
-                $this->emulation->startEnvironmentEmulation(
-                    $storeId,
-                    Area::AREA_FRONTEND,
-                    true
-                );
                 $imageArguments = $this->getImageParams($imageDisplayArea);
                 $this->imageParams[$imageDisplayArea][$storeId] = $this->paramsBuilder->build($imageArguments);
             } catch (\Exception) {
@@ -96,7 +105,17 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
                 $this->emulation->stopEnvironmentEmulation();
             }
         }
-        return $this->imageParams[$imageDisplayArea][$storeId];
+        /** @var ImageAsset $asset */
+        $asset = $this->imageAssetFactory->create(
+            [
+                'miscParams' => $this->imageParams[$imageDisplayArea][$storeId],
+                'filePath' => $path
+            ]
+        );
+        $url = $asset->getUrl();
+        // always stop emulation
+        $this->emulation->stopEnvironmentEmulation();
+        return $url;
     }
 
     /**
