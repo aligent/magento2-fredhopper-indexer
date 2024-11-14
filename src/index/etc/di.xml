@@ -43,4 +43,21 @@
             <argument name="additionalFieldsProvider" xsi:type="object">additionalFieldsProviderForFredhopper</argument>
         </arguments>
     </type>
+
+    <type name="Aligent\FredhopperCommon\Model\Config\CustomAttributeConfig">
+        <arguments>
+            <argument name="customAttributeData" xsi:type="array">
+                <item name="_imageurl" xsi:type="array">
+                    <item name="attribute_code" xsi:type="string">_imageurl</item>
+                    <item name="fredhopper_type" xsi:type="string">asset</item>
+                    <item name="label" xsi:type="string">Image URL</item>
+                </item>
+                <item name="_thumburl" xsi:type="array">
+                    <item name="attribute_code" xsi:type="string">_thumburl</item>
+                    <item name="fredhopper_type" xsi:type="string">asset</item>
+                    <item name="label" xsi:type="string">Thumbnail URL</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>
