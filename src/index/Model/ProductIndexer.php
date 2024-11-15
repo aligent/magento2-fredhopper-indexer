@@ -70,25 +70,26 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     /**
      * @inheritDoc
      *
-     * @throws LocalizedException
      */
     public function executeList(array $ids): void
     {
-        // create temporary table to handle changelogs
-        $this->tempTable->create();
-        foreach ($this->dimensionProvider->getIterator() as $dimension) {
-            try {
-                $this->executeByDimensions($dimension, new \ArrayIterator($ids));
-            } catch (FileSystemException|RuntimeException) {
-                continue;
-            }
-        }
         try {
+            // create temporary table to handle changelogs
+            $this->tempTable->generateTempTableName();
+            $this->tempTable->create();
+            foreach ($this->dimensionProvider->getIterator() as $dimension) {
+                try {
+                    $this->executeByDimensions($dimension, new \ArrayIterator($ids));
+                } catch (FileSystemException|RuntimeException) {
+                    continue;
+                }
+            }
             $this->insertChangelogRecords->execute();
+            $this->tempTable->drop();
         } catch (\Exception $e) {
             $this->logger->critical($e->getMessage(), ['exception' => $e]);
         }
-        $this->tempTable->drop();
+
     }
 
     /**
