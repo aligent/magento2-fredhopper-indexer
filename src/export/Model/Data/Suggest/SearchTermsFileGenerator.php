@@ -37,9 +37,6 @@ class SearchTermsFileGenerator implements FileGeneratorInterface
     {
         $defaultLocale = $this->generalConfig->getDefaultLocale();
         $searchTerms = $this->getSearchTerms();
-        if (empty($searchTerms)) {
-            return '';
-        }
 
         $filename = $directory . DIRECTORY_SEPARATOR .
             ($this->isBlacklist ? self::BLACKLIST_FILENAME : self::WHITELIST_FILENAME);

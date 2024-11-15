@@ -55,7 +55,16 @@ class GenerateSuggestExport
             // create all required files
             $files = [];
             foreach ($this->fileGenerators as $fileGenerator) {
-                $files[] = $fileGenerator->generateFile($directory);
+                $file = $fileGenerator->generateFile($directory);
+                if (!empty($file)) {
+                    $files[] = $fileGenerator->generateFile($directory);
+                }
+            }
+
+            // only create the zip file and export entity if there are files to include
+            if (empty($files)) {
+                $this->logger->info(__METHOD__ . ': No files to export');
+                return;
             }
 
             // create zip file
