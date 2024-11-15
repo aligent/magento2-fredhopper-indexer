@@ -62,7 +62,8 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
         $result = [];
         foreach ($products as $productId => $product) {
             foreach ($this->imageAttributeConfig as $fredhopperAttribute => $imageConfig) {
-                $path = $product->getData($imageConfig['attribute_code']);
+                $path = (string)$product->getData($imageConfig['attribute_code']);
+
                 try {
                     $imageUrl = $this->getImageUrlForStore($imageConfig['display_area'], (int)$storeId, $path);
                 } catch (LocalizedException $e) {
@@ -87,6 +88,10 @@ class ImageFieldsProvider implements AdditionalFieldsProviderInterface
      */
     private function getImageUrlForStore(string $imageDisplayArea, int $storeId, string $path): string
     {
+        if (empty($path)) {
+            return '';
+        }
+
         $this->emulation->startEnvironmentEmulation(
             $storeId,
             Area::AREA_FRONTEND,
