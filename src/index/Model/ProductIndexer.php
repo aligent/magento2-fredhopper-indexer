@@ -77,15 +77,20 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
             // create temporary table to handle changelogs
             $this->tempTable->generateTempTableName();
             $this->tempTable->create();
-            foreach ($this->dimensionProvider->getIterator() as $dimension) {
-                try {
-                    $this->executeByDimensions($dimension, new \ArrayIterator($ids));
-                } catch (FileSystemException|RuntimeException) {
-                    continue;
+            // try block here is nested to ensure that if the table was created, it gets dropped at the end
+            try {
+                foreach ($this->dimensionProvider->getIterator() as $dimension) {
+                    try {
+                        $this->executeByDimensions($dimension, new \ArrayIterator($ids));
+                    } catch (FileSystemException|RuntimeException) {
+                        continue;
+                    }
                 }
+                $this->insertChangelogRecords->execute();
+            } finally {
+                // we want to ensure that the "temporary" table is always dropped
+                $this->tempTable->drop();
             }
-            $this->insertChangelogRecords->execute();
-            $this->tempTable->drop();
         } catch (\Exception $e) {
             $this->logger->critical($e->getMessage(), ['exception' => $e]);
         }
