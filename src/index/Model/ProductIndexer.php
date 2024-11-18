@@ -69,12 +69,10 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
     public function executeList(array $ids): void
     {
         try {
-            // create temporary table to handle changelogs
-            //$this->tempTable->generateTempTableName();
-            //$this->tempTable->create();
+            // create ID for temporary records to handle changelogs
             $replicaId = $this->replicaTableMaintainer->generateUniqueId();
             $this->replicaTableMaintainer->insertRecords($replicaId);
-            // try block here is nested to ensure that if the table was created, it gets dropped at the end
+            // try block here is nested to ensure that if the records were inserted, they get removed at the end
             try {
                 foreach ($this->dimensionProvider->getIterator() as $dimension) {
                     try {
@@ -85,8 +83,7 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
                 }
                 $this->insertChangelogRecords->execute($replicaId);
             } finally {
-                // we want to ensure that the "temporary" table is always dropped
-                //$this->tempTable->drop();
+                // we want to ensure that the temporary records are always deleted
                 $this->replicaTableMaintainer->deleteRecords($replicaId);
             }
         } catch (\Exception $e) {
