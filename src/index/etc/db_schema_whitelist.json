@@ -15,6 +15,19 @@
             "PRIMARY": true
         }
     },
+    "fredhopper_product_data_index_replica": {
+        "column": {
+            "replica_id": true,
+            "store_id": true,
+            "product_type": true,
+            "product_id": true,
+            "parent_id": true,
+            "attribute_data": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
     "fredhopper_product_changelog": {
         "column": {
             "version_id": true,
