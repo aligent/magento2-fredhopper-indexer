@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Aligent\FredhopperIndexer\Model;
 
 use Aligent\FredhopperIndexer\Model\Changelog\InsertRecords;
-use Aligent\FredhopperIndexer\Model\Changelog\TempTable;
+use Aligent\FredhopperIndexer\Model\Changelog\ReplicaTableMaintainer;
 use Aligent\FredhopperIndexer\Model\Data\FredhopperDataProvider;
 use Magento\CatalogSearch\Model\ResourceModel\Fulltext as FulltextResource;
 use Magento\Framework\App\DeploymentConfig;
@@ -29,7 +29,7 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
      * @param DataHandler $dataHandler
      * @param DeploymentConfig $deploymentConfig
      * @param FulltextResource $fulltextResource
-     * @param TempTable $tempTable
+     * @param ReplicaTableMaintainer $replicaTableMaintainer
      * @param InsertRecords $insertChangelogRecords
      * @param LoggerInterface $logger
      * @param int $batchSize
@@ -40,7 +40,7 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
         private readonly DataHandler $dataHandler,
         private readonly DeploymentConfig $deploymentConfig,
         private readonly FulltextResource $fulltextResource,
-        private readonly TempTable $tempTable,
+        private readonly ReplicaTableMaintainer $replicaTableMaintainer,
         private readonly InsertRecords $insertChangelogRecords,
         private readonly LoggerInterface $logger,
         private readonly int $batchSize = 1000
@@ -49,8 +49,6 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
 
     /**
      * @inheritDoc
-     *
-     * @throws LocalizedException
      */
     public function execute($ids): void
     {
@@ -59,8 +57,6 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
 
     /**
      * @inheritDoc
-     *
-     * @throws LocalizedException
      */
     public function executeFull(): void
     {
@@ -69,15 +65,14 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
 
     /**
      * @inheritDoc
-     *
      */
     public function executeList(array $ids): void
     {
         try {
-            // create temporary table to handle changelogs
-            $this->tempTable->generateTempTableName();
-            $this->tempTable->create();
-            // try block here is nested to ensure that if the table was created, it gets dropped at the end
+            // create ID for temporary records to handle changelogs
+            $replicaId = $this->replicaTableMaintainer->generateUniqueId();
+            $this->replicaTableMaintainer->insertRecords($replicaId);
+            // try block here is nested to ensure that if the records were inserted, they get removed at the end
             try {
                 foreach ($this->dimensionProvider->getIterator() as $dimension) {
                     try {
@@ -86,10 +81,10 @@ class ProductIndexer implements DimensionalIndexerInterface, IndexerActionInterf
                         continue;
                     }
                 }
-                $this->insertChangelogRecords->execute();
+                $this->insertChangelogRecords->execute($replicaId);
             } finally {
-                // we want to ensure that the "temporary" table is always dropped
-                $this->tempTable->drop();
+                // we want to ensure that the temporary records are always deleted
+                $this->replicaTableMaintainer->deleteRecords($replicaId);
             }
         } catch (\Exception $e) {
             $this->logger->critical($e->getMessage(), ['exception' => $e]);

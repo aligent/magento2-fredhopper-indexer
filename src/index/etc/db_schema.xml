@@ -18,6 +18,26 @@
             <column name="product_id"/>
         </constraint>
     </table>
+    <table name="fredhopper_product_data_index_replica" resource="default" engine="innodb"
+           comment="Replica Indexing data for Fredhopper to assist with changelog generation">
+        <column xsi:type="varchar" name="replica_id" length="10" nullable="false" comment="Replica ID"/>
+        <column xsi:type="int" name="store_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Store ID"/>
+        <column xsi:type="varchar" name="product_type" length="1" nullable="false"
+                default="p" comment="Product Type (p=Product,v=Variant)"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Product ID"/>
+        <column xsi:type="int" name="parent_id" padding="10" unsigned="true" nullable="true" identity="false"
+                comment="Parent Product ID"/>
+        <column xsi:type="mediumtext" name="attribute_data" nullable="false"
+                comment="JSON-encoded attribute data to be sent to Fredhopper"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="replica_id"/>
+            <column name="store_id"/>
+            <column name="product_type"/>
+            <column name="product_id"/>
+        </constraint>
+    </table>
     <table name="fredhopper_product_changelog" resource="default" engine="innodb"
            comment="Change log for Fredhopper product data">
         <column xsi:type="int" name="version_id" padding="10" unsigned="true" nullable="false" identity="true"
