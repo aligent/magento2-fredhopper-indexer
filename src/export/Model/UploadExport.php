@@ -66,6 +66,10 @@ class UploadExport
             } else {
                 $dataId = $this->dataIntegrationClient->uploadFasData($zipFileName);
             }
+            if ($dataId === null) {
+                $this->logger->error(__METHOD__ . ': Error uploading export to Fredhopper');
+                return;
+            }
             $export->setDataId($dataId);
             $export->setStatus(ExportInterface::STATUS_UPLOADED);
             $this->exportResource->save($export);
