@@ -12,8 +12,6 @@ use Magento\Framework\Filesystem\Driver\File as FilesystemDriver;
 use Magento\Framework\Filesystem\Io\File;
 use Psr\Log\LoggerInterface;
 
-use function PHPUnit\Framework\stringStartsWith;
-
 class DataIntegrationClient
 {
 
@@ -305,10 +303,14 @@ class DataIntegrationClient
         $auth = $this->getAuth();
         $this->httpClient->setAuth($auth['username'], $auth['password']);
 
+        if ($this->generalConfig->getDebugLogging()) {
+            $this->logger->debug("Request: " . $request->renderRequestLine());
+            $this->logger->debug("Request headers:\n" . $request->getHeaders()->toString());
+        }
         $response = $this->httpClient->send($request);
 
         if ($this->generalConfig->getDebugLogging()) {
-            $this->logger->debug("Request response:\n $response");
+            $this->logger->debug("Request response:\n" . $response->toString());
         }
         // clear client for next request
         $this->httpClient->reset();
