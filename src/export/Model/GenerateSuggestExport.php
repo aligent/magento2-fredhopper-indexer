@@ -51,6 +51,7 @@ class GenerateSuggestExport
 
             // create directory
             $directory = $this->createDirectory->execute(ExportInterface::EXPORT_TYPE_SUGGEST);
+            $export->setDirectory($directory);
 
             // create all required files
             $files = [];
@@ -74,13 +75,13 @@ class GenerateSuggestExport
                 $files
             );
             if (!$zipCreated) {
-                throw new LocalizedException(__('Error while creating ZIP file.'));
+                throw new LocalizedException(__(__METHOD__ . ': Error while creating ZIP file.'));
             }
 
             // save export
             $this->exportResource->save($export);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $this->logger->error(__METHOD__ . ': ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 }
