@@ -14,6 +14,7 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class Actions extends Column
 {
     private const string URL_PATH_REPORT = 'fredhopper/exports/report';
+    private const string URL_PATH_DATA_FILE = 'fredhopper/exports/data';
 
     /**
      * @param ContextInterface $context
@@ -43,32 +44,44 @@ class Actions extends Column
             foreach ($dataSource['data']['items'] as &$item) {
                 if (isset($item[ExportInterface::FIELD_EXPORT_ID])) {
                     $exportId = (int)$item[ExportInterface::FIELD_EXPORT_ID];
+                    // give link to download export zip file
+                    $actions = [
+                        'download_data' => [
+                            'href' => $this->urlBuilder->getUrl(
+                                self::URL_PATH_DATA_FILE,
+                                [
+                                    'id' => $item[ExportInterface::FIELD_EXPORT_ID]
+                                ]
+                            ),
+                            'label' => __('Download Data File'),
+                            'target' => '_blank'
+                        ]
+                    ];
                     // if the export is already complete, we can download a quality report
                     if ($this->canDownloadReport($exportId)) {
-                        $item[$this->getData('name')] = [
-                            'download' => [
-                                'href' => $this->urlBuilder->getUrl(
-                                    self::URL_PATH_REPORT,
-                                    [
-                                        'id' => $item[ExportInterface::FIELD_EXPORT_ID]
-                                    ]
-                                ),
-                                'label' => __('Download Quality Report'),
-                                'target' => '_blank',
-                            ],
-                            'download_zip' => [
-                                'href' => $this->urlBuilder->getUrl(
-                                    self::URL_PATH_REPORT,
-                                    [
-                                        'id' => $item[ExportInterface::FIELD_EXPORT_ID],
-                                        'zip' => true
-                                    ]
-                                ),
-                                'label' => __('Download ZIP Report'),
-                                'target' => '_blank',
-                            ]
+                        $actions['download_report'] = [
+                            'href' => $this->urlBuilder->getUrl(
+                                self::URL_PATH_REPORT,
+                                [
+                                    'id' => $item[ExportInterface::FIELD_EXPORT_ID]
+                                ]
+                            ),
+                            'label' => __('Download Quality Report'),
+                            'target' => '_blank'
+                        ];
+                        $actions['download_report_zip'] = [
+                            'href' => $this->urlBuilder->getUrl(
+                                self::URL_PATH_REPORT,
+                                [
+                                    'id' => $item[ExportInterface::FIELD_EXPORT_ID],
+                                    'zip' => true
+                                ]
+                            ),
+                            'label' => __('Download ZIP Report'),
+                            'target' => '_blank',
                         ];
                     }
+                    $item[$this->getData('name')] = $actions;
                 }
             }
         }
@@ -99,5 +112,4 @@ class Actions extends Column
         }
         return true;
     }
-
 }

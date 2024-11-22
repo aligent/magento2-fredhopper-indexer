@@ -45,6 +45,7 @@ class DownloadQualityReport
             }
         } catch (FileSystemException $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
+            return null;
         }
 
         $qualityReportData = $this->dataIntegrationClient->getDataQualityReport($triggerId, $isSummary);

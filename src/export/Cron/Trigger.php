@@ -5,6 +5,7 @@ namespace Aligent\FredhopperExport\Cron;
 
 use Aligent\FredhopperExport\Api\Data\ExportInterface;
 use Aligent\FredhopperExport\Model\Data\Export;
+use Aligent\FredhopperExport\Model\GetExportIsInProgress;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\Collection;
 use Aligent\FredhopperExport\Model\ResourceModel\Data\Export\CollectionFactory;
 use Aligent\FredhopperExport\Model\TriggerDataLoad;
@@ -14,10 +15,12 @@ class Trigger
     /**
      * @param CollectionFactory $exportCollectionFactory
      * @param TriggerDataLoad $triggerDataLoad
+     * @param GetExportIsInProgress $getExportIsInProgress
      */
     public function __construct(
         private readonly CollectionFactory $exportCollectionFactory,
-        private readonly TriggerDataLoad $triggerDataLoad
+        private readonly TriggerDataLoad $triggerDataLoad,
+        private readonly GetExportIsInProgress $getExportIsInProgress
     ) {
     }
 
@@ -28,6 +31,10 @@ class Trigger
      */
     public function execute(): void
     {
+        // don't trigger if an export has already been triggered
+        if ($this->getExportIsInProgress->execute(true)) {
+            return;
+        }
         /** @var Collection $collection */
         $collection = $this->exportCollectionFactory->create();
         $collection->addFieldToFilter(ExportInterface::FIELD_STATUS, ExportInterface::STATUS_UPLOADED);

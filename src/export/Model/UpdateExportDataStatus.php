@@ -16,12 +16,14 @@ class UpdateExportDataStatus
      * @param DataIntegrationClient $dataIntegrationClient
      * @param ExportResource $exportResource
      * @param SetCurrentExport $setCurrentExport
+     * @param InvalidateExports $invalidateExports
      * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly DataIntegrationClient $dataIntegrationClient,
         private readonly ExportResource $exportResource,
         private readonly SetCurrentExport $setCurrentExport,
+        private readonly InvalidateExports $invalidateExports,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -68,6 +70,8 @@ class UpdateExportDataStatus
 
         if ($dataStatus === ExportInterface::DATA_STATUS_SUCCESS) {
             $this->setCurrentExport->execute($export->getExportId());
+            // invalidate any pending exports that have an earlier version than the current one
+            $this->invalidateExports->execute();
         }
     }
 }
