@@ -35,7 +35,7 @@ class GetExportIsInProgress
         /** @var Collection $collection */
         $collection = $this->collectionFactory->create();
         $statusesToCheck = $triggeredOnly ? [ExportInterface::STATUS_TRIGGERED] : self::IN_PROGRESS_STATUSES;
-        $collection->addFieldToFilter('status', ['in' => self::IN_PROGRESS_STATUSES]);
+        $collection->addFieldToFilter('status', ['in' => $statusesToCheck]);
         return $collection->getSize() > 0;
     }
 }
