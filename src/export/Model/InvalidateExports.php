@@ -39,8 +39,14 @@ class InvalidateExports
         /** @var Collection $collection */
         $collection = $this->collectionFactory->create();
         // need to check pending and uploaded exports only
-        $collection->addFieldToFilter(ExportInterface::FIELD_STATUS, ExportInterface::STATUS_PENDING);
-        $collection->addFieldToFilter(ExportInterface::FIELD_EXPORT_TYPE, ExportInterface::EXPORT_TYPE_INCREMENTAL);
+        $collection->addFieldToFilter(
+            ExportInterface::FIELD_STATUS,
+            ['in' => [ExportInterface::STATUS_PENDING, ExportInterface::STATUS_UPLOADED]]
+        );
+        $collection->addFieldToFilter(
+            ExportInterface::FIELD_EXPORT_TYPE,
+            ['in' => [ExportInterface::EXPORT_TYPE_INCREMENTAL, ExportInterface::EXPORT_TYPE_FULL]]
+        );
         /** @var Export[] $exports */
         $exports = $collection->getItems();
         foreach ($exports as $export) {
