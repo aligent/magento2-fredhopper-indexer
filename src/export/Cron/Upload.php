@@ -44,7 +44,7 @@ class Upload
         // do not upload any export behind the current version
         $currentVersion = $this->getCurrentExportedVersion->execute();
         if ($currentVersion > 0) {
-            $collection->addFieldToFilter(ExportInterface::FIELD_VERSION_ID, ['gt' => $currentVersion]);
+            $collection->addFieldToFilter(ExportInterface::FIELD_VERSION_ID, ['gteq' => $currentVersion]);
         }
         // order by the version number descending to get the latest export
         $collection->setOrder(ExportInterface::FIELD_VERSION_ID);
